@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Small Native Ad — horizontal: icon | text | Install CTA -->
+    <dimen name="small_ad_height">76dp</dimen>
+    <dimen name="small_ad_icon_size">76dp</dimen>
+    <dimen name="small_ad_cta_width">76dp</dimen>
+    <dimen name="small_ad_text_padding_h">8dp</dimen>
+    <dimen name="small_ad_headline_size">13sp</dimen>
+    <dimen name="small_ad_body_size">11sp</dimen>
+    <dimen name="small_ad_cta_text_size">12sp</dimen>
+
+    <!-- Medium Native Ad — larger SS match (~40/60 split) -->
+    <dimen name="medium_ad_height">172dp</dimen>
+    <dimen name="medium_ad_media_width">160dp</dimen>
+    <dimen name="medium_ad_media_height">172dp</dimen>
+    <dimen name="medium_ad_media_size">160dp</dimen>
+    <dimen name="medium_ad_content_padding_h">14dp</dimen>
+    <dimen name="medium_ad_content_padding_v">14dp</dimen>
+    <dimen name="medium_ad_padding">0dp</dimen>
+    <dimen name="medium_ad_headline_size">16sp</dimen>
+    <dimen name="medium_ad_body_size">13sp</dimen>
+    <dimen name="medium_ad_cta_height">48dp</dimen>
+    <dimen name="medium_ad_cta_min_width">88dp</dimen>
+</resources>

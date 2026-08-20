@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "561252545060",
+    "project_id": "web-to-app---mak-apps",
+    "storage_bucket": "web-to-app---mak-apps.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:561252545060:android:be1fae8bd900e598441eb1",
+        "android_client_info": {
+          "package_name": "com.webtoapp.converter.appmaker"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyA4CpKCR50TYq6HWUawvidddUGrjMsrnk8"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
