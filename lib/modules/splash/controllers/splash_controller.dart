@@ -149,6 +149,7 @@ class SplashController extends GetxController {
       await InterstitialAdTrigger.showPlacement(
         placementId: AdPlacements.splashInter1st,
         forceFetchRc: true,
+        showLoader: false,
         onAdClosed: () async {
           await storage.markSplashInter1stShown();
         },
@@ -165,6 +166,7 @@ class SplashController extends GetxController {
       await InterstitialAdTrigger.showPlacement(
         placementId: AdPlacements.splashInter2nd,
         forceFetchRc: true,
+        showLoader: false,
       );
     } else if (!isFirstTimeUser) {
       await AdRemoteConfigService.instance.fetchNow();

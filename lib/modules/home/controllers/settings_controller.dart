@@ -34,7 +34,7 @@ class SettingsController extends GetxController {
 
     final rating = await showRateUsDialog(
       context,
-      initial: appRating.value > 0 ? appRating.value : 5,
+      initial: appRating.value,
     );
     if (rating == null) return;
 

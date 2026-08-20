@@ -17,7 +17,10 @@ class AdPresentationGate {
 
   static bool get isOnIapRoute {
     final route = Get.currentRoute;
-    return route == AppRoutes.iap || route.startsWith('${AppRoutes.iap}?');
+    return route == AppRoutes.iap ||
+        route.startsWith('${AppRoutes.iap}?') ||
+        route == AppRoutes.lifetimePremium ||
+        route.startsWith('${AppRoutes.lifetimePremium}?');
   }
 
   static bool get isIapActive => iapVisible || isOnIapRoute;

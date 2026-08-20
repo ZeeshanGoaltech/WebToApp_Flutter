@@ -7,4 +7,5 @@ abstract class AppRoutes {
   static const createApp = '/create-app';
   static const buildApp = '/build-app';
   static const iap = '/iap';
+  static const lifetimePremium = '/premium/lifetime';
 }

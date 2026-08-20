@@ -7,6 +7,7 @@ import 'package:web_to_app/modules/language/models/language_option.dart';
 
 class LanguageController extends GetxController {
   final RxString selectedLanguageId = LanguageData.defaultLanguageId.obs;
+  final RxBool isDoneReady = false.obs;
   late final bool fromSettings;
   DateTime? _lastBackPressAt;
 
@@ -19,6 +20,9 @@ class LanguageController extends GetxController {
     selectedLanguageId.value = LanguageData.normalizeId(
       Get.find<LanguageService>().selectedLanguageId.value,
     );
+    Future<void>.delayed(const Duration(seconds: 2), () {
+      if (!isClosed) isDoneReady.value = true;
+    });
   }
 
   void selectLanguage(String id) {

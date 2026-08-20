@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:web_to_app/core/theme/app_colors.dart';
 import 'package:web_to_app/core/theme/app_text_styles.dart';
 import 'package:web_to_app/core/utils/responsive.dart';
 import 'package:web_to_app/modules/create_app/widgets/shell/create_back_icon.dart';
@@ -48,7 +49,28 @@ class LanguageHeader extends GetView<LanguageController> {
           Expanded(
             child: Text('choose_language'.tr, style: titleStyle),
           ),
-          LanguageDoneButton(onPressed: controller.onDone),
+          Obx(() {
+            if (!controller.isDoneReady.value) {
+              return SizedBox(
+                width: Responsive.w(context, 36),
+                height: Responsive.w(context, 36),
+                child: Center(
+                  child: SizedBox(
+                    width: Responsive.w(context, 20),
+                    height: Responsive.w(context, 20),
+                    child: CircularProgressIndicator(
+                      strokeWidth: 2.5,
+                      strokeCap: StrokeCap.round,
+                      valueColor: const AlwaysStoppedAnimation<Color>(
+                        AppColors.primary,
+                      ),
+                    ),
+                  ),
+                ),
+              );
+            }
+            return LanguageDoneButton(onPressed: controller.onDone);
+          }),
         ],
       ),
     );

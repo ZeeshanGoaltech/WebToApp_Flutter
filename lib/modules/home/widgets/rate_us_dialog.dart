@@ -4,7 +4,7 @@ import 'package:web_to_app/core/theme/app_colors.dart';
 import 'package:web_to_app/core/theme/app_text_styles.dart';
 import 'package:web_to_app/core/utils/responsive.dart';
 
-Future<int?> showRateUsDialog(BuildContext context, {int initial = 5}) {
+Future<int?> showRateUsDialog(BuildContext context, {int initial = 0}) {
   return showDialog<int>(
     context: context,
     barrierDismissible: true,
@@ -24,6 +24,10 @@ class _RateUsDialog extends StatefulWidget {
 
 class _RateUsDialogState extends State<_RateUsDialog> {
   late int _rating;
+  late int _displayRating;
+  late bool _hasUserRated;
+  bool _isAnimating = false;
+  int _bounceStar = 0;
 
   String get _primaryLabel =>
       _rating <= 3 ? 'rate_dialog_feedback'.tr : 'rate_dialog_rate_now'.tr;
@@ -51,6 +55,7 @@ class _RateUsDialogState extends State<_RateUsDialog> {
   };
 
   String get _ratingStatus {
+    if (_rating <= 0) return 'rate_dialog_subtitle'.tr;
     final languageCode = Get.locale?.languageCode.toLowerCase() ?? 'en';
     final localized = _ratingStatusesByLanguage[languageCode] ??
         _ratingStatusesByLanguage['en']!;
@@ -61,7 +66,41 @@ class _RateUsDialogState extends State<_RateUsDialog> {
   @override
   void initState() {
     super.initState();
-    _rating = widget.initial.clamp(1, 5);
+    _rating = widget.initial.clamp(0, 5);
+    _displayRating = _rating;
+    _hasUserRated = _rating > 0;
+  }
+
+  Future<void> _onStarTap(int value) async {
+    if (_isAnimating) return;
+
+    if (_hasUserRated) {
+      setState(() {
+        _rating = value;
+        _displayRating = value;
+      });
+      return;
+    }
+
+    _isAnimating = true;
+    setState(() => _displayRating = 0);
+
+    for (var star = 1; star <= value; star++) {
+      if (!mounted) return;
+      setState(() {
+        _displayRating = star;
+        _bounceStar = star;
+      });
+      await Future<void>.delayed(const Duration(milliseconds: 120));
+    }
+
+    if (!mounted) return;
+    setState(() {
+      _rating = value;
+      _hasUserRated = true;
+      _isAnimating = false;
+      _bounceStar = 0;
+    });
   }
 
   @override
@@ -150,34 +189,49 @@ class _RateUsDialogState extends State<_RateUsDialog> {
                         mainAxisSize: MainAxisSize.min,
                         children: List.generate(5, (index) {
                           final value = index + 1;
-                          final active = value <= _rating;
+                          final active = value <= _displayRating;
+                          final isBouncing = value == _bounceStar;
                           return IconButton(
-                            onPressed: () => setState(() => _rating = value),
+                            onPressed: _isAnimating
+                                ? null
+                                : () => _onStarTap(value),
                             padding: EdgeInsets.zero,
                             constraints: BoxConstraints.tightFor(
                               width: starSize + Responsive.w(context, 12),
                               height: starSize + Responsive.w(context, 12),
                             ),
-                            icon: Icon(
-                              active
-                                  ? Icons.star_rounded
-                                  : Icons.star_border_rounded,
-                              color: active
-                                  ? const Color(0xFFFFB020)
-                                  : AppColors.createFieldBorder,
-                              size: starSize,
+                            icon: AnimatedScale(
+                              scale: isBouncing ? 1.18 : 1.0,
+                              duration: const Duration(milliseconds: 120),
+                              curve: Curves.easeOutBack,
+                              child: Icon(
+                                active
+                                    ? Icons.star_rounded
+                                    : Icons.star_border_rounded,
+                                color: active
+                                    ? const Color(0xFFFFB020)
+                                    : AppColors.createFieldBorder,
+                                size: starSize,
+                              ),
                             ),
                           );
                         }),
                       ),
                     ),
                     SizedBox(height: Responsive.h(context, 8)),
-                    Text(
-                      _ratingStatus,
-                      textAlign: TextAlign.center,
-                      style: AppTextStyles.settingsHeaderTitle(context).copyWith(
-                        fontSize: Responsive.sp(context, 18),
-                        color: AppColors.homeTitle,
+                    AnimatedSwitcher(
+                      duration: const Duration(milliseconds: 200),
+                      child: Text(
+                        _ratingStatus,
+                        key: ValueKey(_rating),
+                        textAlign: TextAlign.center,
+                        style: AppTextStyles.settingsHeaderTitle(context)
+                            .copyWith(
+                          fontSize: Responsive.sp(context, 18),
+                          color: _rating > 0
+                              ? AppColors.homeTitle
+                              : AppColors.createFieldBorder,
+                        ),
                       ),
                     ),
                     SizedBox(height: Responsive.h(context, 16)),
@@ -186,31 +240,41 @@ class _RateUsDialogState extends State<_RateUsDialog> {
                       height: Responsive.w(context, 50),
                       child: DecoratedBox(
                         decoration: BoxDecoration(
-                          gradient: const LinearGradient(
+                          gradient: LinearGradient(
                             begin: Alignment.topLeft,
                             end: Alignment.bottomRight,
-                            colors: [
-                              AppColors.homeCardGradientStart,
-                              AppColors.homeCardGradientMid,
-                              AppColors.homeCardGradientEnd,
-                            ],
+                            colors: _rating > 0
+                                ? const [
+                                    AppColors.homeCardGradientStart,
+                                    AppColors.homeCardGradientMid,
+                                    AppColors.homeCardGradientEnd,
+                                  ]
+                                : [
+                                    AppColors.createFieldBorder,
+                                    AppColors.createFieldBorder,
+                                  ],
                           ),
                           borderRadius: BorderRadius.circular(999),
-                          boxShadow: [
-                            BoxShadow(
-                              color: AppColors.homeAccent.withValues(
-                                alpha: 0.22,
-                              ),
-                              blurRadius: Responsive.w(context, 14),
-                              offset: Offset(0, Responsive.w(context, 6)),
-                            ),
-                          ],
+                          boxShadow: _rating > 0
+                              ? [
+                                  BoxShadow(
+                                    color: AppColors.homeAccent.withValues(
+                                      alpha: 0.22,
+                                    ),
+                                    blurRadius: Responsive.w(context, 14),
+                                    offset: Offset(0, Responsive.w(context, 6)),
+                                  ),
+                                ]
+                              : null,
                         ),
                         child: ElevatedButton(
-                          onPressed: () => Navigator.of(context).pop(_rating),
+                          onPressed: _rating > 0
+                              ? () => Navigator.of(context).pop(_rating)
+                              : null,
                           style: ElevatedButton.styleFrom(
                             backgroundColor: Colors.transparent,
                             shadowColor: Colors.transparent,
+                            disabledBackgroundColor: Colors.transparent,
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(999),
                             ),

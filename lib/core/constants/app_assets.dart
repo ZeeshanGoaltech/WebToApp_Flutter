@@ -28,6 +28,15 @@ class AppAssets {
   static const String authGuestIcon = 'assets/images/auth/auth_guest_icon.svg';
 
   static const String iapHero = 'assets/images/iap/iap_hero.png';
+  static const String iapLifetimeHero = 'assets/images/iap/iap_life_time.png';
   static const String iapCheck = 'assets/images/iap/iap_check.svg';
   static const String iapCloseIcon = 'assets/images/iap/iap_close_icon.svg';
+  static const String exitCrown = 'assets/images/iap/exit_crown.svg';
+  static const String lifetimeIconBuild =
+      'assets/images/iap/lifetime_icon_notebook.svg';
+  static const String lifetimeIconDownload =
+      'assets/images/iap/lifetime_icon_scan.svg';
+  static const String lifetimeIconAds = 'assets/images/iap/lifetime_icon_ads.svg';
+  static const String lifetimeIconCheck =
+      'assets/images/iap/lifetime_icon_check.svg';
 }

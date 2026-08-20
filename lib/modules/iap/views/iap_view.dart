@@ -88,9 +88,8 @@ class _IapCanvas extends StatelessWidget {
         _HeroFade(),
         _TitleBlock(),
         _FeatureList(),
-        _FreeTrialButton(),
-        _YearlyButton(),
-        _LifetimeButton(),
+        _PrimaryCtaButton(),
+        _SecondaryPlans(),
         _FooterLinks(),
         _CloseButton(),
       ],
@@ -338,8 +337,8 @@ class _FeatureLabel extends StatelessWidget {
   }
 }
 
-class _FreeTrialButton extends GetView<IapController> {
-  const _FreeTrialButton();
+class _PrimaryCtaButton extends GetView<IapController> {
+  const _PrimaryCtaButton();
 
   @override
   Widget build(BuildContext context) {
@@ -349,112 +348,145 @@ class _FreeTrialButton extends GetView<IapController> {
       right: IapView._screenHPad,
       height: IapView._trialH,
       child: Obx(
-        () => Material(
-          color: Colors.transparent,
-          child: InkWell(
-            onTap: controller.isPurchasing.value || controller.isRestoring.value
-                ? null
-                : () => controller.purchase(IapPlan.freeTrial),
-            borderRadius: BorderRadius.circular(IapView._btnRadius),
-            child: Ink(
-              decoration: BoxDecoration(
-                color: AppColors.iapTrialButton,
-                borderRadius: BorderRadius.circular(IapView._btnRadius),
-                boxShadow: const [
-                  BoxShadow(
-                    color: Color(0x1A000000),
-                    offset: Offset(0, 11.423),
-                    blurRadius: 8.567,
-                  ),
-                  BoxShadow(
-                    color: Color(0x1A000000),
-                    offset: Offset(0, 4.569),
-                    blurRadius: 3.427,
-                  ),
-                ],
-              ),
-              child:
-                  controller.isPurchasing.value &&
-                      controller.selectedPlan.value == IapPlan.freeTrial
-                  ? const Center(child: ButtonLoadingIndicator())
-                  : Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Text(
-                          'iap_start_free_trial'.tr,
-                          textAlign: TextAlign.center,
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: GoogleFonts.inter(
-                            fontWeight: FontWeight.w600,
-                            fontSize: 19.278,
-                            height: 27.415 / 19.278,
-                            letterSpacing: -0.357,
-                            color: Colors.white,
-                          ),
-                        ),
-                        const SizedBox(height: 2),
-                        Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 24),
-                          child: Text(
-                            controller.displayTrialSubtitle() ?? '—',
+        () {
+          final plan = controller.primaryPlan;
+          return Material(
+            color: Colors.transparent,
+            child: InkWell(
+              onTap:
+                  controller.isPurchasing.value || controller.isRestoring.value
+                      ? null
+                      : () => controller.purchase(plan),
+              borderRadius: BorderRadius.circular(IapView._btnRadius),
+              child: Ink(
+                decoration: BoxDecoration(
+                  color: AppColors.iapTrialButton,
+                  borderRadius: BorderRadius.circular(IapView._btnRadius),
+                  boxShadow: const [
+                    BoxShadow(
+                      color: Color(0x1A000000),
+                      offset: Offset(0, 11.423),
+                      blurRadius: 8.567,
+                    ),
+                    BoxShadow(
+                      color: Color(0x1A000000),
+                      offset: Offset(0, 4.569),
+                      blurRadius: 3.427,
+                    ),
+                  ],
+                ),
+                child: controller.isPurchasing.value &&
+                        controller.selectedPlan.value == plan
+                    ? const Center(child: ButtonLoadingIndicator())
+                    : Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Text(
+                            controller.displayPrimaryCtaTitle(),
                             textAlign: TextAlign.center,
-                            maxLines: 2,
+                            maxLines: 1,
                             overflow: TextOverflow.ellipsis,
                             style: GoogleFonts.inter(
-                              fontWeight: FontWeight.w500,
-                              fontSize: 14.994,
-                              height: 27.415 / 14.994,
+                              fontWeight: FontWeight.w600,
+                              fontSize: 19.278,
+                              height: 27.415 / 19.278,
                               letterSpacing: -0.357,
                               color: Colors.white,
                             ),
                           ),
-                        ),
-                      ],
-                    ),
+                          const SizedBox(height: 2),
+                          Padding(
+                            padding: const EdgeInsets.symmetric(horizontal: 24),
+                            child: Text(
+                              controller.displayPrimaryCtaSubtitle(),
+                              textAlign: TextAlign.center,
+                              maxLines: 2,
+                              overflow: TextOverflow.ellipsis,
+                              style: GoogleFonts.inter(
+                                fontWeight: FontWeight.w500,
+                                fontSize: 14.994,
+                                height: 27.415 / 14.994,
+                                letterSpacing: -0.357,
+                                color: Colors.white,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+              ),
+            ),
+          );
+        },
+      ),
+    );
+  }
+}
+
+/// Diginotes Android: Monthly + Weekly.
+/// Diginotes iOS: Yearly + Lifetime.
+class _SecondaryPlans extends GetView<IapController> {
+  const _SecondaryPlans();
+
+  @override
+  Widget build(BuildContext context) {
+    return Obx(() {
+      if (controller.useMonthlyLayout) {
+        return const Stack(
+          children: [
+            Positioned(
+              top: 742.67,
+              left: IapView._screenHPad,
+              right: IapView._screenHPad,
+              height: IapView._planH,
+              child: _PlanCard(
+                plan: IapPlan.monthly,
+                titleKey: 'iap_monthly_access',
+                subtitleKey: 'iap_billed_every_month',
+              ),
+            ),
+            Positioned(
+              top: 848.7,
+              left: IapView._screenHPad,
+              right: IapView._screenHPad,
+              height: IapView._planH,
+              child: _PlanCard(
+                plan: IapPlan.weekly,
+                titleKey: 'iap_weekly_access',
+                subtitleKey: 'iap_billed_every_week',
+              ),
+            ),
+          ],
+        );
+      }
+
+      return const Stack(
+        children: [
+          Positioned(
+            top: 742.67,
+            left: IapView._screenHPad,
+            right: IapView._screenHPad,
+            height: IapView._planH,
+            child: _PlanCard(
+              plan: IapPlan.yearly,
+              titleKey: 'iap_yearly_access',
+              subtitleKey: 'iap_billed_every_year',
+              priceLabelKey: 'iap_per_yearly',
             ),
           ),
-        ),
-      ),
-    );
-  }
-}
-
-class _YearlyButton extends StatelessWidget {
-  const _YearlyButton();
-
-  @override
-  Widget build(BuildContext context) {
-    return const Positioned(
-      top: 742.67,
-      left: IapView._screenHPad,
-      right: IapView._screenHPad,
-      height: IapView._planH,
-      child: _PlanCard(
-        plan: IapPlan.yearly,
-        titleKey: 'iap_yearly_access',
-        priceLabelKey: 'iap_per_yearly',
-      ),
-    );
-  }
-}
-
-class _LifetimeButton extends StatelessWidget {
-  const _LifetimeButton();
-
-  @override
-  Widget build(BuildContext context) {
-    return const Positioned(
-      top: 848.7,
-      left: IapView._screenHPad,
-      right: IapView._screenHPad,
-      height: IapView._planH,
-      child: _PlanCard(
-        plan: IapPlan.lifetime,
-        titleKey: 'iap_lifetime',
-        subtitleKey: 'iap_lifetime_subtitle',
-      ),
-    );
+          Positioned(
+            top: 848.7,
+            left: IapView._screenHPad,
+            right: IapView._screenHPad,
+            height: IapView._planH,
+            child: _PlanCard(
+              plan: IapPlan.lifetime,
+              titleKey: 'iap_lifetime',
+              subtitleKey: 'iap_lifetime_subtitle',
+            ),
+          ),
+        ],
+      );
+    });
   }
 }
 
@@ -471,21 +503,13 @@ class _PlanCard extends GetView<IapController> {
   final String? subtitleKey;
   final String? priceLabelKey;
 
-  String _subtitle(IapController controller) {
-    if (plan == IapPlan.yearly) {
-      return controller.displayYearlyPerWeekSubtitle() ?? '—';
-    }
-    return subtitleKey?.tr ?? '';
-  }
-
   @override
   Widget build(BuildContext context) {
     return Obx(() {
-      final isLoading =
-          controller.isPurchasing.value &&
+      final isLoading = controller.isPurchasing.value &&
           controller.selectedPlan.value == plan;
       final price = controller.displayPrice(plan);
-      final subtitle = _subtitle(controller);
+      final subtitle = subtitleKey?.tr ?? '';
 
       return Material(
         color: Colors.transparent,
@@ -512,13 +536,13 @@ class _PlanCard extends GetView<IapController> {
                 : Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 23.12),
                     child: priceLabelKey != null
-                        ? _YearlyPlanLayout(
+                        ? _TwoLinePriceLayout(
                             title: titleKey.tr,
                             subtitle: subtitle,
                             price: price,
                             priceLabel: priceLabelKey!.tr,
                           )
-                        : _LifetimePlanLayout(
+                        : _SimplePlanLayout(
                             title: titleKey.tr,
                             subtitle: subtitle,
                             price: price,
@@ -531,8 +555,8 @@ class _PlanCard extends GetView<IapController> {
   }
 }
 
-class _YearlyPlanLayout extends StatelessWidget {
-  const _YearlyPlanLayout({
+class _TwoLinePriceLayout extends StatelessWidget {
+  const _TwoLinePriceLayout({
     required this.title,
     required this.subtitle,
     required this.price,
@@ -616,8 +640,8 @@ class _YearlyPlanLayout extends StatelessWidget {
   }
 }
 
-class _LifetimePlanLayout extends StatelessWidget {
-  const _LifetimePlanLayout({
+class _SimplePlanLayout extends StatelessWidget {
+  const _SimplePlanLayout({
     required this.title,
     required this.subtitle,
     required this.price,

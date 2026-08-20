@@ -47,14 +47,14 @@ class SettingsTab extends StatelessWidget {
                     padding: EdgeInsets.symmetric(
                       horizontal: Responsive.w(context, 24),
                     ),
-                    child: const _ProfileSection(),
+                    child: const _PreferencesSection(),
                   ),
                   SizedBox(height: Responsive.h(context, 24)),
                   Padding(
                     padding: EdgeInsets.symmetric(
                       horizontal: Responsive.w(context, 24),
                     ),
-                    child: const _PreferencesSection(),
+                    child: const _ProfileSection(),
                   ),
                   SizedBox(height: Responsive.h(context, 24)),
                   Padding(

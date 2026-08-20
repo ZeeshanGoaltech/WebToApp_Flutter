@@ -12,7 +12,9 @@ import 'package:web_to_app/modules/intro/views/intro_view.dart';
 import 'package:web_to_app/modules/language/bindings/language_binding.dart';
 import 'package:web_to_app/modules/language/views/language_view.dart';
 import 'package:web_to_app/modules/iap/bindings/iap_binding.dart';
+import 'package:web_to_app/modules/iap/bindings/lifetime_premium_binding.dart';
 import 'package:web_to_app/modules/iap/views/iap_view.dart';
+import 'package:web_to_app/modules/iap/views/lifetime_premium_view.dart';
 import 'package:web_to_app/modules/splash/bindings/splash_binding.dart';
 import 'package:web_to_app/modules/splash/views/splash_view.dart';
 
@@ -61,6 +63,12 @@ class AppPages {
       name: AppRoutes.iap,
       page: () => const IapView(),
       binding: IapBinding(),
+      popGesture: false,
+    ),
+    GetPage(
+      name: AppRoutes.lifetimePremium,
+      page: () => const LifetimePremiumView(),
+      binding: LifetimePremiumBinding(),
       popGesture: false,
     ),
   ];

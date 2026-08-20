@@ -1,4 +1,4 @@
-// GENERATED — do not edit by hand. Run: node tools/generate_i18n.js
+// GENERATED — do not edit by hand. Run: python tools/generate_i18n.py
 import 'package:get/get.dart';
 import 'package:web_to_app/core/localization/translations/en_us.dart';
 import 'package:web_to_app/core/localization/translations/en_gb.dart';
@@ -24,13 +24,6 @@ import 'package:web_to_app/core/localization/translations/ms_my.dart';
 import 'package:web_to_app/core/localization/translations/th_th.dart';
 import 'package:web_to_app/core/localization/translations/vi_vn.dart';
 import 'package:web_to_app/core/localization/translations/fil_ph.dart';
-import 'package:web_to_app/core/localization/translations/ar_sa.dart';
-import 'package:web_to_app/core/localization/translations/hi_in.dart';
-import 'package:web_to_app/core/localization/translations/bn_bd.dart';
-import 'package:web_to_app/core/localization/translations/tr_tr.dart';
-import 'package:web_to_app/core/localization/translations/uz_uz.dart';
-import 'package:web_to_app/core/localization/translations/af_za.dart';
-import 'package:web_to_app/core/localization/translations/fa_ir.dart';
 
 class AppTranslations extends Translations {
   @override
@@ -59,12 +52,5 @@ class AppTranslations extends Translations {
     'th_TH': ThThTranslations,
     'vi_VN': ViVnTranslations,
     'fil_PH': FilPhTranslations,
-    'ar_SA': ArSaTranslations,
-    'hi_IN': HiInTranslations,
-    'bn_BD': BnBdTranslations,
-    'tr_TR': TrTrTranslations,
-    'uz_UZ': UzUzTranslations,
-    'af_ZA': AfZaTranslations,
-    'fa_IR': FaIrTranslations,
   };
 }

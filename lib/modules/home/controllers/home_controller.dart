@@ -14,7 +14,6 @@ class HomeController extends GetxController {
   final RxInt selectedTab = 0.obs;
   final RxList<AppSummary> apps = <AppSummary>[].obs;
   final RxBool isLoadingApps = false.obs;
-  final RxBool isExitSheetVisible = false.obs;
   final RxString appsError = ''.obs;
   final RxnString openingAppId = RxnString();
   final RxnString appActionId = RxnString();

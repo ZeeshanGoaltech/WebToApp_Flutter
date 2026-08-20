@@ -8,6 +8,7 @@ import 'package:in_app_purchase_android/billing_client_wrappers.dart';
 import 'package:in_app_purchase_android/in_app_purchase_android.dart';
 import 'package:in_app_purchase_storekit/in_app_purchase_storekit.dart';
 import 'package:in_app_purchase_storekit/store_kit_2_wrappers.dart';
+import 'package:in_app_purchase_storekit/store_kit_wrappers.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:web_to_app/core/services/iap_product_id_resolver.dart';
 
@@ -28,6 +29,7 @@ class PremiumService {
   static const String _proKey = 'pro_user';
   static const String _purchaseTokenKey = 'purchase_token';
   static const String _purchaseIdKey = 'purchase_id';
+  static const String _productIdKey = 'premium_product_id';
   static const String _premiumExpiryKey = 'premium_expires_at_ms';
 
   final InAppPurchase _iap = InAppPurchase.instance;
@@ -81,6 +83,7 @@ class PremiumService {
     await _prefs?.remove(_proKey);
     await _prefs?.remove(_purchaseTokenKey);
     await _prefs?.remove(_purchaseIdKey);
+    await _prefs?.remove(_productIdKey);
     await _prefs?.remove(_premiumExpiryKey);
   }
 
@@ -290,6 +293,7 @@ class PremiumService {
       purchase.verificationData.source,
     );
     await _prefs?.setString(_purchaseIdKey, purchase.purchaseID ?? '');
+    await _prefs?.setString(_productIdKey, purchase.productID);
 
     final expiryMs = _readExpiryMillis(purchase);
     if (expiryMs != null) {
@@ -326,39 +330,182 @@ class PremiumService {
     return true;
   }
 
-  ProductDetails? getWeeklySubscription() {
-    final weeklyProductId = _productIdResolver.getWeeklySubscriptionId();
-    final weeklyProducts =
-        _products.where((p) => p.id == weeklyProductId).toList();
-    if (weeklyProducts.isEmpty) return null;
-
-    weeklyProducts.sort((a, b) => b.rawPrice.compareTo(a.rawPrice));
-    return weeklyProducts.first;
+  bool hasLifetimeAccess() {
+    if (!isPremiumUser()) return false;
+    final productId = _prefs?.getString(_productIdKey);
+    return productId != null && _productIdResolver.isLifetimeProductId(productId);
   }
 
-  ProductDetails? getYearlySubscription() {
-    try {
-      final yearlyProductId = _productIdResolver.getYearlySubscriptionId();
-      return _products.firstWhere((p) => p.id == yearlyProductId);
-    } catch (_) {
-      return null;
+  /// Android expands each subscription offer into its own [ProductDetails].
+  /// Prefer the free-trial offer when [preferFreeTrial] is true.
+  ProductDetails? getProductById(
+    String productId, {
+    bool preferFreeTrial = true,
+  }) {
+    ProductDetails? fallback;
+    for (final p in _products) {
+      if (p.id != productId) continue;
+      fallback ??= p;
+      if (preferFreeTrial &&
+          p is GooglePlayProductDetails &&
+          _offerHasFreeTrial(p)) {
+        return p;
+      }
     }
+    return fallback;
+  }
+
+  ProductDetails? getWeeklySubscription({bool preferFreeTrial = false}) {
+    return getProductById(
+      _productIdResolver.getWeeklySubscriptionId(),
+      preferFreeTrial: preferFreeTrial,
+    );
+  }
+
+  ProductDetails? getMonthlySubscription({bool preferFreeTrial = false}) {
+    return getProductById(
+      _productIdResolver.getMonthlySubscriptionId(),
+      preferFreeTrial: preferFreeTrial,
+    );
+  }
+
+  ProductDetails? getYearlySubscription({bool preferFreeTrial = true}) {
+    return getProductById(
+      _productIdResolver.getYearlySubscriptionId(),
+      preferFreeTrial: preferFreeTrial,
+    );
   }
 
   ProductDetails? getLifetimeProduct() {
-    try {
-      final lifetimeProductId = _productIdResolver.getLifetimeProductId();
-      return _products.firstWhere((p) => p.id == lifetimeProductId);
-    } catch (_) {
-      return null;
-    }
+    return getProductById(
+      _productIdResolver.getLifetimeProductId(),
+      preferFreeTrial: false,
+    );
   }
 
-  String? getWeeklyPrice() => getWeeklySubscription()?.price;
+  /// Store-localized recurring price (skips free-trial $0 intro phase).
+  String? localizedPriceFor(String productId) {
+    final paidProduct = getProductById(productId, preferFreeTrial: false);
+    final fromPaid = _priceFromProduct(paidProduct);
+    if (fromPaid != null) return fromPaid;
 
-  String? getYearlyPrice() => getYearlySubscription()?.price;
+    final trialProduct = getProductById(productId, preferFreeTrial: true);
+    return _priceFromProduct(trialProduct);
+  }
 
-  String? getLifetimePrice() => getLifetimeProduct()?.price;
+  String? getWeeklyPrice() =>
+      localizedPriceFor(_productIdResolver.getWeeklySubscriptionId());
+
+  String? getMonthlyPrice() =>
+      localizedPriceFor(_productIdResolver.getMonthlySubscriptionId());
+
+  String? getYearlyPrice() =>
+      localizedPriceFor(_productIdResolver.getYearlySubscriptionId());
+
+  String? getLifetimePrice() => _priceFromProduct(getLifetimeProduct());
+
+  bool hasFreeTrial(String productId) {
+    final product = getProductById(productId);
+    if (product == null) return false;
+
+    if (product is GooglePlayProductDetails) {
+      return _androidFreeTrialPhase(product) != null;
+    }
+    if (product is AppStoreProductDetails) {
+      final intro = product.skProduct.introductoryPrice;
+      return intro != null &&
+          intro.paymentMode == SKProductDiscountPaymentMode.freeTrail;
+    }
+    if (product is AppStoreProduct2Details) {
+      final offers = product.sk2Product.subscription?.promotionalOffers;
+      if (offers == null) return false;
+      return offers.any(
+        (o) =>
+            o.type == SK2SubscriptionOfferType.introductory &&
+            o.paymentMode == SK2SubscriptionOfferPaymentMode.freeTrial,
+      );
+    }
+    return false;
+  }
+
+  bool hasYearlyFreeTrial() =>
+      hasFreeTrial(_productIdResolver.getYearlySubscriptionId());
+
+  bool hasWeeklyFreeTrial() =>
+      hasFreeTrial(_productIdResolver.getWeeklySubscriptionId());
+
+  String? _priceFromProduct(ProductDetails? product) {
+    if (product == null) return null;
+
+    if (product is GooglePlayProductDetails) {
+      final phase = _recurringPhaseForProduct(product);
+      if (phase != null) {
+        final formatted = phase.formattedPrice.trim();
+        if (formatted.isNotEmpty && !_isFreePriceText(formatted)) {
+          return formatted;
+        }
+      }
+    }
+
+    final price = product.price.trim();
+    if (price.isNotEmpty &&
+        !_isFreePriceText(price, rawPrice: product.rawPrice)) {
+      return price;
+    }
+    return null;
+  }
+
+  PricingPhaseWrapper? _recurringPhaseForProduct(
+    GooglePlayProductDetails product,
+  ) {
+    final offers = product.productDetails.subscriptionOfferDetails;
+    if (offers == null || offers.isEmpty) return null;
+
+    final index = product.subscriptionIndex;
+    if (index != null && index >= 0 && index < offers.length) {
+      for (final phase in offers[index].pricingPhases) {
+        if (phase.priceAmountMicros > 0) return phase;
+      }
+    }
+
+    for (final offer in offers) {
+      for (final phase in offer.pricingPhases) {
+        if (phase.priceAmountMicros > 0) return phase;
+      }
+    }
+    return null;
+  }
+
+  bool _offerHasFreeTrial(GooglePlayProductDetails product) {
+    final index = product.subscriptionIndex;
+    final offers = product.productDetails.subscriptionOfferDetails;
+    if (index == null || offers == null || index >= offers.length) {
+      return false;
+    }
+    return offers[index].pricingPhases.any((p) => p.priceAmountMicros <= 0);
+  }
+
+  PricingPhaseWrapper? _androidFreeTrialPhase(
+    GooglePlayProductDetails product,
+  ) {
+    final offers = product.productDetails.subscriptionOfferDetails;
+    if (offers == null) return null;
+    for (final offer in offers) {
+      for (final phase in offer.pricingPhases) {
+        if (phase.priceAmountMicros <= 0) return phase;
+      }
+    }
+    return null;
+  }
+
+  bool _isFreePriceText(String text, {double rawPrice = -1}) {
+    if (rawPrice >= 0 && rawPrice <= 0) return true;
+    final lower = text.toLowerCase().trim();
+    if (lower.isEmpty || lower == 'null') return true;
+    if (lower.contains('free')) return true;
+    if (RegExp(r'^[\$€£₹]?\s*0([.,]0+)?$').hasMatch(lower)) return true;
+    return false;
+  }
 
   Future<bool> _startStorePurchase(ProductDetails product) async {
     lastPurchaseCancelledByUser = false;
@@ -385,9 +532,20 @@ class PremiumService {
         }
       }
 
-      return _iap.buyNonConsumable(
-        purchaseParam: PurchaseParam(productDetails: product),
-      );
+      PurchaseParam purchaseParam;
+      if (Platform.isAndroid && product is GooglePlayProductDetails) {
+        final token = product.offerToken?.trim();
+        purchaseParam = (token != null && token.isNotEmpty)
+            ? GooglePlayPurchaseParam(
+                productDetails: product,
+                offerToken: token,
+              )
+            : PurchaseParam(productDetails: product);
+      } else {
+        purchaseParam = PurchaseParam(productDetails: product);
+      }
+
+      return _iap.buyNonConsumable(purchaseParam: purchaseParam);
     } catch (_) {
       return false;
     }
@@ -397,7 +555,18 @@ class PremiumService {
     if (!_isAvailable) return false;
     if (_products.isEmpty) await _loadProducts();
 
-    final product = getWeeklySubscription();
+    // Weekly has no trial CTA — buy the paid base offer.
+    final product = getWeeklySubscription(preferFreeTrial: false);
+    if (product == null) return false;
+
+    return _startStorePurchase(product);
+  }
+
+  Future<bool> purchaseMonthlySubscription() async {
+    if (!_isAvailable) return false;
+    if (_products.isEmpty) await _loadProducts();
+
+    final product = getMonthlySubscription(preferFreeTrial: false);
     if (product == null) return false;
 
     return _startStorePurchase(product);
@@ -407,7 +576,8 @@ class PremiumService {
     if (!_isAvailable) return false;
     if (_products.isEmpty) await _loadProducts();
 
-    final product = getYearlySubscription();
+    // Prefer trial offer when Play returns one for yearly.
+    final product = getYearlySubscription(preferFreeTrial: true);
     if (product == null) return false;
 
     return _startStorePurchase(product);
