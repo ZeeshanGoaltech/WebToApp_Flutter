@@ -279,7 +279,7 @@ const Map<String, String> FrFrTranslations = {
   'quick_guide_body': 'Pas de code. Aucune expérience requise. Juste l\'URL de votre site.',
   'rate_app': 'Noter l\'app',
   'rate_app_subtitle': 'Vous aimez l\'app ? Donnez-nous 5 étoiles !',
-  'rate_dialog_feedback': 'Share feedback',
+  'rate_dialog_feedback': 'Feedback',
   'rate_dialog_feedback_subject': 'AppForge feedback',
   'rate_dialog_later': 'Maybe later',
   'rate_dialog_rate_now': 'Rate now',

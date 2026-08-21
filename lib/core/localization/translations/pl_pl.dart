@@ -279,7 +279,7 @@ const Map<String, String> PlPlTranslations = {
   'quick_guide_body': 'Bez kodu. Bez doświadczenia. Wystarczy URL Twojej strony.',
   'rate_app': 'Oceń aplikację',
   'rate_app_subtitle': 'Podoba Ci się aplikacja? Daj nam 5 gwiazdek!',
-  'rate_dialog_feedback': 'Share feedback',
+  'rate_dialog_feedback': 'Feedback',
   'rate_dialog_feedback_subject': 'AppForge feedback',
   'rate_dialog_later': 'Maybe later',
   'rate_dialog_rate_now': 'Rate now',

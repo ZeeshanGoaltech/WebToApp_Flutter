@@ -6,7 +6,7 @@ class AppDebugFlags {
   static const bool forceOnboardingOnLaunch = false;
 
   // Enable this for QA/testing to force language + onboarding on every launch.
-  static const bool forceLanguageAndOnboardingOnLaunch = true;
+  static const bool forceLanguageAndOnboardingOnLaunch = false;
 
   /// Deprecated for launch gating — use Firebase RC `splash_sub` instead.
   /// Kept for reference; LaunchFlow reads Remote Config.

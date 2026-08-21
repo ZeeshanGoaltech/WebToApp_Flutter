@@ -246,7 +246,7 @@ const Map<String, String> AfZaTranslations = {
   'quick_guide_body': 'Geen kodering nie. Geen ondervinding nodig nie. Net jou webwerf URL.',
   'rate_app': 'Beoordeel App',
   'rate_app_subtitle': 'Hou jy van die toepassing? Gee ons 5 sterre!',
-  'rate_dialog_feedback': 'Deel terugvoer',
+  'rate_dialog_feedback': 'Terugvoer',
   'rate_dialog_feedback_subject': 'Web-na-toepassing-omskakelaar-terugvoer',
   'rate_dialog_later': 'Miskien later',
   'rate_dialog_rate_now': 'Beoordeel nou',

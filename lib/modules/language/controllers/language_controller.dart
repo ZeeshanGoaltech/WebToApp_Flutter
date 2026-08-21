@@ -43,6 +43,8 @@ class LanguageController extends GetxController {
   void onBack() => Get.back();
 
   Future<bool> handleSystemBack() async {
+    if (fromSettings) return true;
+
     final now = DateTime.now();
     if (_lastBackPressAt == null ||
         now.difference(_lastBackPressAt!) > const Duration(seconds: 2)) {

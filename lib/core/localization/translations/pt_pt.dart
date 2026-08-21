@@ -279,7 +279,7 @@ const Map<String, String> PtPtTranslations = {
   'quick_guide_body': 'Sem código. Sem experiência necessária. Apenas o URL do seu site.',
   'rate_app': 'Avaliar app',
   'rate_app_subtitle': 'Gosta da app? Dê-nos 5 estrelas!',
-  'rate_dialog_feedback': 'Share feedback',
+  'rate_dialog_feedback': 'Feedback',
   'rate_dialog_feedback_subject': 'AppForge feedback',
   'rate_dialog_later': 'Maybe later',
   'rate_dialog_rate_now': 'Rate now',

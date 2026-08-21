@@ -246,7 +246,7 @@ const Map<String, String> ArSaTranslations = {
   'quick_guide_body': 'لا الترميز. لا حاجة للخبرة. فقط موقع الويب الخاص بك URL.',
   'rate_app': 'معدل التطبيق',
   'rate_app_subtitle': 'أحب التطبيق؟ تعطينا 5 نجوم!',
-  'rate_dialog_feedback': 'مشاركة التعليقات',
+  'rate_dialog_feedback': 'تعليقات',
   'rate_dialog_feedback_subject': 'تعليقات حول محول الويب إلى التطبيقات',
   'rate_dialog_later': 'ربما في وقت لاحق',
   'rate_dialog_rate_now': 'قيم الآن',

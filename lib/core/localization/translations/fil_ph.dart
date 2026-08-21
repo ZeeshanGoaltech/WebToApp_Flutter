@@ -279,7 +279,7 @@ const Map<String, String> FilPhTranslations = {
   'quick_guide_body': 'Walang coding. Walang karanasan na kailangan. URL lang ng website mo.',
   'rate_app': 'I-rate ang App',
   'rate_app_subtitle': 'Gusto mo ang app? Bigyan kami ng 5 stars!',
-  'rate_dialog_feedback': 'Share feedback',
+  'rate_dialog_feedback': 'Feedback',
   'rate_dialog_feedback_subject': 'AppForge feedback',
   'rate_dialog_later': 'Maybe later',
   'rate_dialog_rate_now': 'Rate now',

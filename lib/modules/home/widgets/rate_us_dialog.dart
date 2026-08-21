@@ -4,7 +4,7 @@ import 'package:web_to_app/core/theme/app_colors.dart';
 import 'package:web_to_app/core/theme/app_text_styles.dart';
 import 'package:web_to_app/core/utils/responsive.dart';
 
-Future<int?> showRateUsDialog(BuildContext context, {int initial = 0}) {
+Future<int?> showRateUsDialog(BuildContext context, {int initial = 5}) {
   return showDialog<int>(
     context: context,
     barrierDismissible: true,
@@ -23,11 +23,17 @@ class _RateUsDialog extends StatefulWidget {
 }
 
 class _RateUsDialogState extends State<_RateUsDialog> {
+  static const _minRating = 1;
+  static const _maxRating = 5;
+  static const _starColor = Color(0xFFFFB020);
+  static const _starFillStep = Duration(milliseconds: 140);
+  static const _starBounceDuration = Duration(milliseconds: 200);
+
   late int _rating;
-  late int _displayRating;
-  late bool _hasUserRated;
-  bool _isAnimating = false;
+  late int _targetRating;
+  int _displayRating = 0;
   int _bounceStar = 0;
+  bool _isAnimating = false;
 
   String get _primaryLabel =>
       _rating <= 3 ? 'rate_dialog_feedback'.tr : 'rate_dialog_rate_now'.tr;
@@ -55,51 +61,69 @@ class _RateUsDialogState extends State<_RateUsDialog> {
   };
 
   String get _ratingStatus {
-    if (_rating <= 0) return 'rate_dialog_subtitle'.tr;
+    final shown = _isAnimating ? _displayRating : _rating;
+    if (shown <= 0) return 'rate_dialog_subtitle'.tr;
     final languageCode = Get.locale?.languageCode.toLowerCase() ?? 'en';
     final localized = _ratingStatusesByLanguage[languageCode] ??
         _ratingStatusesByLanguage['en']!;
-    final index = _rating.clamp(1, 5) - 1;
+    final index = shown.clamp(_minRating, _maxRating) - 1;
     return localized[index];
+  }
+
+  int _clampRating(int value) {
+    if (value < _minRating) return _minRating;
+    if (value > _maxRating) return _maxRating;
+    return value;
   }
 
   @override
   void initState() {
     super.initState();
-    _rating = widget.initial.clamp(0, 5);
-    _displayRating = _rating;
-    _hasUserRated = _rating > 0;
+    _targetRating =
+        widget.initial <= 0 ? _maxRating : _clampRating(widget.initial);
+    _rating = _targetRating;
+    _displayRating = 0;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) _playOpenFillAnimation();
+    });
   }
 
-  Future<void> _onStarTap(int value) async {
+  Future<void> _playOpenFillAnimation() async {
     if (_isAnimating) return;
+    setState(() {
+      _isAnimating = true;
+      _displayRating = 0;
+      _bounceStar = 0;
+    });
 
-    if (_hasUserRated) {
-      setState(() {
-        _rating = value;
-        _displayRating = value;
-      });
-      return;
-    }
+    await Future<void>.delayed(const Duration(milliseconds: 80));
 
-    _isAnimating = true;
-    setState(() => _displayRating = 0);
-
-    for (var star = 1; star <= value; star++) {
+    for (var star = 1; star <= _targetRating; star++) {
       if (!mounted) return;
       setState(() {
         _displayRating = star;
         _bounceStar = star;
       });
-      await Future<void>.delayed(const Duration(milliseconds: 120));
+      await Future<void>.delayed(_starFillStep);
     }
 
     if (!mounted) return;
+    await Future<void>.delayed(_starBounceDuration - _starFillStep);
+
+    if (!mounted) return;
     setState(() {
-      _rating = value;
-      _hasUserRated = true;
+      _rating = _targetRating;
+      _displayRating = _targetRating;
       _isAnimating = false;
       _bounceStar = 0;
+    });
+  }
+
+  void _onStarTap(int value) {
+    if (_isAnimating) return;
+    setState(() {
+      _rating = _clampRating(value);
+      _displayRating = _rating;
     });
   }
 
@@ -187,7 +211,7 @@ class _RateUsDialogState extends State<_RateUsDialog> {
                       fit: BoxFit.scaleDown,
                       child: Row(
                         mainAxisSize: MainAxisSize.min,
-                        children: List.generate(5, (index) {
+                        children: List.generate(_maxRating, (index) {
                           final value = index + 1;
                           final active = value <= _displayRating;
                           final isBouncing = value == _bounceStar;
@@ -201,17 +225,35 @@ class _RateUsDialogState extends State<_RateUsDialog> {
                               height: starSize + Responsive.w(context, 12),
                             ),
                             icon: AnimatedScale(
-                              scale: isBouncing ? 1.18 : 1.0,
-                              duration: const Duration(milliseconds: 120),
+                              scale: isBouncing ? 1.22 : (active ? 1.0 : 0.92),
+                              duration: _starBounceDuration,
                               curve: Curves.easeOutBack,
-                              child: Icon(
-                                active
-                                    ? Icons.star_rounded
-                                    : Icons.star_border_rounded,
-                                color: active
-                                    ? const Color(0xFFFFB020)
-                                    : AppColors.createFieldBorder,
-                                size: starSize,
+                              child: AnimatedSwitcher(
+                                duration: const Duration(milliseconds: 120),
+                                switchInCurve: Curves.easeOut,
+                                switchOutCurve: Curves.easeIn,
+                                transitionBuilder: (child, animation) {
+                                  return FadeTransition(
+                                    opacity: animation,
+                                    child: ScaleTransition(
+                                      scale: Tween<double>(
+                                        begin: 0.7,
+                                        end: 1.0,
+                                      ).animate(animation),
+                                      child: child,
+                                    ),
+                                  );
+                                },
+                                child: Icon(
+                                  active
+                                      ? Icons.star_rounded
+                                      : Icons.star_border_rounded,
+                                  key: ValueKey<bool>(active),
+                                  color: active
+                                      ? _starColor
+                                      : AppColors.createFieldBorder,
+                                  size: starSize,
+                                ),
                               ),
                             ),
                           );
@@ -223,12 +265,17 @@ class _RateUsDialogState extends State<_RateUsDialog> {
                       duration: const Duration(milliseconds: 200),
                       child: Text(
                         _ratingStatus,
-                        key: ValueKey(_rating),
+                        key: ValueKey(
+                          _isAnimating ? _displayRating : _rating,
+                        ),
                         textAlign: TextAlign.center,
                         style: AppTextStyles.settingsHeaderTitle(context)
                             .copyWith(
                           fontSize: Responsive.sp(context, 18),
-                          color: _rating > 0
+                          color: (_isAnimating
+                                      ? _displayRating
+                                      : _rating) >
+                                  0
                               ? AppColors.homeTitle
                               : AppColors.createFieldBorder,
                         ),
@@ -243,7 +290,7 @@ class _RateUsDialogState extends State<_RateUsDialog> {
                           gradient: LinearGradient(
                             begin: Alignment.topLeft,
                             end: Alignment.bottomRight,
-                            colors: _rating > 0
+                            colors: !_isAnimating
                                 ? const [
                                     AppColors.homeCardGradientStart,
                                     AppColors.homeCardGradientMid,
@@ -255,7 +302,7 @@ class _RateUsDialogState extends State<_RateUsDialog> {
                                   ],
                           ),
                           borderRadius: BorderRadius.circular(999),
-                          boxShadow: _rating > 0
+                          boxShadow: !_isAnimating
                               ? [
                                   BoxShadow(
                                     color: AppColors.homeAccent.withValues(
@@ -268,9 +315,9 @@ class _RateUsDialogState extends State<_RateUsDialog> {
                               : null,
                         ),
                         child: ElevatedButton(
-                          onPressed: _rating > 0
-                              ? () => Navigator.of(context).pop(_rating)
-                              : null,
+                          onPressed: _isAnimating
+                              ? null
+                              : () => Navigator.of(context).pop(_rating),
                           style: ElevatedButton.styleFrom(
                             backgroundColor: Colors.transparent,
                             shadowColor: Colors.transparent,

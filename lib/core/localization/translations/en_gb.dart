@@ -279,7 +279,7 @@ const Map<String, String> EnGbTranslations = {
   'quick_guide_body': 'No coding. No experience needed. Just your website URL.',
   'rate_app': 'Rate App',
   'rate_app_subtitle': 'Love the app? Give us 5 stars!',
-  'rate_dialog_feedback': 'Share feedback',
+  'rate_dialog_feedback': 'Feedback',
   'rate_dialog_feedback_subject': 'Web to App Converter feedback',
   'rate_dialog_later': 'Maybe later',
   'rate_dialog_rate_now': 'Rate now',

@@ -279,7 +279,7 @@ const Map<String, String> KoKrTranslations = {
   'quick_guide_body': '코딩 불필요. 경험 불필요. 웹사이트 URL만 있으면 됩니다.',
   'rate_app': '앱 평가',
   'rate_app_subtitle': '마음에 드시나요? 별 5개를 주세요!',
-  'rate_dialog_feedback': 'Share feedback',
+  'rate_dialog_feedback': 'Feedback',
   'rate_dialog_feedback_subject': 'AppForge feedback',
   'rate_dialog_later': 'Maybe later',
   'rate_dialog_rate_now': 'Rate now',

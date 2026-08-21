@@ -279,7 +279,7 @@ const Map<String, String> DeDeTranslations = {
   'quick_guide_body': 'Kein Programmieren. Keine Erfahrung nötig. Nur Ihre Website-URL.',
   'rate_app': 'App bewerten',
   'rate_app_subtitle': 'Gefällt Ihnen die App? Geben Sie uns 5 Sterne!',
-  'rate_dialog_feedback': 'Share feedback',
+  'rate_dialog_feedback': 'Feedback',
   'rate_dialog_feedback_subject': 'AppForge feedback',
   'rate_dialog_later': 'Maybe later',
   'rate_dialog_rate_now': 'Rate now',

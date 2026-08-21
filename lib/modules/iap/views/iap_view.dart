@@ -429,36 +429,7 @@ class _SecondaryPlans extends GetView<IapController> {
 
   @override
   Widget build(BuildContext context) {
-    return Obx(() {
-      if (controller.useMonthlyLayout) {
-        return const Stack(
-          children: [
-            Positioned(
-              top: 742.67,
-              left: IapView._screenHPad,
-              right: IapView._screenHPad,
-              height: IapView._planH,
-              child: _PlanCard(
-                plan: IapPlan.monthly,
-                titleKey: 'iap_monthly_access',
-                subtitleKey: 'iap_billed_every_month',
-              ),
-            ),
-            Positioned(
-              top: 848.7,
-              left: IapView._screenHPad,
-              right: IapView._screenHPad,
-              height: IapView._planH,
-              child: _PlanCard(
-                plan: IapPlan.weekly,
-                titleKey: 'iap_weekly_access',
-                subtitleKey: 'iap_billed_every_week',
-              ),
-            ),
-          ],
-        );
-      }
-
+    if (controller.useMonthlyLayout) {
       return const Stack(
         children: [
           Positioned(
@@ -467,10 +438,9 @@ class _SecondaryPlans extends GetView<IapController> {
             right: IapView._screenHPad,
             height: IapView._planH,
             child: _PlanCard(
-              plan: IapPlan.yearly,
-              titleKey: 'iap_yearly_access',
-              subtitleKey: 'iap_billed_every_year',
-              priceLabelKey: 'iap_per_yearly',
+              plan: IapPlan.monthly,
+              titleKey: 'iap_monthly_access',
+              subtitleKey: 'iap_billed_every_month',
             ),
           ),
           Positioned(
@@ -479,14 +449,42 @@ class _SecondaryPlans extends GetView<IapController> {
             right: IapView._screenHPad,
             height: IapView._planH,
             child: _PlanCard(
-              plan: IapPlan.lifetime,
-              titleKey: 'iap_lifetime',
-              subtitleKey: 'iap_lifetime_subtitle',
+              plan: IapPlan.weekly,
+              titleKey: 'iap_weekly_access',
+              subtitleKey: 'iap_billed_every_week',
             ),
           ),
         ],
       );
-    });
+    }
+
+    return const Stack(
+      children: [
+        Positioned(
+          top: 742.67,
+          left: IapView._screenHPad,
+          right: IapView._screenHPad,
+          height: IapView._planH,
+          child: _PlanCard(
+            plan: IapPlan.yearly,
+            titleKey: 'iap_yearly_access',
+            subtitleKey: 'iap_billed_every_year',
+            priceLabelKey: 'iap_per_yearly',
+          ),
+        ),
+        Positioned(
+          top: 848.7,
+          left: IapView._screenHPad,
+          right: IapView._screenHPad,
+          height: IapView._planH,
+          child: _PlanCard(
+            plan: IapPlan.lifetime,
+            titleKey: 'iap_lifetime',
+            subtitleKey: 'iap_lifetime_subtitle',
+          ),
+        ),
+      ],
+    );
   }
 }
 

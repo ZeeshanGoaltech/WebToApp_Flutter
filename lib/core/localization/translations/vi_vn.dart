@@ -279,7 +279,7 @@ const Map<String, String> ViVnTranslations = {
   'quick_guide_body': 'Không cần code. Không cần kinh nghiệm. Chỉ cần URL trang web.',
   'rate_app': 'Đánh giá ứng dụng',
   'rate_app_subtitle': 'Thích ứng dụng? Cho chúng tôi 5 sao!',
-  'rate_dialog_feedback': 'Share feedback',
+  'rate_dialog_feedback': 'Feedback',
   'rate_dialog_feedback_subject': 'AppForge feedback',
   'rate_dialog_later': 'Maybe later',
   'rate_dialog_rate_now': 'Rate now',

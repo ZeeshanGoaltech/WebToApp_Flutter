@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:web_to_app/core/ads/ad_placements.dart';
 import 'package:web_to_app/core/ads/widgets/medium_native_ad_widget.dart';
@@ -18,8 +19,12 @@ class LanguageView extends GetView<LanguageController> {
       onPopInvokedWithResult: (didPop, _) async {
         if (didPop) return;
         final shouldClose = await controller.handleSystemBack();
-        if (shouldClose && context.mounted) {
+        if (!shouldClose || !context.mounted) return;
+
+        if (controller.fromSettings) {
           Get.back();
+        } else {
+          await SystemNavigator.pop();
         }
       },
       child: Scaffold(

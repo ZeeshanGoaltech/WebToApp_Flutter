@@ -279,7 +279,7 @@ const Map<String, String> MsMyTranslations = {
   'quick_guide_body': 'Tiada pengekodan. Tiada pengalaman diperlukan. Hanya URL laman web anda.',
   'rate_app': 'Nilai Aplikasi',
   'rate_app_subtitle': 'Suka aplikasi ini? Beri kami 5 bintang!',
-  'rate_dialog_feedback': 'Share feedback',
+  'rate_dialog_feedback': 'Feedback',
   'rate_dialog_feedback_subject': 'AppForge feedback',
   'rate_dialog_later': 'Maybe later',
   'rate_dialog_rate_now': 'Rate now',

@@ -279,7 +279,7 @@ const Map<String, String> EsCoTranslations = {
   'quick_guide_body': 'Sin programar. Sin experiencia previa. Solo la URL de tu sitio web.',
   'rate_app': 'Calificar app',
   'rate_app_subtitle': '¿Te gusta la app? ¡Danos 5 estrellas!',
-  'rate_dialog_feedback': 'Share feedback',
+  'rate_dialog_feedback': 'Feedback',
   'rate_dialog_feedback_subject': 'AppForge feedback',
   'rate_dialog_later': 'Maybe later',
   'rate_dialog_rate_now': 'Rate now',

@@ -279,7 +279,7 @@ const Map<String, String> IdIdTranslations = {
   'quick_guide_body': 'Tanpa coding. Tanpa pengalaman. Cukup URL situs web Anda.',
   'rate_app': 'Beri Rating',
   'rate_app_subtitle': 'Suka aplikasinya? Beri kami 5 bintang!',
-  'rate_dialog_feedback': 'Share feedback',
+  'rate_dialog_feedback': 'Feedback',
   'rate_dialog_feedback_subject': 'AppForge feedback',
   'rate_dialog_later': 'Maybe later',
   'rate_dialog_rate_now': 'Rate now',

@@ -246,7 +246,7 @@ const Map<String, String> FaIrTranslations = {
   'quick_guide_body': 'بدون کد نویسی بدون نیاز به تجربه فقط وب سایت شما URL.',
   'rate_app': 'امتیاز دادن به برنامه',
   'rate_app_subtitle': 'برنامه را دوست دارید؟ به ما 5 ستاره بدهید!',
-  'rate_dialog_feedback': 'بازخورد را به اشتراک بگذارید',
+  'rate_dialog_feedback': 'بازخورد',
   'rate_dialog_feedback_subject': 'بازخورد مبدل وب به برنامه',
   'rate_dialog_later': 'شاید بعدا',
   'rate_dialog_rate_now': 'اکنون امتیاز دهید',

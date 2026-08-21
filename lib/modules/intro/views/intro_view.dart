@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:web_to_app/core/ads/ad_placements.dart';
 import 'package:web_to_app/core/ads/widgets/medium_native_ad_widget.dart';
@@ -19,7 +20,7 @@ class IntroView extends GetView<IntroController> {
         if (didPop) return;
         final shouldClose = await controller.handleSystemBack();
         if (shouldClose && context.mounted) {
-          Get.back();
+          await SystemNavigator.pop();
         }
       },
       child: Scaffold(

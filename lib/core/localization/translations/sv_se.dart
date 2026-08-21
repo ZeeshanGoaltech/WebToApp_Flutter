@@ -279,7 +279,7 @@ const Map<String, String> SvSeTranslations = {
   'quick_guide_body': 'Ingen kodning. Ingen erfarenhet krävs. Bara din webbplats-URL.',
   'rate_app': 'Betygsätt appen',
   'rate_app_subtitle': 'Gillar du appen? Ge oss 5 stjärnor!',
-  'rate_dialog_feedback': 'Share feedback',
+  'rate_dialog_feedback': 'Feedback',
   'rate_dialog_feedback_subject': 'AppForge feedback',
   'rate_dialog_later': 'Maybe later',
   'rate_dialog_rate_now': 'Rate now',
