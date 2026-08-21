@@ -47,10 +47,12 @@ class LifetimePremiumView extends GetView<LifetimePremiumController> {
                         children: [
                           Image.asset(
                             AppAssets.iapLifetimeHero,
-                            fit: BoxFit.cover,
+                            fit: BoxFit.fitWidth,
                             alignment: Alignment.topCenter,
                             filterQuality: FilterQuality.high,
-                            errorBuilder: (context, error, stackTrace) => Container(
+                            width: double.infinity,
+                            errorBuilder: (context, error, stackTrace) =>
+                                Container(
                               color: iconBg,
                               child: const Icon(
                                 Icons.phone_android_rounded,
@@ -345,9 +347,13 @@ class LifetimePremiumView extends GetView<LifetimePremiumController> {
                       return const SizedBox.shrink();
                     }
                     final scale = IapCloseButton.scaleOf(context);
+                    final sideInset =
+                        (MediaQuery.sizeOf(context).width -
+                            IapCloseButton.designW * scale) /
+                        2;
                     return Positioned(
-                      top: topInset + IapCloseButton.designTop * scale,
-                      left: IapCloseButton.designLeft * scale,
+                      top: topInset + IapCloseButton.designTop * scale - 4,
+                      left: sideInset + IapCloseButton.designLeft * scale,
                       child: IapCloseButton(onTap: controller.finish),
                     );
                   },

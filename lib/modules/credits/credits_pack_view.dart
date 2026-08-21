@@ -323,8 +323,13 @@ class _CreditsPackViewState extends State<CreditsPackView> {
                           if (_showCloseButton)
                             Positioned(
                               top: topInset +
-                                  IapCloseButton.designTop * closeScale,
-                              left: IapCloseButton.designLeft * closeScale,
+                                  IapCloseButton.designTop * closeScale -
+                                  2,
+                              left: (constraints.maxWidth -
+                                          IapCloseButton.designW *
+                                              closeScale) /
+                                      2 +
+                                  IapCloseButton.designLeft * closeScale,
                               child: IapCloseButton(
                                 onTap: () => Get.back(result: false),
                               ),
@@ -347,21 +352,31 @@ class _CreditsPackViewState extends State<CreditsPackView> {
   }
 
   Widget _buildHero({required double height}) {
+    // Match subscription IAP hero framing: slight scale-up + shift up.
     return SizedBox(
       height: height,
       width: double.infinity,
-      child: Image.asset(
-        AppAssets.iapThreePacks,
-        fit: BoxFit.cover,
-        alignment: Alignment.topCenter,
-        filterQuality: FilterQuality.high,
-        errorBuilder: (context, error, stackTrace) => Container(
-          color: _accentLight,
-          alignment: Alignment.center,
-          child: const Icon(
-            Icons.phone_android_rounded,
-            size: 64,
-            color: _accent,
+      child: ClipRect(
+        child: Transform.translate(
+          offset: Offset(0, -height * 0.0521),
+          child: SizedBox(
+            height: height * 1.0521,
+            width: double.infinity,
+            child: Image.asset(
+              AppAssets.iapThreePacks,
+              fit: BoxFit.cover,
+              alignment: Alignment.topCenter,
+              filterQuality: FilterQuality.high,
+              errorBuilder: (context, error, stackTrace) => Container(
+                color: _accentLight,
+                alignment: Alignment.center,
+                child: const Icon(
+                  Icons.phone_android_rounded,
+                  size: 64,
+                  color: _accent,
+                ),
+              ),
+            ),
           ),
         ),
       ),
