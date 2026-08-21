@@ -157,6 +157,7 @@ class _SlideEditor extends GetView<CreateAppController> {
               CreateUploadZone(
                 label: 'upload_slide_image'.tr,
                 onTap: () => controller.pickSlideImage(index),
+                isLoading: controller.pickingSlideIndex.value == index,
               ),
             SizedBox(height: Responsive.w(context, 16)),
             _SlideTitleField(slide: slide, index: index),

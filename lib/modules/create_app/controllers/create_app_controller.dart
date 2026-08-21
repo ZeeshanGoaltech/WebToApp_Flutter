@@ -28,6 +28,9 @@ class CreateAppController extends GetxController {
 
   final iconPath = Rxn<String>();
   final splashPath = Rxn<String>();
+  final isPickingIcon = false.obs;
+  final isPickingSplash = false.obs;
+  final pickingSlideIndex = RxnInt();
 
   final bottomNavEnabled = true.obs;
   final navTabs = CreateAppDefaults.defaultNavTabs().obs;
@@ -136,7 +139,13 @@ class CreateAppController extends GetxController {
       }
     }
 
-    setError('url', CreateAppValidator.validateWebsiteUrl(websiteUrlController.text));
+    final normalizedUrl =
+        CreateAppValidator.normalizeWebsiteUrl(websiteUrlController.text);
+    if (normalizedUrl != websiteUrlController.text.trim()) {
+      websiteUrlController.text = normalizedUrl;
+    }
+
+    setError('url', CreateAppValidator.validateWebsiteUrl(normalizedUrl));
     setError('appName', CreateAppValidator.validateAppName(appNameController.text));
     setError(
       'packageName',
@@ -200,20 +209,38 @@ class CreateAppController extends GetxController {
   void clearSplash() => splashPath.value = null;
 
   Future<void> pickAppIcon() async {
-    final path = await CreateAppPickerService.pickImageFromGallery();
-    if (path != null) iconPath.value = path;
+    if (isPickingIcon.value) return;
+    isPickingIcon.value = true;
+    try {
+      final path = await CreateAppPickerService.pickImageFromGallery();
+      if (path != null) iconPath.value = path;
+    } finally {
+      isPickingIcon.value = false;
+    }
   }
 
   Future<void> pickSplashImage() async {
-    final path = await CreateAppPickerService.pickImageFromGallery();
-    if (path != null) splashPath.value = path;
+    if (isPickingSplash.value) return;
+    isPickingSplash.value = true;
+    try {
+      final path = await CreateAppPickerService.pickImageFromGallery();
+      if (path != null) splashPath.value = path;
+    } finally {
+      isPickingSplash.value = false;
+    }
   }
 
   Future<void> pickSlideImage(int index) async {
-    final path = await CreateAppPickerService.pickImageFromGallery();
-    if (path == null) return;
-    slides[index].imagePath = path;
-    slides.refresh();
+    if (pickingSlideIndex.value != null) return;
+    pickingSlideIndex.value = index;
+    try {
+      final path = await CreateAppPickerService.pickImageFromGallery();
+      if (path == null) return;
+      slides[index].imagePath = path;
+      slides.refresh();
+    } finally {
+      pickingSlideIndex.value = null;
+    }
   }
 
   void toggleBottomNav(bool value) => bottomNavEnabled.value = value;
@@ -304,6 +331,9 @@ class CreateAppController extends GetxController {
 
     iconPath.value = null;
     splashPath.value = null;
+    isPickingIcon.value = false;
+    isPickingSplash.value = false;
+    pickingSlideIndex.value = null;
 
     bottomNavEnabled.value = true;
     navTabs.assignAll(CreateAppDefaults.defaultNavTabs());
@@ -352,7 +382,8 @@ class CreateAppController extends GetxController {
     this.configVersion.value = configVersion;
     appNameController.text = name;
     packageNameController.text = androidPackage;
-    websiteUrlController.text = startUrl;
+    websiteUrlController.text =
+        CreateAppValidator.normalizeWebsiteUrl(startUrl);
     versionNameController.text = versionName;
     versionCodeController.text = versionCode.toString();
   }

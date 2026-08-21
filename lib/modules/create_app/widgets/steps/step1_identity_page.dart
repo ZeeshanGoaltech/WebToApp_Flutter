@@ -74,6 +74,7 @@ class Step1IdentityPage extends GetView<CreateAppController> {
                   return CreateUploadZone(
                     label: 'upload_icon'.tr,
                     onTap: controller.pickAppIcon,
+                    isLoading: controller.isPickingIcon.value,
                   );
                 }),
                 SizedBox(height: Responsive.w(context, 16)),
@@ -92,6 +93,7 @@ class Step1IdentityPage extends GetView<CreateAppController> {
                   return CreateUploadZone(
                     label: 'upload_image'.tr,
                     onTap: controller.pickSplashImage,
+                    isLoading: controller.isPickingSplash.value,
                   );
                 }),
               ],

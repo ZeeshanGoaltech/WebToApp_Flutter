@@ -12,21 +12,24 @@ class CreateUploadZone extends StatelessWidget {
     required this.label,
     required this.onTap,
     this.dashed = true,
+    this.isLoading = false,
   });
 
   final String label;
   final VoidCallback onTap;
   final bool dashed;
+  final bool isLoading;
 
   @override
   Widget build(BuildContext context) {
     final height = Responsive.w(context, 55.997);
     final radius = Responsive.w(context, 14);
+    final indicatorSize = Responsive.w(context, 20);
 
     return Material(
       color: Colors.transparent,
       child: InkWell(
-        onTap: onTap,
+        onTap: isLoading ? null : onTap,
         borderRadius: BorderRadius.circular(radius),
         child: CustomPaint(
           painter: dashed
@@ -39,17 +42,26 @@ class CreateUploadZone extends StatelessWidget {
             height: height,
             width: double.infinity,
             alignment: Alignment.center,
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                FigmaSvgIcon(
-                  asset: CreateAppAssets.upload,
-                  size: Responsive.w(context, 19.995),
-                ),
-                SizedBox(width: Responsive.w(context, 8)),
-                Text(label, style: AppTextStyles.createLink(context)),
-              ],
-            ),
+            child: isLoading
+                ? SizedBox(
+                    width: indicatorSize,
+                    height: indicatorSize,
+                    child: CircularProgressIndicator(
+                      strokeWidth: 2,
+                      color: AppColors.createAccent,
+                    ),
+                  )
+                : Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      FigmaSvgIcon(
+                        asset: CreateAppAssets.upload,
+                        size: Responsive.w(context, 19.995),
+                      ),
+                      SizedBox(width: Responsive.w(context, 8)),
+                      Text(label, style: AppTextStyles.createLink(context)),
+                    ],
+                  ),
           ),
         ),
       ),

@@ -4,8 +4,19 @@ import 'package:web_to_app/modules/create_app/models/onboarding_slide_model.dart
 class CreateAppValidator {
   CreateAppValidator._();
 
-  static bool isValidUrl(String value) {
+  /// Upgrades `http://` to `https://` so WebViews can load the site
+  /// (Android blocks cleartext HTTP by default).
+  static String normalizeWebsiteUrl(String value) {
     final trimmed = value.trim();
+    if (trimmed.isEmpty) return trimmed;
+    final uri = Uri.tryParse(trimmed);
+    if (uri == null || !uri.hasScheme) return trimmed;
+    if (uri.scheme.toLowerCase() != 'http') return trimmed;
+    return uri.replace(scheme: 'https').toString();
+  }
+
+  static bool isValidUrl(String value) {
+    final trimmed = normalizeWebsiteUrl(value);
     if (trimmed.isEmpty) return false;
     final uri = Uri.tryParse(trimmed);
     if (uri == null || !uri.hasScheme) return false;
@@ -27,8 +38,9 @@ class CreateAppValidator {
   }
 
   static String? validateWebsiteUrl(String value) {
-    if (value.trim().isEmpty) return 'err_url_required'.tr;
-    if (!isValidUrl(value)) return 'err_url_invalid'.tr;
+    final normalized = normalizeWebsiteUrl(value);
+    if (normalized.isEmpty) return 'err_url_required'.tr;
+    if (!isValidUrl(normalized)) return 'err_url_invalid'.tr;
     return null;
   }
 

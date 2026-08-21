@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:web_to_app/modules/create_app/controllers/create_app_controller.dart';
+import 'package:web_to_app/modules/create_app/data/create_app_validator.dart';
 import 'package:web_to_app/modules/create_app/models/nav_tab_model.dart';
 
 class AppConfigMapper {
@@ -12,7 +13,9 @@ class AppConfigMapper {
     required String? splashAssetId,
     required Map<String, String> slideAssetIds,
   }) {
-    final startUrl = controller.websiteUrlController.text.trim();
+    final startUrl = CreateAppValidator.normalizeWebsiteUrl(
+      controller.websiteUrlController.text,
+    );
     final versionCode = int.parse(controller.versionCodeController.text.trim());
     final primaryColor = _colorToHex(controller.selectedThemeColor.value);
 
