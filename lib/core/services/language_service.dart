@@ -1,5 +1,6 @@
 import 'package:get/get.dart';
 import 'package:web_to_app/core/localization/app_locale.dart';
+import 'package:web_to_app/core/services/analytics_service.dart';
 import 'package:web_to_app/core/services/token_storage.dart';
 import 'package:web_to_app/modules/language/data/language_data.dart';
 import 'package:web_to_app/modules/language/models/language_option.dart';
@@ -25,6 +26,7 @@ class LanguageService extends GetxService {
     selectedLanguageId.value = id;
     await Get.find<TokenStorage>().saveLanguageId(id);
     _applyLocale(id);
+    await AnalyticsService.instance.logLanguageChange(id);
   }
 
   void _applyLocale(String id) {

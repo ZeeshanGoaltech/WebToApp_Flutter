@@ -7,6 +7,7 @@ import 'package:web_to_app/core/ads/app_open_ad_manager.dart';
 import 'package:web_to_app/core/constants/app_feature_flags.dart';
 import 'package:web_to_app/core/constants/app_info.dart';
 import 'package:web_to_app/core/navigation/launch_flow.dart';
+import 'package:web_to_app/core/services/analytics_service.dart';
 import 'package:web_to_app/core/services/premium_service.dart';
 import 'package:web_to_app/core/services/session_service.dart';
 import 'package:web_to_app/core/utils/app_toast.dart';
@@ -72,6 +73,10 @@ class IapController extends GetxController {
     AppOpenAdManager.instance.blockAppOpenAds = true;
     selectedPlan.value =
         useMonthlyLayout ? IapPlan.yearly : IapPlan.weekly;
+    AnalyticsService.instance.logIapScreen(
+      fromLaunch: LaunchFlow.iapOpenedFromLaunch,
+      fromSettings: !LaunchFlow.iapOpenedFromLaunch,
+    );
     _initPremium();
   }
 

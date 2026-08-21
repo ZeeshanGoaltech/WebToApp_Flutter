@@ -15,6 +15,7 @@ import 'package:web_to_app/modules/iap/bindings/iap_binding.dart';
 import 'package:web_to_app/modules/iap/bindings/lifetime_premium_binding.dart';
 import 'package:web_to_app/modules/iap/views/iap_view.dart';
 import 'package:web_to_app/modules/iap/views/lifetime_premium_view.dart';
+import 'package:web_to_app/modules/credits/credits_pack_view.dart';
 import 'package:web_to_app/modules/splash/bindings/splash_binding.dart';
 import 'package:web_to_app/modules/splash/views/splash_view.dart';
 
@@ -69,6 +70,12 @@ class AppPages {
       name: AppRoutes.lifetimePremium,
       page: () => const LifetimePremiumView(),
       binding: LifetimePremiumBinding(),
+      popGesture: false,
+    ),
+    GetPage(
+      name: AppRoutes.creditsPack,
+      page: () => const CreditsPackView(),
+      binding: CreditsPackBinding(),
       popGesture: false,
     ),
   ];

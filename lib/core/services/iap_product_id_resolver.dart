@@ -11,6 +11,9 @@ class IapProductIdResolver {
   static const String yearlyPremium = 'yearly_sub';
   static const String lifetimePremium = 'lifetime';
 
+  /// Consumable credit pack (+3 builds). Separate from subscription SKUs.
+  static const String creditsPack = 'threescan_inapp';
+
   String getWeeklySubscriptionId() => weeklyPremium;
 
   String getMonthlySubscriptionId() => monthlyPremium;
@@ -19,14 +22,27 @@ class IapProductIdResolver {
 
   String getLifetimeProductId() => lifetimePremium;
 
+  String getCreditsPackProductId() => creditsPack;
+
   bool isLifetimeProductId(String productId) =>
       productId == getLifetimeProductId();
+
+  bool isCreditsPackProductId(String productId) =>
+      productId == getCreditsPackProductId();
 
   Set<String> getAllProductIds() => {
         getWeeklySubscriptionId(),
         if (AppFeatureFlags.monthlyPlanEnabled) getMonthlySubscriptionId(),
         getYearlySubscriptionId(),
         getLifetimeProductId(),
+        getCreditsPackProductId(),
+      };
+
+  /// Subscription SKUs only (excludes lifetime + credit pack).
+  Set<String> getSubscriptionProductIds() => {
+        getWeeklySubscriptionId(),
+        if (AppFeatureFlags.monthlyPlanEnabled) getMonthlySubscriptionId(),
+        getYearlySubscriptionId(),
       };
 
   bool isValidSubscriptionProductId(String productId) =>

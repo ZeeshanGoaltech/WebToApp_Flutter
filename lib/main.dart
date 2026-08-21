@@ -1,6 +1,5 @@
 import 'dart:async';
 
-import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
@@ -10,6 +9,7 @@ import 'package:web_to_app/core/bindings/initial_binding.dart';
 import 'package:web_to_app/core/constants/app_info.dart';
 import 'package:web_to_app/core/localization/app_locale.dart';
 import 'package:web_to_app/core/localization/app_translations.dart';
+import 'package:web_to_app/core/services/analytics_service.dart';
 import 'package:web_to_app/core/services/firebase_service.dart';
 import 'package:web_to_app/core/services/language_service.dart';
 import 'package:web_to_app/core/theme/app_theme.dart';
@@ -85,7 +85,7 @@ class _WebToAppState extends State<WebToApp> with WidgetsBindingObserver {
       initialRoute: AppPages.initial,
       getPages: AppPages.routes,
       navigatorObservers: [
-        FirebaseAnalyticsObserver(analytics: FirebaseService.analytics),
+        AnalyticsService.instance.navigatorObserver,
       ],
     );
   }

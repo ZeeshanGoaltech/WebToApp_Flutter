@@ -10,6 +10,7 @@ import 'package:in_app_purchase_storekit/in_app_purchase_storekit.dart';
 import 'package:in_app_purchase_storekit/store_kit_2_wrappers.dart';
 import 'package:in_app_purchase_storekit/store_kit_wrappers.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:web_to_app/core/services/credit_service.dart';
 import 'package:web_to_app/core/services/iap_product_id_resolver.dart';
 
 Future<bool>? _earlyRestoreFuture;
@@ -274,6 +275,14 @@ class PremiumService {
   void _handlePurchaseError(PurchaseDetails purchase) {}
 
   Future<void> _handlePurchaseSuccess(PurchaseDetails purchase) async {
+    if (_productIdResolver.isCreditsPackProductId(purchase.productID)) {
+      final key = purchase.purchaseID?.trim().isNotEmpty == true
+          ? purchase.purchaseID!.trim()
+          : purchase.verificationData.serverVerificationData;
+      await CreditService.instance.addPurchasedPack(key);
+      return;
+    }
+
     if (!_isPurchaseCurrentlyActive(purchase)) {
       developer.log(
         'Ignoring inactive/expired purchase: ${purchase.productID}',
@@ -381,6 +390,56 @@ class PremiumService {
       _productIdResolver.getLifetimeProductId(),
       preferFreeTrial: false,
     );
+  }
+
+  ProductDetails? getCreditsPackProduct() {
+    return getProductById(
+      _productIdResolver.getCreditsPackProductId(),
+      preferFreeTrial: false,
+    );
+  }
+
+  String? getCreditsPackPrice() =>
+      localizedPriceFor(_productIdResolver.getCreditsPackProductId());
+
+  /// Consumable credit pack — does not grant premium / subscription.
+  Future<bool> purchaseCreditsPack() async {
+    if (!_isAvailable) return false;
+    if (_products.isEmpty) await _loadProducts();
+
+    final product = getCreditsPackProduct();
+    if (product == null) return false;
+
+    lastPurchaseCancelledByUser = false;
+    try {
+      if (Platform.isIOS) {
+        try {
+          final result = await SK2Product.purchase(product.id);
+          switch (result) {
+            case SK2ProductPurchaseResult.userCancelled:
+              lastPurchaseCancelledByUser = true;
+              return false;
+            case SK2ProductPurchaseResult.unverified:
+              return false;
+            case SK2ProductPurchaseResult.pending:
+            case SK2ProductPurchaseResult.success:
+              return true;
+          }
+        } catch (e) {
+          developer.log(
+            'SK2 credit pack failed, falling back to buyConsumable: $e',
+            name: 'PremiumService',
+          );
+        }
+      }
+
+      return _iap.buyConsumable(
+        purchaseParam: PurchaseParam(productDetails: product),
+        autoConsume: true,
+      );
+    } catch (_) {
+      return false;
+    }
   }
 
   /// Store-localized recurring price (skips free-trial $0 intro phase).

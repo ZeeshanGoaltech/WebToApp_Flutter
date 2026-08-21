@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:get/get.dart';
 import 'package:web_to_app/core/ads/interstitial_ad_trigger.dart';
+import 'package:web_to_app/core/services/analytics_service.dart';
 import 'package:web_to_app/core/services/push_notification_service.dart';
 import 'package:web_to_app/core/services/session_service.dart';
 import 'package:web_to_app/core/utils/app_error_handler.dart';
@@ -34,6 +35,11 @@ class HomeController extends GetxController {
     }
     // Bottom Click Inter (RC: project_native) — count every tab change.
     if (isTabChange) {
+      unawaited(
+        AnalyticsService.instance.logBottomNav(
+          AnalyticsService.tabNameForIndex(index),
+        ),
+      );
       unawaited(InterstitialAdTrigger.showBottomTabInterstitial());
     }
   }

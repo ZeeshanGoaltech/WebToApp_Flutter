@@ -3,6 +3,7 @@ import 'package:web_to_app/core/ads/ad_remote_config_service.dart';
 import 'package:web_to_app/core/api/api_client.dart';
 import 'package:web_to_app/core/services/language_service.dart';
 import 'package:web_to_app/core/services/push_notification_service.dart';
+import 'package:web_to_app/core/services/credit_service.dart';
 import 'package:web_to_app/core/services/premium_service.dart';
 import 'package:web_to_app/core/services/session_service.dart';
 import 'package:web_to_app/core/services/token_storage.dart';
@@ -78,6 +79,7 @@ class InitialBinding extends Bindings {
     Get.put<PushNotificationService>(pushService, permanent: true);
 
     await PremiumService.beginRestoreEarly();
+    await CreditService.instance.initialize();
 
     // Remote Config early; Mobile Ads + GDPR consent wait until UI exists
     // (see SplashController / AdService.initialize).

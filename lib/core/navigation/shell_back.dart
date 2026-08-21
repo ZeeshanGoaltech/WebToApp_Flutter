@@ -28,7 +28,9 @@ abstract final class ShellBack {
   /// Returns true when the back press was handled.
   static Future<bool> handle(BuildContext context) async {
     final route = Get.currentRoute;
-    if (route == AppRoutes.lifetimePremium || route == AppRoutes.iap) {
+    if (route == AppRoutes.lifetimePremium ||
+        route == AppRoutes.iap ||
+        route == AppRoutes.creditsPack) {
       return true;
     }
 

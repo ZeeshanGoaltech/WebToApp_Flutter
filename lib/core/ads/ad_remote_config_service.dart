@@ -24,6 +24,12 @@ abstract final class RemoteConfigKeys {
   /// Build Again quota: `off` = unlimited, `1`/`2`/… = then IAP.
   /// Persists across restarts. Default: `3`.
   static const buildAgainSub = 'buildagain_sub';
+
+  /// Free credits before pack paywall (Diginotes-compatible). Default: `3`.
+  static const aiModuleFreeCredits = 'ai_module_free_credits';
+
+  /// Credits granted per `threescan_inapp` purchase. Default: `3`.
+  static const aiModulePackCredits = 'ai_module_pack_credits';
 }
 
 /// Placements whose RC value is a frequency string: `off, 1, 2, 3, 4`.
@@ -54,6 +60,8 @@ const Map<String, dynamic> adRemoteConfigDefaults = {
   RemoteConfigKeys.generateBundleApkSub: 'off',
   RemoteConfigKeys.downloadBundleApkSub: '1',
   RemoteConfigKeys.buildAgainSub: '3',
+  RemoteConfigKeys.aiModuleFreeCredits: 3,
+  RemoteConfigKeys.aiModulePackCredits: 3,
 };
 
 /// Thin Remote Config wrapper for ad / feature flags.
@@ -162,6 +170,27 @@ class AdRemoteConfigService {
 
   /// Free-build limit for `buildapp_sub`.
   int? getBuildAppSubLimit() => getQuotaLimit(RemoteConfigKeys.buildAppSub);
+
+  /// Integer Remote Config value with [fallback] when missing/invalid.
+  int getInt(String key, int fallback) {
+    final remoteConfig = _remoteConfig;
+    if (remoteConfig == null) {
+      final defaultValue = adRemoteConfigDefaults[key];
+      if (defaultValue is int) return defaultValue;
+      return fallback;
+    }
+
+    try {
+      final value = remoteConfig.getInt(key);
+      if (value > 0) return value;
+      final defaultValue = adRemoteConfigDefaults[key];
+      if (defaultValue is int && defaultValue > 0) return defaultValue;
+      return fallback;
+    } catch (e) {
+      developer.log('[AdRemoteConfig] getInt($key) failed: $e');
+      return fallback;
+    }
+  }
 
   /// Whether [placementId] is enabled in Remote Config.
   /// Bool keys: standard true/false.

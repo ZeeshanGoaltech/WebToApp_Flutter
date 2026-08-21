@@ -11,6 +11,9 @@ class LaunchFlow {
 
   static bool _iapFromLaunch = false;
 
+  /// True while the subscription screen was opened from cold-start / splash.
+  static bool get iapOpenedFromLaunch => _iapFromLaunch;
+
   /// IAP when RC `splash_sub` is true and user is not premium.
   static bool shouldShowIap() {
     if (Get.find<SessionService>().hasPremiumAccess) return false;

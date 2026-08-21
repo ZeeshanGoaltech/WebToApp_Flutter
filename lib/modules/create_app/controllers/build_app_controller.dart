@@ -9,7 +9,7 @@ import 'package:web_to_app/app/routes/app_routes.dart';
 import 'package:web_to_app/core/api/api_exception.dart';
 import 'package:web_to_app/core/ads/ad_placements.dart';
 import 'package:web_to_app/core/ads/interstitial_ad_trigger.dart';
-import 'package:web_to_app/core/services/build_quota_service.dart';
+import 'package:web_to_app/core/services/credit_gate.dart';
 import 'package:web_to_app/core/services/session_service.dart';
 import 'package:web_to_app/core/utils/app_error_handler.dart';
 import 'package:web_to_app/core/utils/app_toast.dart';
@@ -246,9 +246,7 @@ class BuildAppController extends GetxController {
   }
 
   Future<void> startBuild() async {
-    // Generate Bundle & APK Sub (RC: generatebundleapk_sub) — persistent quota
-    if (!await BuildQuotaService.instance
-        .ensureCanGenerateBundleApkOrOpenIap()) {
+    if (!await CreditGate.ensureOrOpenPaywall()) {
       return;
     }
 
@@ -288,7 +286,7 @@ class BuildAppController extends GetxController {
       buildId.value = build.id;
       buildState.value = BuildState.building;
       _applyBuild(build);
-      await BuildQuotaService.instance.recordSuccessfulGenerate();
+      await CreditGate.consumeAfterSuccess();
       _startPolling(build.id);
     } on ApiException catch (e) {
       buildState.value = BuildState.ready;
@@ -457,10 +455,7 @@ class BuildAppController extends GetxController {
     final id = buildId.value;
     if (id == null || buildState.value == BuildState.downloading) return;
 
-    // Download APK & Bundle Sub (RC: downloadbundleapk_sub) — persists until premium
-    if (!await BuildQuotaService.instance.ensureCanDownloadBundleApkOrOpenIap(
-      isAab: format == BuildFormat.aab,
-    )) {
+    if (!await CreditGate.ensureOrOpenPaywall()) {
       return;
     }
 
@@ -483,9 +478,7 @@ class BuildAppController extends GetxController {
       downloadProgress.value = 1.0;
       buildState.value = launched ? BuildState.downloaded : BuildState.success;
       if (launched) {
-        await BuildQuotaService.instance.recordSuccessfulDownload(
-          isAab: format == BuildFormat.aab,
-        );
+        await CreditGate.consumeAfterSuccess();
       } else {
         AppToast.info('download'.tr, description: 'could_not_open_download'.tr);
       }
@@ -540,14 +533,13 @@ class BuildAppController extends GetxController {
     _resetBuildResult();
   }
 
-  /// Build Again button — sub quota, then interstitial, then reset.
+  /// Build Again button — need credits available, then interstitial, then reset.
   Future<void> onBuildAgainTapped() async {
-    if (!await BuildQuotaService.instance.ensureCanBuildAgainOrOpenIap()) {
+    if (!await CreditGate.ensureOrOpenPaywall()) {
       return;
     }
 
     await InterstitialAdTrigger.showBuildAgainInterstitial();
-    await BuildQuotaService.instance.recordSuccessfulBuildAgain();
     buildAgain();
   }
 

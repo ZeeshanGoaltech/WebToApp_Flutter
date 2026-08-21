@@ -9,6 +9,7 @@ import 'package:url_launcher/url_launcher.dart';
 import 'package:web_to_app/core/ads/ad_presentation_gate.dart';
 import 'package:web_to_app/core/ads/app_open_ad_manager.dart';
 import 'package:web_to_app/core/constants/app_info.dart';
+import 'package:web_to_app/core/services/analytics_service.dart';
 import 'package:web_to_app/core/services/premium_service.dart';
 import 'package:web_to_app/core/services/session_service.dart';
 import 'package:web_to_app/core/utils/app_toast.dart';
@@ -34,6 +35,7 @@ class LifetimePremiumController extends GetxController {
     super.onInit();
     AdPresentationGate.markIapOpened();
     AppOpenAdManager.instance.blockAppOpenAds = true;
+    unawaited(AnalyticsService.instance.logLifetimePremiumOpen());
     _closeRevealTimer = Timer(kLifetimeCloseRevealDelay, () {
       showCloseButton.value = true;
     });
