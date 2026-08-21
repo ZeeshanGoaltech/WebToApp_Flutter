@@ -118,7 +118,7 @@ const Map<String, String> FrFrTranslations = {
   'exit_confirm': 'Are you sure you want to exit?',
   'exit_lifetime_card_subtitle': 'All premium features · One-time payment',
   'exit_lifetime_card_title': 'Lifetime Access',
-  'exit_never_lose_a_thought': 'Don\'t lose your apps.',
+  'exit_never_lose_a_thought': 'Never lose a thought.',
   'exit_one_time_payment': 'One Time Payment',
   'exit_sheet_exit': 'Exit',
   'exit_sheet_stay': 'Stay',

@@ -7,18 +7,24 @@ import 'package:web_to_app/core/constants/app_assets.dart';
 class ExitLifetimeSheet extends StatelessWidget {
   const ExitLifetimeSheet({super.key});
 
-  static const _bg = Color(0xFFFBF6F2);
-  static const _heading = Color(0xFF301B0A);
-  static const _eyebrow = Color(0xFF8C6963);
-  static const _subtitle = Color(0xFF8C6963);
-  static const _peach = Color(0xFFFDEBDD);
-  static const _primary = Color(0xFFF35D89);
-  static const _exitBg = Color(0x0D866E6C);
+  static const _bg = Color(0xFFF9F8FD);
+  static const _heading = Color(0xFF111625);
+  static const _eyebrow = Color(0xFF6F7477);
+  static const _subtitle = Color(0xFF6F7477);
+  static const _lavender = Color(0x26807EEE);
+  static const _purple = Color(0xFF7B7AD8);
+  static const _exitBg = Color(0xB3FFFFFF);
   static const _exitText = Color(0xFF182033);
-  static const _cardBg = Color(0xFFFFFBF8);
-  static const _cardBorder = Color(0xFFD3C2B4);
+  static const _cardBg = Color(0xFFFFFFFF);
+  static const _cardBorder = Color(0xFFFFFFFF);
   static const _sheetBorder = Color(0xFFD3C2B4);
-  static const _handle = Color(0x66D3C2B4);
+  static const _handle = Color(0x262563EB);
+  static const _badgeBg = Color(0x267B7AD8);
+  static const _stayGradient = LinearGradient(
+    begin: Alignment.centerLeft,
+    end: Alignment.centerRight,
+    colors: [Color(0xFFA39BF3), Color(0xFF8280EE)],
+  );
 
   @override
   Widget build(BuildContext context) {
@@ -99,7 +105,7 @@ class ExitLifetimeSheet extends StatelessWidget {
                         width: 52,
                         height: 52,
                         decoration: BoxDecoration(
-                          color: _peach,
+                          color: _lavender,
                           borderRadius: BorderRadius.circular(16),
                         ),
                         alignment: Alignment.center,
@@ -110,7 +116,7 @@ class ExitLifetimeSheet extends StatelessWidget {
                           fit: BoxFit.contain,
                           placeholderBuilder: (_) => const Icon(
                             Icons.workspace_premium_rounded,
-                            color: _heading,
+                            color: _purple,
                             size: 24,
                           ),
                         ),
@@ -125,7 +131,7 @@ class ExitLifetimeSheet extends StatelessWidget {
                               style: const TextStyle(
                                 fontSize: 15,
                                 fontWeight: FontWeight.w800,
-                                color: _heading,
+                                color: _purple,
                               ),
                             ),
                             const SizedBox(height: 2),
@@ -149,7 +155,7 @@ class ExitLifetimeSheet extends StatelessWidget {
                           vertical: 10,
                         ),
                         decoration: BoxDecoration(
-                          color: _peach,
+                          color: _badgeBg,
                           borderRadius: BorderRadius.circular(20),
                         ),
                         child: Text(
@@ -158,7 +164,7 @@ class ExitLifetimeSheet extends StatelessWidget {
                           style: const TextStyle(
                             fontSize: 10,
                             fontWeight: FontWeight.w700,
-                            color: _heading,
+                            color: _purple,
                             height: 1.2,
                           ),
                         ),
@@ -197,22 +203,33 @@ class ExitLifetimeSheet extends StatelessWidget {
                 Expanded(
                   child: SizedBox(
                     height: 52,
-                    child: ElevatedButton(
-                      onPressed: () => Navigator.of(context).pop('stay'),
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: _primary,
-                        foregroundColor: Colors.white,
-                        elevation: 2,
-                        shadowColor: const Color(0x1A000000),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(16),
-                        ),
+                    child: DecoratedBox(
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(16),
+                        gradient: _stayGradient,
+                        boxShadow: const [
+                          BoxShadow(
+                            color: Color(0x1A000000),
+                            blurRadius: 4,
+                            offset: Offset(0, 2),
+                          ),
+                        ],
                       ),
-                      child: Text(
-                        'exit_sheet_stay'.tr,
-                        style: const TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.w800,
+                      child: Material(
+                        color: Colors.transparent,
+                        child: InkWell(
+                          onTap: () => Navigator.of(context).pop('stay'),
+                          borderRadius: BorderRadius.circular(16),
+                          child: Center(
+                            child: Text(
+                              'exit_sheet_stay'.tr,
+                              style: const TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.w800,
+                                color: Colors.white,
+                              ),
+                            ),
+                          ),
                         ),
                       ),
                     ),
