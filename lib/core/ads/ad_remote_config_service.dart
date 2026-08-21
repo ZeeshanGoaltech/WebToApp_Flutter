@@ -4,7 +4,8 @@ import 'package:firebase_remote_config/firebase_remote_config.dart';
 import 'package:flutter/foundation.dart';
 import 'package:web_to_app/core/ads/ad_placements.dart';
 
-/// Non-ad Remote Config feature keys.
+/// Non-ad Remote Config feature keys (Android base names).
+/// iOS uses the same name with `_ios` suffix, e.g. `splash_sub_ios`.
 abstract final class RemoteConfigKeys {
   /// Show IAP paywall before auth (new users) or before home (logged-in).
   static const splashSub = 'splash_sub';
@@ -39,8 +40,8 @@ const Set<String> frequencyRemoteConfigKeys = {
   AdPlacements.buildAgainInter,
 };
 
-/// Firebase Remote Config defaults.
-const Map<String, dynamic> adRemoteConfigDefaults = {
+/// Base Remote Config defaults (Android key names).
+const Map<String, dynamic> _adRemoteConfigBaseDefaults = {
   AdPlacements.splashInter1st: true,
   AdPlacements.splashInter2nd: true,
   AdPlacements.languageNative: true,
@@ -63,6 +64,23 @@ const Map<String, dynamic> adRemoteConfigDefaults = {
   RemoteConfigKeys.aiModuleFreeCredits: 3,
   RemoteConfigKeys.aiModulePackCredits: 3,
 };
+
+/// Firebase defaults for Android keys + matching `*_ios` keys.
+final Map<String, dynamic> adRemoteConfigDefaults = {
+  for (final entry in _adRemoteConfigBaseDefaults.entries) ...{
+    entry.key: entry.value,
+    '${entry.key}_ios': entry.value,
+  },
+};
+
+/// Resolves platform-specific RC key.
+/// Android: `splash_inter_1st` · iOS: `splash_inter_1st_ios`
+String platformRemoteConfigKey(String baseKey) {
+  if (defaultTargetPlatform == TargetPlatform.iOS) {
+    return '${baseKey}_ios';
+  }
+  return baseKey;
+}
 
 /// Thin Remote Config wrapper for ad / feature flags.
 class AdRemoteConfigService {
@@ -98,7 +116,10 @@ class AdRemoteConfigService {
 
       _remoteConfig = remoteConfig;
       _initialized = true;
-      developer.log('[AdRemoteConfig] initialized');
+      developer.log(
+        '[AdRemoteConfig] initialized '
+        '(platform keys: ${defaultTargetPlatform == TargetPlatform.iOS ? 'ios' : 'android'})',
+      );
     } catch (e) {
       developer.log('[AdRemoteConfig] initialize failed: $e');
       _initialized = true;
@@ -120,9 +141,15 @@ class AdRemoteConfigService {
     }
   }
 
-  /// Frequency string for [key], e.g. `off, 1, 2, 3, 4`.
-  String getFrequency(String key) {
-    final defaultValue = adRemoteConfigDefaults[key];
+  dynamic _defaultFor(String baseKey) =>
+      adRemoteConfigDefaults[platformRemoteConfigKey(baseKey)] ??
+      adRemoteConfigDefaults[baseKey];
+
+  /// Frequency string for [baseKey], e.g. `off, 1, 2, 3, 4`.
+  /// Reads Android key or `*_ios` depending on platform.
+  String getFrequency(String baseKey) {
+    final key = platformRemoteConfigKey(baseKey);
+    final defaultValue = _defaultFor(baseKey);
     final fallback = defaultValue is String ? defaultValue : 'off';
 
     final remoteConfig = _remoteConfig;
@@ -139,8 +166,8 @@ class AdRemoteConfigService {
   }
 
   /// Parsed positive frequency thresholds (ignores `off`).
-  List<int> getFrequencyThresholds(String key) {
-    final trimmed = getFrequency(key).trim().toLowerCase();
+  List<int> getFrequencyThresholds(String baseKey) {
+    final trimmed = getFrequency(baseKey).trim().toLowerCase();
     if (trimmed.isEmpty || trimmed == 'off') return const [];
 
     final values = <int>[];
@@ -156,14 +183,14 @@ class AdRemoteConfigService {
   /// Quota limit for keys like `buildapp_sub` / `generatebundleapk_sub`.
   /// Returns `null` when unlimited (`off` / empty / invalid).
   /// Returns `N` when RC is `N` (or max if a comma list is used).
-  int? getQuotaLimit(String key) {
-    final trimmed = getFrequency(key).trim().toLowerCase();
+  int? getQuotaLimit(String baseKey) {
+    final trimmed = getFrequency(baseKey).trim().toLowerCase();
     if (trimmed.isEmpty || trimmed == 'off') return null;
 
     final single = int.tryParse(trimmed);
     if (single != null && single > 0) return single;
 
-    final thresholds = getFrequencyThresholds(key);
+    final thresholds = getFrequencyThresholds(baseKey);
     if (thresholds.isEmpty) return null;
     return thresholds.reduce((a, b) => a > b ? a : b);
   }
@@ -172,10 +199,11 @@ class AdRemoteConfigService {
   int? getBuildAppSubLimit() => getQuotaLimit(RemoteConfigKeys.buildAppSub);
 
   /// Integer Remote Config value with [fallback] when missing/invalid.
-  int getInt(String key, int fallback) {
+  int getInt(String baseKey, int fallback) {
+    final key = platformRemoteConfigKey(baseKey);
     final remoteConfig = _remoteConfig;
     if (remoteConfig == null) {
-      final defaultValue = adRemoteConfigDefaults[key];
+      final defaultValue = _defaultFor(baseKey);
       if (defaultValue is int) return defaultValue;
       return fallback;
     }
@@ -183,7 +211,7 @@ class AdRemoteConfigService {
     try {
       final value = remoteConfig.getInt(key);
       if (value > 0) return value;
-      final defaultValue = adRemoteConfigDefaults[key];
+      final defaultValue = _defaultFor(baseKey);
       if (defaultValue is int && defaultValue > 0) return defaultValue;
       return fallback;
     } catch (e) {
@@ -192,26 +220,27 @@ class AdRemoteConfigService {
     }
   }
 
-  /// Whether [placementId] is enabled in Remote Config.
+  /// Whether [placementId] is enabled in Remote Config for this platform.
   /// Bool keys: standard true/false.
   /// Frequency keys: enabled when at least one positive threshold exists.
   bool isPlacementEnabled(String placementId) {
+    final key = platformRemoteConfigKey(placementId);
+
     if (frequencyRemoteConfigKeys.contains(placementId) ||
-        adRemoteConfigDefaults[placementId] is String) {
+        _defaultFor(placementId) is String) {
       return getFrequencyThresholds(placementId).isNotEmpty;
     }
 
-    final defaultValue =
-        (adRemoteConfigDefaults[placementId] as bool?) ?? true;
+    final defaultValue = (_defaultFor(placementId) as bool?) ?? true;
 
     final remoteConfig = _remoteConfig;
     if (remoteConfig == null) return defaultValue;
 
     try {
-      return remoteConfig.getBool(placementId);
+      return remoteConfig.getBool(key);
     } catch (e) {
       developer.log(
-        '[AdRemoteConfig] getBool($placementId) failed: $e → default $defaultValue',
+        '[AdRemoteConfig] getBool($key) failed: $e → default $defaultValue',
       );
       return defaultValue;
     }

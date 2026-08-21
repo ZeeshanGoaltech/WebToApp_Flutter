@@ -1,0 +1,231 @@
+{
+  "conditions": [],
+  "parameters": {},
+  "parameterGroups": {
+    "Ads": {
+      "description": "Ad enable / frequency flags. Android = base key, iOS = same key + _ios suffix.",
+      "parameters": {
+        "splash_inter_1st": {
+          "defaultValue": { "value": "true" },
+          "description": "Android — Splash interstitial 1st open. Boolean.",
+          "valueType": "BOOLEAN"
+        },
+        "splash_inter_1st_ios": {
+          "defaultValue": { "value": "true" },
+          "description": "iOS — Splash interstitial 1st open. Boolean.",
+          "valueType": "BOOLEAN"
+        },
+        "splash_inter_2nd": {
+          "defaultValue": { "value": "true" },
+          "description": "Android — Splash interstitial 2nd+. Boolean.",
+          "valueType": "BOOLEAN"
+        },
+        "splash_inter_2nd_ios": {
+          "defaultValue": { "value": "true" },
+          "description": "iOS — Splash interstitial 2nd+. Boolean.",
+          "valueType": "BOOLEAN"
+        },
+        "language_native": {
+          "defaultValue": { "value": "true" },
+          "description": "Android — Language medium native. Boolean.",
+          "valueType": "BOOLEAN"
+        },
+        "language_native_ios": {
+          "defaultValue": { "value": "true" },
+          "description": "iOS — Language medium native. Boolean.",
+          "valueType": "BOOLEAN"
+        },
+        "onboarding_native": {
+          "defaultValue": { "value": "true" },
+          "description": "Android — Onboarding medium native. Boolean.",
+          "valueType": "BOOLEAN"
+        },
+        "onboarding_native_ios": {
+          "defaultValue": { "value": "true" },
+          "description": "iOS — Onboarding medium native. Boolean.",
+          "valueType": "BOOLEAN"
+        },
+        "home_native": {
+          "defaultValue": { "value": "false" },
+          "description": "Android — Home medium native. Boolean.",
+          "valueType": "BOOLEAN"
+        },
+        "home_native_ios": {
+          "defaultValue": { "value": "false" },
+          "description": "iOS — Home medium native. Boolean.",
+          "valueType": "BOOLEAN"
+        },
+        "project_native": {
+          "defaultValue": { "value": "3" },
+          "description": "Android — Bottom tab interstitial frequency. off | 1 | 2 | 3 | off, 1, 2, 3, 4",
+          "valueType": "STRING"
+        },
+        "project_native_ios": {
+          "defaultValue": { "value": "3" },
+          "description": "iOS — Bottom tab interstitial frequency. off | 1 | 2 | 3 | off, 1, 2, 3, 4",
+          "valueType": "STRING"
+        },
+        "createapp_inter": {
+          "defaultValue": { "value": "true" },
+          "description": "Android — Create App Get Started interstitial. Boolean.",
+          "valueType": "BOOLEAN"
+        },
+        "createapp_inter_ios": {
+          "defaultValue": { "value": "true" },
+          "description": "iOS — Create App Get Started interstitial. Boolean.",
+          "valueType": "BOOLEAN"
+        },
+        "creationscreen_native": {
+          "defaultValue": { "value": "true" },
+          "description": "Android — Creation screens small native. Boolean.",
+          "valueType": "BOOLEAN"
+        },
+        "creationscreen_native_ios": {
+          "defaultValue": { "value": "true" },
+          "description": "iOS — Creation screens small native. Boolean.",
+          "valueType": "BOOLEAN"
+        },
+        "generatebundleapk_inter": {
+          "defaultValue": { "value": "1" },
+          "description": "Android — Generate Bundle & APK interstitial frequency.",
+          "valueType": "STRING"
+        },
+        "generatebundleapk_inter_ios": {
+          "defaultValue": { "value": "1" },
+          "description": "iOS — Generate Bundle & APK interstitial frequency.",
+          "valueType": "STRING"
+        },
+        "buildagain_inter": {
+          "defaultValue": { "value": "1" },
+          "description": "Android — Build Again interstitial frequency.",
+          "valueType": "STRING"
+        },
+        "buildagain_inter_ios": {
+          "defaultValue": { "value": "1" },
+          "description": "iOS — Build Again interstitial frequency.",
+          "valueType": "STRING"
+        },
+        "gotohome_inter": {
+          "defaultValue": { "value": "true" },
+          "description": "Android — Go to Home interstitial. Boolean.",
+          "valueType": "BOOLEAN"
+        },
+        "gotohome_inter_ios": {
+          "defaultValue": { "value": "true" },
+          "description": "iOS — Go to Home interstitial. Boolean.",
+          "valueType": "BOOLEAN"
+        },
+        "myproj_native": {
+          "defaultValue": { "value": "true" },
+          "description": "Android — My Projects medium native. Boolean.",
+          "valueType": "BOOLEAN"
+        },
+        "myproj_native_ios": {
+          "defaultValue": { "value": "true" },
+          "description": "iOS — My Projects medium native. Boolean.",
+          "valueType": "BOOLEAN"
+        },
+        "helpscreen_native": {
+          "defaultValue": { "value": "true" },
+          "description": "Android — Help screen medium native. Boolean.",
+          "valueType": "BOOLEAN"
+        },
+        "helpscreen_native_ios": {
+          "defaultValue": { "value": "true" },
+          "description": "iOS — Help screen medium native. Boolean.",
+          "valueType": "BOOLEAN"
+        },
+        "appopen": {
+          "defaultValue": { "value": "true" },
+          "description": "Android — App Open ad. Boolean.",
+          "valueType": "BOOLEAN"
+        },
+        "appopen_ios": {
+          "defaultValue": { "value": "true" },
+          "description": "iOS — App Open ad. Boolean.",
+          "valueType": "BOOLEAN"
+        }
+      }
+    },
+    "Subscriptions_Quotas": {
+      "description": "IAP / quotas. Android = base key, iOS = same key + _ios.",
+      "parameters": {
+        "splash_sub": {
+          "defaultValue": { "value": "true" },
+          "description": "Android — Splash subscription paywall. Boolean.",
+          "valueType": "BOOLEAN"
+        },
+        "splash_sub_ios": {
+          "defaultValue": { "value": "true" },
+          "description": "iOS — Splash subscription paywall. Boolean.",
+          "valueType": "BOOLEAN"
+        },
+        "buildapp_sub": {
+          "defaultValue": { "value": "off" },
+          "description": "Android — Free Build App quota. off | 1 | 2 | 3…",
+          "valueType": "STRING"
+        },
+        "buildapp_sub_ios": {
+          "defaultValue": { "value": "off" },
+          "description": "iOS — Free Build App quota. off | 1 | 2 | 3…",
+          "valueType": "STRING"
+        },
+        "generatebundleapk_sub": {
+          "defaultValue": { "value": "off" },
+          "description": "Android — Generate Bundle & APK free quota.",
+          "valueType": "STRING"
+        },
+        "generatebundleapk_sub_ios": {
+          "defaultValue": { "value": "off" },
+          "description": "iOS — Generate Bundle & APK free quota.",
+          "valueType": "STRING"
+        },
+        "downloadbundleapk_sub": {
+          "defaultValue": { "value": "1" },
+          "description": "Android — Download APK/AAB free quota.",
+          "valueType": "STRING"
+        },
+        "downloadbundleapk_sub_ios": {
+          "defaultValue": { "value": "1" },
+          "description": "iOS — Download APK/AAB free quota.",
+          "valueType": "STRING"
+        },
+        "buildagain_sub": {
+          "defaultValue": { "value": "3" },
+          "description": "Android — Build Again free quota.",
+          "valueType": "STRING"
+        },
+        "buildagain_sub_ios": {
+          "defaultValue": { "value": "3" },
+          "description": "iOS — Build Again free quota.",
+          "valueType": "STRING"
+        }
+      }
+    },
+    "AI_Credits": {
+      "description": "AI credits. Android = base key, iOS = same key + _ios.",
+      "parameters": {
+        "ai_module_free_credits": {
+          "defaultValue": { "value": "3" },
+          "description": "Android — Free AI credits before pack paywall.",
+          "valueType": "NUMBER"
+        },
+        "ai_module_free_credits_ios": {
+          "defaultValue": { "value": "3" },
+          "description": "iOS — Free AI credits before pack paywall.",
+          "valueType": "NUMBER"
+        },
+        "ai_module_pack_credits": {
+          "defaultValue": { "value": "3" },
+          "description": "Android — Credits per pack IAP.",
+          "valueType": "NUMBER"
+        },
+        "ai_module_pack_credits_ios": {
+          "defaultValue": { "value": "3" },
+          "description": "iOS — Credits per pack IAP.",
+          "valueType": "NUMBER"
+        }
+      }
+    }
+  }
+}
