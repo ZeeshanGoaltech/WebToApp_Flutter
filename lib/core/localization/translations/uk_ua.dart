@@ -220,7 +220,7 @@ const Map<String, String> UkUaTranslations = {
   'lifetime_feat_ads': 'Ad-free Experience, Always',
   'lifetime_feat_notebooks': 'Unlimited App Builds',
   'lifetime_feat_scan': 'Download APK & AAB',
-  'lifetime_hero_title': 'Build smarter. Ship faster.',
+  'lifetime_hero_title': 'Build apps faster.',
   'lifetime_pay_once': 'pay once',
   'lifetime_unlock_cta': 'Unlock Lifetime Access',
   'loading_ad': 'Завантаження реклами',

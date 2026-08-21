@@ -5,9 +5,8 @@ import 'package:flutter/services.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:get/get.dart';
 import 'package:web_to_app/core/constants/app_assets.dart';
-import 'package:web_to_app/core/theme/app_colors.dart';
-import 'package:web_to_app/core/widgets/figma_svg_icon.dart';
 import 'package:web_to_app/modules/iap/controllers/lifetime_premium_controller.dart';
+import 'package:web_to_app/modules/iap/widgets/iap_close_button.dart';
 
 /// Dedicated lifetime paywall shown from the exit-intent sheet.
 class LifetimePremiumView extends GetView<LifetimePremiumController> {
@@ -67,11 +66,11 @@ class LifetimePremiumView extends GetView<LifetimePremiumController> {
                                 end: Alignment.bottomCenter,
                                 colors: [
                                   Colors.transparent,
-                                  Color(0x00FFFFFF),
-                                  Color(0xBBFFFFFF),
+                                  Color(0x66FFFFFF),
+                                  Color(0xE6FFFFFF),
                                   bg,
                                 ],
-                                stops: [0.0, 0.45, 0.75, 1.0],
+                                stops: [0.70, 0.85, 0.94, 1.0],
                               ),
                             ),
                           ),
@@ -126,13 +125,13 @@ class LifetimePremiumView extends GetView<LifetimePremiumController> {
                               text: 'lifetime_feat_notebooks'.tr,
                               fallbackIcon: Icons.language_rounded,
                             ),
-                            const SizedBox(height: 14),
+                            const SizedBox(height: 12),
                             _FeatureRow(
                               iconAsset: AppAssets.lifetimeIconDownload,
                               text: 'lifetime_feat_scan'.tr,
                               fallbackIcon: Icons.apps_rounded,
                             ),
-                            const SizedBox(height: 14),
+                            const SizedBox(height: 12),
                             _FeatureRow(
                               iconAsset: AppAssets.lifetimeIconAds,
                               text: 'lifetime_feat_ads'.tr,
@@ -341,32 +340,17 @@ class LifetimePremiumView extends GetView<LifetimePremiumController> {
                   ],
                 ),
                 Obx(
-                  () => controller.showCloseButton.value
-                      ? Positioned(
-                          top: topInset + 19,
-                          left: 11,
-                          child: Material(
-                            color: Colors.transparent,
-                            child: InkWell(
-                              onTap: controller.finish,
-                              customBorder: const CircleBorder(),
-                              child: Container(
-                                width: 28,
-                                height: 28,
-                                decoration: const BoxDecoration(
-                                  color: AppColors.iapCloseBg,
-                                  shape: BoxShape.circle,
-                                ),
-                                alignment: Alignment.center,
-                                child: const FigmaSvgIcon(
-                                  asset: AppAssets.iapCloseIcon,
-                                  size: 20,
-                                ),
-                              ),
-                            ),
-                          ),
-                        )
-                      : const SizedBox.shrink(),
+                  () {
+                    if (!controller.showCloseButton.value) {
+                      return const SizedBox.shrink();
+                    }
+                    final scale = IapCloseButton.scaleOf(context);
+                    return Positioned(
+                      top: topInset + IapCloseButton.designTop * scale,
+                      left: IapCloseButton.designLeft * scale,
+                      child: IapCloseButton(onTap: controller.finish),
+                    );
+                  },
                 ),
               ],
             ),
@@ -415,8 +399,8 @@ class _FeatureRow extends StatelessWidget {
     return Row(
       children: [
         Container(
-          width: 40,
-          height: 40,
+          width: 38,
+          height: 38,
           decoration: const BoxDecoration(
             color: LifetimePremiumView.iconBg,
             shape: BoxShape.circle,
@@ -430,7 +414,7 @@ class _FeatureRow extends StatelessWidget {
             placeholderBuilder: (_) => Icon(
               fallbackIcon,
               color: LifetimePremiumView.primary,
-              size: 18,
+              size: 14,
             ),
           ),
         ),
@@ -439,7 +423,7 @@ class _FeatureRow extends StatelessWidget {
           child: Text(
             text,
             style: const TextStyle(
-              fontSize: 16,
+              fontSize: 14,
               fontWeight: FontWeight.w600,
               color: LifetimePremiumView.heading,
             ),

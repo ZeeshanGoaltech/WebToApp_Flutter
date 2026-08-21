@@ -13,9 +13,8 @@ import 'package:web_to_app/core/constants/app_info.dart';
 import 'package:web_to_app/core/services/analytics_service.dart';
 import 'package:web_to_app/core/services/credit_service.dart';
 import 'package:web_to_app/core/services/premium_service.dart';
-import 'package:web_to_app/core/theme/app_colors.dart';
 import 'package:web_to_app/core/utils/app_toast.dart';
-import 'package:web_to_app/core/widgets/figma_svg_icon.dart';
+import 'package:web_to_app/modules/iap/widgets/iap_close_button.dart';
 
 /// Diginotes `module_paywall_screen` port — consumable credits pack paywall.
 class CreditsPackBinding extends Bindings {
@@ -283,6 +282,7 @@ class _CreditsPackViewState extends State<CreditsPackView> {
               builder: (context, constraints) {
                 final contentHeight = constraints.maxHeight - bottomInset;
                 final heroHeight = contentHeight * 0.35;
+                final closeScale = IapCloseButton.scaleOf(context);
 
                 return Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -322,27 +322,11 @@ class _CreditsPackViewState extends State<CreditsPackView> {
                           ),
                           if (_showCloseButton)
                             Positioned(
-                              top: topInset + 19,
-                              left: 11,
-                              child: Material(
-                                color: Colors.transparent,
-                                child: InkWell(
-                                  onTap: () => Get.back(result: false),
-                                  customBorder: const CircleBorder(),
-                                  child: Container(
-                                    width: 28,
-                                    height: 28,
-                                    decoration: const BoxDecoration(
-                                      color: AppColors.iapCloseBg,
-                                      shape: BoxShape.circle,
-                                    ),
-                                    alignment: Alignment.center,
-                                    child: const FigmaSvgIcon(
-                                      asset: AppAssets.iapCloseIcon,
-                                      size: 20,
-                                    ),
-                                  ),
-                                ),
+                              top: topInset +
+                                  IapCloseButton.designTop * closeScale,
+                              left: IapCloseButton.designLeft * closeScale,
+                              child: IapCloseButton(
+                                onTap: () => Get.back(result: false),
                               ),
                             ),
                         ],
@@ -366,39 +350,20 @@ class _CreditsPackViewState extends State<CreditsPackView> {
     return SizedBox(
       height: height,
       width: double.infinity,
-      child: Stack(
-        fit: StackFit.expand,
-        children: [
-          Image.asset(
-            AppAssets.iapThreePacks,
-            fit: BoxFit.cover,
-            alignment: Alignment.topCenter,
-            filterQuality: FilterQuality.high,
-            errorBuilder: (context, error, stackTrace) => Container(
-              color: _accentLight,
-              alignment: Alignment.center,
-              child: const Icon(
-                Icons.phone_android_rounded,
-                size: 64,
-                color: _accent,
-              ),
-            ),
+      child: Image.asset(
+        AppAssets.iapThreePacks,
+        fit: BoxFit.cover,
+        alignment: Alignment.topCenter,
+        filterQuality: FilterQuality.high,
+        errorBuilder: (context, error, stackTrace) => Container(
+          color: _accentLight,
+          alignment: Alignment.center,
+          child: const Icon(
+            Icons.phone_android_rounded,
+            size: 64,
+            color: _accent,
           ),
-          const DecoratedBox(
-            decoration: BoxDecoration(
-              gradient: LinearGradient(
-                begin: Alignment.topCenter,
-                end: Alignment.bottomCenter,
-                colors: [
-                  Colors.transparent,
-                  Color(0x00FFFFFF),
-                  _page,
-                ],
-                stops: [0.45, 0.72, 1],
-              ),
-            ),
-          ),
-        ],
+        ),
       ),
     );
   }

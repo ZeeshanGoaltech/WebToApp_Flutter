@@ -82,7 +82,7 @@ class AppColors {
   static const Color createDelete = Color(0xFFEF4444);
 
   // IAP / Premium paywall (Figma 127:101)
-  static const Color iapBackground = Color(0xFFF7F6FB);
+  static const Color iapBackground = Color(0xFFFFFFFF);
   static const Color iapSafeAreaTop = Color(0xFFCADBF2);
   static const Color iapTitleDark = Color(0xFF26272B);
   static const Color iapUnlockAccent = Color(0xFF26272B);

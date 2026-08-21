@@ -176,7 +176,7 @@ class _HeroFade extends StatelessWidget {
               begin: Alignment.topCenter,
               end: Alignment.bottomCenter,
               colors: [
-                Color(0x00F7F6FB),
+                Color(0x00FFFFFF),
                 AppColors.iapBackground,
               ],
               stops: [0.22276, 0.39978],
