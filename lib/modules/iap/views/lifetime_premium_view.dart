@@ -5,6 +5,8 @@ import 'package:flutter/services.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:get/get.dart';
 import 'package:web_to_app/core/constants/app_assets.dart';
+import 'package:web_to_app/core/theme/app_colors.dart';
+import 'package:web_to_app/core/widgets/figma_svg_icon.dart';
 import 'package:web_to_app/modules/iap/controllers/lifetime_premium_controller.dart';
 
 /// Dedicated lifetime paywall shown from the exit-intent sheet.
@@ -15,8 +17,6 @@ class LifetimePremiumView extends GetView<LifetimePremiumController> {
   static const heading = Color(0xFF101828);
   static const subtitle = Color(0xFF9696A0);
   static const primary = Color(0xFF6A69D3);
-  static const primaryEnd = Color(0xFF7273EC);
-  static const primaryStart = Color(0xFFAAA1F4);
   static const iconBg = Color(0xFFEEEEFC);
   static const cardBorder = Color(0xFFF3F4F6);
   static const priceAccent = Color(0xFF6A69D3);
@@ -225,16 +225,9 @@ class LifetimePremiumView extends GetView<LifetimePremiumController> {
                           () => DecoratedBox(
                             decoration: BoxDecoration(
                               borderRadius: BorderRadius.circular(16),
-                              gradient: LinearGradient(
-                                begin: const Alignment(-0.2, -1),
-                                end: const Alignment(0.2, 1),
-                                colors: controller.isPurchasing.value
-                                    ? [
-                                        primaryStart.withValues(alpha: 0.55),
-                                        primaryEnd.withValues(alpha: 0.55),
-                                      ]
-                                    : const [primaryStart, primaryEnd],
-                              ),
+                              color: controller.isPurchasing.value
+                                  ? primary.withValues(alpha: 0.55)
+                                  : primary,
                               boxShadow: [
                                 BoxShadow(
                                   color: Colors.black.withValues(alpha: 0.1),
@@ -349,22 +342,25 @@ class LifetimePremiumView extends GetView<LifetimePremiumController> {
                 ),
                 Obx(
                   () => controller.showCloseButton.value
-                      ? PositionedDirectional(
-                          top: topInset + 8,
-                          start: 12,
+                      ? Positioned(
+                          top: topInset + 19,
+                          left: 11,
                           child: Material(
-                            color: const Color(0xCC3D2418),
-                            shape: const CircleBorder(),
-                            elevation: 2,
+                            color: Colors.transparent,
                             child: InkWell(
                               onTap: controller.finish,
                               customBorder: const CircleBorder(),
-                              child: const Padding(
-                                padding: EdgeInsets.all(6),
-                                child: Icon(
-                                  Icons.close_rounded,
-                                  color: Colors.white,
-                                  size: 16,
+                              child: Container(
+                                width: 28,
+                                height: 28,
+                                decoration: const BoxDecoration(
+                                  color: AppColors.iapCloseBg,
+                                  shape: BoxShape.circle,
+                                ),
+                                alignment: Alignment.center,
+                                child: const FigmaSvgIcon(
+                                  asset: AppAssets.iapCloseIcon,
+                                  size: 20,
                                 ),
                               ),
                             ),

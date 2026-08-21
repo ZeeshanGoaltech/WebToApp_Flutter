@@ -13,7 +13,9 @@ import 'package:web_to_app/core/constants/app_info.dart';
 import 'package:web_to_app/core/services/analytics_service.dart';
 import 'package:web_to_app/core/services/credit_service.dart';
 import 'package:web_to_app/core/services/premium_service.dart';
+import 'package:web_to_app/core/theme/app_colors.dart';
 import 'package:web_to_app/core/utils/app_toast.dart';
+import 'package:web_to_app/core/widgets/figma_svg_icon.dart';
 
 /// Diginotes `module_paywall_screen` port — consumable credits pack paywall.
 class CreditsPackBinding extends Bindings {
@@ -32,18 +34,13 @@ class _CreditsPackViewState extends State<CreditsPackView> {
   // Figma Screen3 palette on Diginotes layout.
   static const Color _accent = Color(0xFF6A69D3);
   static const Color _accentSoft = Color(0xFF7B7AD8);
-  static const Color _page = Color(0xFFF3F3FA);
+  static const Color _page = Color(0xFFFFFFFF);
   static const Color _card = Color(0xFFFFFFFF);
   static const Color _border = Color(0xFFE8E4F0);
   static const Color _text = Color(0xFF101828);
   static const Color _subText = Color(0xFF6A7282);
   static const Color _muted = Color(0xFF99A1AF);
   static const Color _accentLight = Color(0xFFEEEEFC);
-  static const LinearGradient _ctaGradient = LinearGradient(
-    begin: Alignment(-0.3, -1),
-    end: Alignment(0.3, 1),
-    colors: [Color(0xFF8E8DF0), Color(0xFF7F7EEE)],
-  );
   static const LinearGradient _iconGradient = LinearGradient(
     begin: Alignment.topLeft,
     end: Alignment.bottomRight,
@@ -324,22 +321,25 @@ class _CreditsPackViewState extends State<CreditsPackView> {
                             ],
                           ),
                           if (_showCloseButton)
-                            PositionedDirectional(
-                              top: topInset + 8,
-                              start: 12,
+                            Positioned(
+                              top: topInset + 19,
+                              left: 11,
                               child: Material(
-                                color: const Color(0xCC3D2418),
-                                shape: const CircleBorder(),
-                                elevation: 2,
+                                color: Colors.transparent,
                                 child: InkWell(
                                   onTap: () => Get.back(result: false),
                                   customBorder: const CircleBorder(),
-                                  child: const Padding(
-                                    padding: EdgeInsets.all(6),
-                                    child: Icon(
-                                      Icons.close_rounded,
-                                      color: Colors.white,
-                                      size: 16,
+                                  child: Container(
+                                    width: 28,
+                                    height: 28,
+                                    decoration: const BoxDecoration(
+                                      color: AppColors.iapCloseBg,
+                                      shape: BoxShape.circle,
+                                    ),
+                                    alignment: Alignment.center,
+                                    child: const FigmaSvgIcon(
+                                      asset: AppAssets.iapCloseIcon,
+                                      size: 20,
                                     ),
                                   ),
                                 ),
@@ -370,7 +370,7 @@ class _CreditsPackViewState extends State<CreditsPackView> {
         fit: StackFit.expand,
         children: [
           Image.asset(
-            AppAssets.iapLifetimeHero,
+            AppAssets.iapThreePacks,
             fit: BoxFit.cover,
             alignment: Alignment.topCenter,
             filterQuality: FilterQuality.high,
@@ -391,7 +391,7 @@ class _CreditsPackViewState extends State<CreditsPackView> {
                 end: Alignment.bottomCenter,
                 colors: [
                   Colors.transparent,
-                  Color(0x00F3F3FA),
+                  Color(0x00FFFFFF),
                   _page,
                 ],
                 stops: [0.45, 0.72, 1],
@@ -755,7 +755,7 @@ class _CreditsPackViewState extends State<CreditsPackView> {
               height: 54,
               child: DecoratedBox(
                 decoration: BoxDecoration(
-                  gradient: _ctaGradient,
+                  color: _accent,
                   borderRadius: BorderRadius.circular(18),
                   boxShadow: [
                     BoxShadow(
