@@ -11,14 +11,16 @@ import 'package:web_to_app/modules/iap/controllers/lifetime_premium_controller.d
 class LifetimePremiumView extends GetView<LifetimePremiumController> {
   const LifetimePremiumView({super.key});
 
-  static const bg = Color(0xFFFBF6F2);
-  static const heading = Color(0xFF301B0A);
-  static const subtitle = Color(0xFF8C6963);
-  static const primary = Color(0xFFF35D89);
-  static const peach = Color(0xFFFDEADD);
-  static const cardBorder = Color(0xFFD3C2B4);
-  static const priceAccent = Color(0xFF301B0A);
-  static const footer = Color(0xFF343434);
+  static const bg = Color(0xFFFFFFFF);
+  static const heading = Color(0xFF101828);
+  static const subtitle = Color(0xFF9696A0);
+  static const primary = Color(0xFF6A69D3);
+  static const primaryEnd = Color(0xFF7273EC);
+  static const primaryStart = Color(0xFFAAA1F4);
+  static const iconBg = Color(0xFFEEEEFC);
+  static const cardBorder = Color(0xFFF3F4F6);
+  static const priceAccent = Color(0xFF6A69D3);
+  static const footer = Color(0xFF99A1AF);
 
   @override
   Widget build(BuildContext context) {
@@ -50,7 +52,7 @@ class LifetimePremiumView extends GetView<LifetimePremiumController> {
                             alignment: Alignment.topCenter,
                             filterQuality: FilterQuality.high,
                             errorBuilder: (context, error, stackTrace) => Container(
-                              color: peach,
+                              color: iconBg,
                               child: const Icon(
                                 Icons.phone_android_rounded,
                                 size: 64,
@@ -65,8 +67,8 @@ class LifetimePremiumView extends GetView<LifetimePremiumController> {
                                 end: Alignment.bottomCenter,
                                 colors: [
                                   Colors.transparent,
-                                  Color(0x00FAF7F2),
-                                  Color(0xBBFAF7F2),
+                                  Color(0x00FFFFFF),
+                                  Color(0xBBFFFFFF),
                                   bg,
                                 ],
                                 stops: [0.0, 0.45, 0.75, 1.0],
@@ -105,14 +107,14 @@ class LifetimePremiumView extends GetView<LifetimePremiumController> {
                           ),
                           boxShadow: [
                             BoxShadow(
-                              color: primary.withValues(alpha: 0.12),
-                              blurRadius: 20,
-                              offset: const Offset(0, 8),
+                              color: Colors.black.withValues(alpha: 0.1),
+                              blurRadius: 3,
+                              offset: const Offset(0, 1),
                             ),
                             BoxShadow(
-                              color: Colors.black.withValues(alpha: 0.06),
-                              blurRadius: 14,
-                              offset: const Offset(0, 4),
+                              color: Colors.black.withValues(alpha: 0.1),
+                              blurRadius: 2,
+                              offset: const Offset(0, 1),
                             ),
                           ],
                         ),
@@ -122,13 +124,13 @@ class LifetimePremiumView extends GetView<LifetimePremiumController> {
                             _FeatureRow(
                               iconAsset: AppAssets.lifetimeIconBuild,
                               text: 'lifetime_feat_notebooks'.tr,
-                              fallbackIcon: Icons.apps_rounded,
+                              fallbackIcon: Icons.language_rounded,
                             ),
                             const SizedBox(height: 14),
                             _FeatureRow(
                               iconAsset: AppAssets.lifetimeIconDownload,
                               text: 'lifetime_feat_scan'.tr,
-                              fallbackIcon: Icons.download_rounded,
+                              fallbackIcon: Icons.apps_rounded,
                             ),
                             const SizedBox(height: 14),
                             _FeatureRow(
@@ -174,11 +176,11 @@ class LifetimePremiumView extends GetView<LifetimePremiumController> {
                                 Obx(
                                   () => Container(
                                     decoration: BoxDecoration(
-                                      color: peach,
-                                      borderRadius: BorderRadius.circular(14),
+                                      color: iconBg,
+                                      borderRadius: BorderRadius.circular(12),
                                     ),
                                     padding: const EdgeInsets.symmetric(
-                                      horizontal: 14,
+                                      horizontal: 16,
                                       vertical: 8,
                                     ),
                                     child: Column(
@@ -189,8 +191,8 @@ class LifetimePremiumView extends GetView<LifetimePremiumController> {
                                           child: Text(
                                             controller.lifetimePrice.value,
                                             style: const TextStyle(
-                                              fontSize: 16,
-                                              fontWeight: FontWeight.w900,
+                                              fontSize: 20,
+                                              fontWeight: FontWeight.w600,
                                               color: priceAccent,
                                             ),
                                           ),
@@ -198,7 +200,7 @@ class LifetimePremiumView extends GetView<LifetimePremiumController> {
                                         Text(
                                           'lifetime_pay_once'.tr,
                                           style: const TextStyle(
-                                            fontSize: 10,
+                                            fontSize: 12,
                                             fontWeight: FontWeight.w600,
                                             color: priceAccent,
                                           ),
@@ -220,50 +222,77 @@ class LifetimePremiumView extends GetView<LifetimePremiumController> {
                         width: double.infinity,
                         height: 54,
                         child: Obx(
-                          () => ElevatedButton(
-                            onPressed: controller.isPurchasing.value
-                                ? null
-                                : controller.buyLifetime,
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: primary,
-                              disabledBackgroundColor:
-                                  primary.withValues(alpha: 0.55),
-                              foregroundColor: Colors.white,
-                              elevation: 3,
-                              shadowColor: primary.withValues(alpha: 0.35),
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(16),
+                          () => DecoratedBox(
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(16),
+                              gradient: LinearGradient(
+                                begin: const Alignment(-0.2, -1),
+                                end: const Alignment(0.2, 1),
+                                colors: controller.isPurchasing.value
+                                    ? [
+                                        primaryStart.withValues(alpha: 0.55),
+                                        primaryEnd.withValues(alpha: 0.55),
+                                      ]
+                                    : const [primaryStart, primaryEnd],
                               ),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.black.withValues(alpha: 0.1),
+                                  blurRadius: 15,
+                                  offset: const Offset(0, 10),
+                                ),
+                                BoxShadow(
+                                  color: Colors.black.withValues(alpha: 0.1),
+                                  blurRadius: 6,
+                                  offset: const Offset(0, 4),
+                                ),
+                              ],
                             ),
-                            child: controller.isPurchasing.value
-                                ? const SizedBox(
-                                    width: 24,
-                                    height: 24,
-                                    child: CircularProgressIndicator(
-                                      color: Colors.white,
-                                      strokeWidth: 2.5,
-                                    ),
-                                  )
-                                : Row(
-                                    mainAxisAlignment: MainAxisAlignment.center,
-                                    children: [
-                                      const Icon(
-                                        Icons.lock_outline_rounded,
-                                        size: 20,
+                            child: ElevatedButton(
+                              onPressed: controller.isPurchasing.value
+                                  ? null
+                                  : controller.buyLifetime,
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: Colors.transparent,
+                                disabledBackgroundColor: Colors.transparent,
+                                shadowColor: Colors.transparent,
+                                foregroundColor: Colors.white,
+                                elevation: 0,
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(16),
+                                ),
+                              ),
+                              child: controller.isPurchasing.value
+                                  ? const SizedBox(
+                                      width: 24,
+                                      height: 24,
+                                      child: CircularProgressIndicator(
                                         color: Colors.white,
+                                        strokeWidth: 2.5,
                                       ),
-                                      const SizedBox(width: 8),
-                                      Flexible(
-                                        child: Text(
-                                          'lifetime_unlock_cta'.tr,
-                                          style: const TextStyle(
-                                            fontSize: 17,
-                                            fontWeight: FontWeight.w800,
+                                    )
+                                  : Row(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.center,
+                                      children: [
+                                        const Icon(
+                                          Icons.lock_outline_rounded,
+                                          size: 20,
+                                          color: Colors.white,
+                                        ),
+                                        const SizedBox(width: 8),
+                                        Flexible(
+                                          child: Text(
+                                            'lifetime_unlock_cta'.tr,
+                                            style: const TextStyle(
+                                              fontSize: 17,
+                                              fontWeight: FontWeight.w800,
+                                            ),
                                           ),
                                         ),
-                                      ),
-                                    ],
-                                  ),
+                                      ],
+                                    ),
+                            ),
                           ),
                         ),
                       ),
@@ -390,45 +419,45 @@ class _FeatureRow extends StatelessWidget {
     return Row(
       children: [
         Container(
-          width: 38,
-          height: 38,
-          decoration: BoxDecoration(
-            color: LifetimePremiumView.peach,
-            borderRadius: BorderRadius.circular(10),
+          width: 40,
+          height: 40,
+          decoration: const BoxDecoration(
+            color: LifetimePremiumView.iconBg,
+            shape: BoxShape.circle,
           ),
           alignment: Alignment.center,
           child: SvgPicture.asset(
             iconAsset,
-            width: 20,
-            height: 20,
+            width: 18,
+            height: 18,
             fit: BoxFit.contain,
             placeholderBuilder: (_) => Icon(
               fallbackIcon,
-              color: LifetimePremiumView.heading,
-              size: 20,
+              color: LifetimePremiumView.primary,
+              size: 18,
             ),
           ),
         ),
-        const SizedBox(width: 14),
+        const SizedBox(width: 12),
         Expanded(
           child: Text(
             text,
             style: const TextStyle(
-              fontSize: 15,
-              fontWeight: FontWeight.w700,
+              fontSize: 16,
+              fontWeight: FontWeight.w600,
               color: LifetimePremiumView.heading,
             ),
           ),
         ),
         SvgPicture.asset(
           AppAssets.lifetimeIconCheck,
-          width: 22,
-          height: 22,
+          width: 20,
+          height: 20,
           fit: BoxFit.contain,
           placeholderBuilder: (_) => const Icon(
             Icons.check_rounded,
-            color: LifetimePremiumView.heading,
-            size: 22,
+            color: LifetimePremiumView.primary,
+            size: 20,
           ),
         ),
       ],

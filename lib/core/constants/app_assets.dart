@@ -33,9 +33,9 @@ class AppAssets {
   static const String iapCloseIcon = 'assets/images/iap/iap_close_icon.svg';
   static const String exitCrown = 'assets/images/iap/exit_crown.svg';
   static const String lifetimeIconBuild =
-      'assets/images/iap/lifetime_icon_notebook.svg';
+      'assets/images/iap/lifetime_icon_globe.svg';
   static const String lifetimeIconDownload =
-      'assets/images/iap/lifetime_icon_scan.svg';
+      'assets/images/iap/lifetime_icon_apps.svg';
   static const String lifetimeIconAds = 'assets/images/iap/lifetime_icon_ads.svg';
   static const String lifetimeIconCheck =
       'assets/images/iap/lifetime_icon_check.svg';
