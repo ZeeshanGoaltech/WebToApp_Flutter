@@ -32,6 +32,15 @@ class AppColors {
   static const Color homeDraftBg = Color(0xFFFFFBEB);
   static const Color homeOrange = Color(0xFFF59E0B);
 
+  // Settings premium card (Figma 343:5)
+  static const Color settingsPremiumCardBg = Color(0xFFF3F8FF);
+  static const Color settingsPremiumCardBorder = Color(0xFF3B4FE4);
+  static const Color settingsPremiumTitle = Color(0xFF0F172A);
+  static const Color settingsPremiumAccent = Color(0xFF3B4FE4);
+  static const Color settingsPremiumSubtitle = Color(0xFF475569);
+  static const Color settingsPremiumCtaStart = Color(0xFF4D5DFB);
+  static const Color settingsPremiumCtaEnd = Color(0xFF2535C8);
+
   // Auth
   static const Color authBackground = Color(0xFFF7F7FB);
   static const Color authTitle = Color(0xFF101828);

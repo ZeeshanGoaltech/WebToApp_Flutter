@@ -367,5 +367,9 @@
   "webview": "WebView",
   "welcome": "Maligayang pagdating",
   "welcome_back": "Maligayang pagbabalik",
-  "your_app": "App Mo"
+  "your_app": "App Mo",
+  "settings_upgrade_to": "Mag-upgrade sa ",
+  "settings_premium_label": "Premium",
+  "settings_premium_benefits": "Lahat ng styles  •  Walang ads  •  Priority support",
+  "upgrade_now": "Mag-upgrade Ngayon"
 }

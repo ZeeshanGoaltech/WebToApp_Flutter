@@ -367,5 +367,9 @@
   "webview": "WebView",
   "welcome": "Välkommen",
   "welcome_back": "Välkommen tillbaka",
-  "your_app": "Din app"
+  "your_app": "Din app",
+  "settings_upgrade_to": "Uppgradera till ",
+  "settings_premium_label": "Premium",
+  "settings_premium_benefits": "Alla stilar  •  Inga annonser  •  Prioriterad support",
+  "upgrade_now": "Uppgradera nu"
 }

@@ -88,6 +88,7 @@ flutter:
     - assets/images/home/nav/
     - assets/images/home/card/
     - assets/images/help_guide/icons/
+    - assets/images/settings/
     - assets/images/settings/icons/
     - assets/images/auth/
     - assets/images/create_app/icons/

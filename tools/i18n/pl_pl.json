@@ -367,5 +367,9 @@
   "webview": "WebView",
   "welcome": "Witamy",
   "welcome_back": "Witaj ponownie",
-  "your_app": "Twoja aplikacja"
+  "your_app": "Twoja aplikacja",
+  "settings_upgrade_to": "Przejdź na ",
+  "settings_premium_label": "Premium",
+  "settings_premium_benefits": "Wszystkie style  •  Bez reklam  •  Priorytetowe wsparcie",
+  "upgrade_now": "Ulepsz teraz"
 }

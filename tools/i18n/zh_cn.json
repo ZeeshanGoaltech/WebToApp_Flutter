@@ -367,5 +367,9 @@
   "webview": "WebView",
   "welcome": "欢迎",
   "welcome_back": "欢迎回来",
-  "your_app": "您的应用"
+  "your_app": "您的应用",
+  "settings_upgrade_to": "升级至",
+  "settings_premium_label": "高级版",
+  "settings_premium_benefits": "全部样式  •  无广告  •  优先支持",
+  "upgrade_now": "立即升级"
 }

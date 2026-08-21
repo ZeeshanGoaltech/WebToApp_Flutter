@@ -367,5 +367,9 @@
   "webview": "WebView",
   "welcome": "Welkom",
   "welcome_back": "Welkom terug",
-  "your_app": "Jou App"
+  "your_app": "Jou App",
+  "settings_upgrade_to": "Upgrade to ",
+  "settings_premium_label": "Premium",
+  "settings_premium_benefits": "All styles  •  No ads  •  Priority support",
+  "upgrade_now": "Upgrade Now"
 }

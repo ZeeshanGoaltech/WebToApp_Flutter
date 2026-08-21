@@ -367,5 +367,9 @@
   "webview": "WebView",
   "welcome": "Chào mừng",
   "welcome_back": "Chào mừng trở lại",
-  "your_app": "Ứng dụng của bạn"
+  "your_app": "Ứng dụng của bạn",
+  "settings_upgrade_to": "Nâng cấp ",
+  "settings_premium_label": "Premium",
+  "settings_premium_benefits": "Mọi style  •  Không quảng cáo  •  Hỗ trợ ưu tiên",
+  "upgrade_now": "Nâng cấp ngay"
 }

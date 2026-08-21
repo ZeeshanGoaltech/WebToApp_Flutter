@@ -149,17 +149,9 @@ class _SettingsHeader extends StatelessWidget {
   }
 }
 
+/// Settings premium upgrade card — Figma node 343:5.
 class _PremiumCard extends GetView<SettingsController> {
   const _PremiumCard();
-
-  static const _dots = [
-    _PremiumDot(left: 53.07, top: 21.98, size: 4.539, opacity: 0.30),
-    _PremiumDot(left: 228.08, top: 55.71, size: 4.932, opacity: 0.54),
-    _PremiumDot(left: 304.54, top: 25.86, size: 4.327, opacity: 0.29),
-    _PremiumDot(left: 349.9, top: 102.78, size: 5.001, opacity: 0.56),
-    _PremiumDot(left: 113.52, top: 130.77, size: 5.516, opacity: 0.53),
-    _PremiumDot(left: 266.56, top: 150.3, size: 4.123, opacity: 0.22),
-  ];
 
   @override
   Widget build(BuildContext context) {
@@ -170,149 +162,131 @@ class _PremiumCard extends GetView<SettingsController> {
         return const SizedBox.shrink();
       }
 
-      final radius = Responsive.w(context, 22);
+      final radius = Responsive.w(context, 21);
+      final titleStyle = AppTextStyles.settingsPremiumTitle(context);
+      final upgradeTo = 'settings_upgrade_to'.tr;
+      final premiumLabel = 'settings_premium_label'.tr;
+      final buttonRadius = BorderRadius.circular(999);
 
-    return ClipRRect(
-      borderRadius: BorderRadius.circular(radius),
-      child: DecoratedBox(
+      return Container(
         decoration: BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-            transform: GradientRotation(159.193 * math.pi / 180),
-            colors: const [Color(0xFFFF9500), Color(0xFFFF9D00)],
+          color: AppColors.settingsPremiumCardBg,
+          borderRadius: BorderRadius.circular(radius),
+          border: Border.all(
+            color: AppColors.settingsPremiumCardBorder,
+            width: 0.657,
           ),
         ),
-        child: Stack(
+        padding: EdgeInsets.fromLTRB(
+          Responsive.w(context, 11),
+          Responsive.w(context, 8),
+          Responsive.w(context, 11),
+          Responsive.w(context, 16),
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            for (final dot in _dots)
-              Positioned(
-                left: Responsive.w(context, dot.left),
-                top: Responsive.w(context, dot.top),
-                child: Container(
-                  width: Responsive.w(context, dot.size),
-                  height: Responsive.w(context, dot.size),
-                  decoration: BoxDecoration(
-                    color: Colors.white.withValues(alpha: dot.opacity),
-                    shape: BoxShape.circle,
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                SizedBox(
+                  width: Responsive.w(context, 77),
+                  height: Responsive.w(context, 81),
+                  child: Image.asset(
+                    SettingsAssets.premiumDiamond,
+                    fit: BoxFit.contain,
                   ),
                 ),
-              ),
-            Padding(
-              padding: EdgeInsets.all(Responsive.w(context, 16)),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                SizedBox(width: Responsive.w(context, 9)),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Container(
-                        padding: EdgeInsets.symmetric(
-                          horizontal: Responsive.w(context, 10),
-                          vertical: Responsive.w(context, 4),
-                        ),
-                        decoration: BoxDecoration(
-                          color: Colors.white.withValues(alpha: 0.25),
-                          borderRadius: BorderRadius.circular(999),
-                        ),
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
+                      Text.rich(
+                        TextSpan(
+                          style: titleStyle,
                           children: [
-                            FigmaSvgIcon(
-                              asset: SettingsAssets.crown,
-                              size: Responsive.w(context, 12),
-                            ),
-                            SizedBox(width: Responsive.w(context, 6)),
-                            Text(
-                              'premium'.tr,
-                              style: AppTextStyles.settingsPremiumBadge(
-                                context,
+                            if (upgradeTo.isNotEmpty)
+                              TextSpan(text: upgradeTo),
+                            TextSpan(
+                              text: premiumLabel,
+                              style: titleStyle.copyWith(
+                                color: AppColors.settingsPremiumAccent,
                               ),
                             ),
                           ],
                         ),
                       ),
+                      SizedBox(height: Responsive.w(context, 5)),
                       Text(
-                        '\$4.99/mo',
-                        style: AppTextStyles.settingsPremiumPrice(context),
+                        'settings_premium_benefits'.tr,
+                        style: AppTextStyles.settingsPremiumSubtitle(context),
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
                       ),
                     ],
                   ),
-                  SizedBox(height: Responsive.w(context, 10)),
-                  Text(
-                    'unlock_full_power'.tr,
-                    style: AppTextStyles.settingsPremiumTitle(context),
+                ),
+              ],
+            ),
+            SizedBox(height: Responsive.w(context, 8)),
+            DecoratedBox(
+              decoration: BoxDecoration(
+                borderRadius: buttonRadius,
+                boxShadow: [
+                  BoxShadow(
+                    color: const Color(0xFF2535C8).withValues(alpha: 0.25),
+                    blurRadius: Responsive.w(context, 10.5),
+                    offset: Offset(0, Responsive.w(context, 5.3)),
                   ),
-                  SizedBox(height: Responsive.w(context, 2)),
-                  Text(
-                    'premium_subtitle'.tr,
-                    style: AppTextStyles.settingsPremiumSubtitle(context),
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                  SizedBox(height: Responsive.w(context, 10)),
-                  Material(
-                    color: Colors.transparent,
-                    child: InkWell(
-                      onTap: controller.upgradeToPremium,
-                      borderRadius: BorderRadius.circular(
-                        Responsive.w(context, 12),
+                ],
+              ),
+              child: Material(
+                color: Colors.transparent,
+                borderRadius: buttonRadius,
+                clipBehavior: Clip.antiAlias,
+                child: InkWell(
+                  onTap: controller.upgradeToPremium,
+                  borderRadius: buttonRadius,
+                  child: Ink(
+                    height: Responsive.w(context, 56),
+                    decoration: const BoxDecoration(
+                      gradient: LinearGradient(
+                        begin: Alignment.centerLeft,
+                        end: Alignment.centerRight,
+                        colors: [
+                          AppColors.settingsPremiumCtaStart,
+                          AppColors.settingsPremiumCtaEnd,
+                        ],
                       ),
-                      child: Ink(
-                        height: Responsive.w(context, 41),
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.circular(
-                            Responsive.w(context, 12),
+                    ),
+                    child: Center(
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          FigmaSvgIcon(
+                            asset: SettingsAssets.sparklesWhite,
+                            size: Responsive.w(context, 12),
                           ),
-                        ),
-                        child: Center(
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              FigmaSvgIcon(
-                                asset: SettingsAssets.sparkle,
-                                size: Responsive.w(context, 16),
-                                color: AppColors.homeTitle,
-                                tinted: true,
-                              ),
-                              SizedBox(width: Responsive.w(context, 8)),
-                              Text(
-                                'upgrade_to_premium'.tr,
-                                style: AppTextStyles.settingsPremiumButton(
-                                  context,
-                                ),
-                              ),
-                            ],
+                          SizedBox(width: Responsive.w(context, 8)),
+                          Text(
+                            'upgrade_now'.tr,
+                            style: AppTextStyles.settingsPremiumButton(context),
                           ),
-                        ),
+                        ],
                       ),
                     ),
                   ),
-                ],
+                ),
               ),
             ),
           ],
         ),
-      ),
-    );
+      );
     });
   }
-}
-
-class _PremiumDot {
-  const _PremiumDot({
-    required this.left,
-    required this.top,
-    required this.size,
-    required this.opacity,
-  });
-
-  final double left;
-  final double top;
-  final double size;
-  final double opacity;
 }
 
 class _ProfileSection extends StatelessWidget {

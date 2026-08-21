@@ -367,5 +367,9 @@
   "webview": "WebView",
   "welcome": "স্বাগতম",
   "welcome_back": "আবার স্বাগতম",
-  "your_app": "আপনার অ্যাপ"
+  "your_app": "আপনার অ্যাপ",
+  "settings_upgrade_to": "Upgrade to ",
+  "settings_premium_label": "Premium",
+  "settings_premium_benefits": "All styles  •  No ads  •  Priority support",
+  "upgrade_now": "Upgrade Now"
 }

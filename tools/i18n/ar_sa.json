@@ -367,5 +367,9 @@
   "webview": "WebView",
   "welcome": "مرحباً",
   "welcome_back": "مرحبًا بعودتك",
-  "your_app": "التطبيق الخاص بك"
+  "your_app": "التطبيق الخاص بك",
+  "settings_upgrade_to": "Upgrade to ",
+  "settings_premium_label": "Premium",
+  "settings_premium_benefits": "All styles  •  No ads  •  Priority support",
+  "upgrade_now": "Upgrade Now"
 }

@@ -367,5 +367,9 @@
   "webview": "WebView",
   "welcome": "स्वागत है",
   "welcome_back": "वापसी पर स्वागत है",
-  "your_app": "आपका ऐप"
+  "your_app": "आपका ऐप",
+  "settings_upgrade_to": "Upgrade to ",
+  "settings_premium_label": "Premium",
+  "settings_premium_benefits": "All styles  •  No ads  •  Priority support",
+  "upgrade_now": "Upgrade Now"
 }

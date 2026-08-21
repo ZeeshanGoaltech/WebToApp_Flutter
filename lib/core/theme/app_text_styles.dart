@@ -638,32 +638,32 @@ class AppTextStyles {
     );
   }
 
+  /// Settings premium card title (Figma 343:5) — "Upgrade to" portion.
   static TextStyle settingsPremiumTitle(BuildContext context) {
     return GoogleFonts.inter(
-      fontWeight: FontWeight.w700,
-      fontSize: Responsive.sp(context, 18),
-      height: 25.242 / 18,
-      letterSpacing: -0.4482,
-      color: Colors.white,
+      fontWeight: FontWeight.w800,
+      fontSize: Responsive.sp(context, 25),
+      height: 1.2,
+      letterSpacing: -0.6573,
+      color: AppColors.settingsPremiumTitle,
     );
   }
 
   static TextStyle settingsPremiumSubtitle(BuildContext context) {
     return GoogleFonts.inter(
-      fontWeight: FontWeight.w400,
-      fontSize: Responsive.sp(context, 12),
-      height: 18.358 / 12,
-      color: Colors.white.withValues(alpha: 0.5),
+      fontWeight: FontWeight.w500,
+      fontSize: Responsive.sp(context, 10.5),
+      height: 1.0,
+      color: AppColors.settingsPremiumSubtitle,
     );
   }
 
   static TextStyle settingsPremiumButton(BuildContext context) {
     return GoogleFonts.inter(
       fontWeight: FontWeight.w700,
-      fontSize: Responsive.sp(context, 13),
-      height: 19.887 / 13,
-      letterSpacing: -0.0777,
-      color: AppColors.homeTitle,
+      fontSize: Responsive.sp(context, 14),
+      height: 1.0,
+      color: Colors.white,
     );
   }
 

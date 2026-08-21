@@ -367,5 +367,9 @@
   "webview": "WebView",
   "welcome": "Добро пожаловать",
   "welcome_back": "С возвращением",
-  "your_app": "Ваше приложение"
+  "your_app": "Ваше приложение",
+  "settings_upgrade_to": "Перейти на ",
+  "settings_premium_label": "Premium",
+  "settings_premium_benefits": "Все стили  •  Без рекламы  •  Приоритетная поддержка",
+  "upgrade_now": "Обновить сейчас"
 }

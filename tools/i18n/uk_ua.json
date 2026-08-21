@@ -367,5 +367,9 @@
   "webview": "WebView",
   "welcome": "Ласкаво просимо",
   "welcome_back": "З поверненням",
-  "your_app": "Ваш застосунок"
+  "your_app": "Ваш застосунок",
+  "settings_upgrade_to": "Перейти на ",
+  "settings_premium_label": "Premium",
+  "settings_premium_benefits": "Усі стилі  •  Без реклами  •  Пріоритетна підтримка",
+  "upgrade_now": "Оновити зараз"
 }

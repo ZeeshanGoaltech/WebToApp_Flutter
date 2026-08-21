@@ -283,64 +283,95 @@ class _RateUsDialogState extends State<_RateUsDialog> {
                     ),
                     SizedBox(height: Responsive.h(context, 16)),
                     SizedBox(
-                      width: double.infinity,
                       height: Responsive.w(context, 50),
-                      child: DecoratedBox(
-                        decoration: BoxDecoration(
-                          gradient: LinearGradient(
-                            begin: Alignment.topLeft,
-                            end: Alignment.bottomRight,
-                            colors: !_isAnimating
-                                ? const [
-                                    AppColors.homeCardGradientStart,
-                                    AppColors.homeCardGradientMid,
-                                    AppColors.homeCardGradientEnd,
-                                  ]
-                                : [
-                                    AppColors.createFieldBorder,
-                                    AppColors.createFieldBorder,
-                                  ],
-                          ),
-                          borderRadius: BorderRadius.circular(999),
-                          boxShadow: !_isAnimating
-                              ? [
-                                  BoxShadow(
-                                    color: AppColors.homeAccent.withValues(
-                                      alpha: 0.22,
-                                    ),
-                                    blurRadius: Responsive.w(context, 14),
-                                    offset: Offset(0, Responsive.w(context, 6)),
-                                  ),
-                                ]
-                              : null,
-                        ),
-                        child: ElevatedButton(
-                          onPressed: _isAnimating
-                              ? null
-                              : () => Navigator.of(context).pop(_rating),
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.transparent,
-                            shadowColor: Colors.transparent,
-                            disabledBackgroundColor: Colors.transparent,
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(999),
+                      child: Row(
+                        children: [
+                          Expanded(
+                            child: OutlinedButton(
+                              onPressed: () => Navigator.of(context).pop(),
+                              style: OutlinedButton.styleFrom(
+                                padding: EdgeInsets.symmetric(
+                                  horizontal: Responsive.w(context, 8),
+                                ),
+                                side: BorderSide(
+                                  color: AppColors.createFieldBorder,
+                                  width: Responsive.w(context, 1.2),
+                                ),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(999),
+                                ),
+                              ),
+                              child: Text(
+                                'rate_dialog_later'.tr,
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                textAlign: TextAlign.center,
+                                style: AppTextStyles.createRowSubtitle(
+                                  context,
+                                ).copyWith(fontWeight: FontWeight.w600),
+                              ),
                             ),
                           ),
-                          child: Text(
-                            _primaryLabel,
-                            style: AppTextStyles.createCta(context),
+                          SizedBox(width: Responsive.w(context, 10)),
+                          Expanded(
+                            child: DecoratedBox(
+                              decoration: BoxDecoration(
+                                gradient: LinearGradient(
+                                  begin: Alignment.topLeft,
+                                  end: Alignment.bottomRight,
+                                  colors: !_isAnimating
+                                      ? const [
+                                          AppColors.homeCardGradientStart,
+                                          AppColors.homeCardGradientMid,
+                                          AppColors.homeCardGradientEnd,
+                                        ]
+                                      : [
+                                          AppColors.createFieldBorder,
+                                          AppColors.createFieldBorder,
+                                        ],
+                                ),
+                                borderRadius: BorderRadius.circular(999),
+                                boxShadow: !_isAnimating
+                                    ? [
+                                        BoxShadow(
+                                          color: AppColors.homeAccent
+                                              .withValues(alpha: 0.22),
+                                          blurRadius: Responsive.w(context, 14),
+                                          offset: Offset(
+                                            0,
+                                            Responsive.w(context, 6),
+                                          ),
+                                        ),
+                                      ]
+                                    : null,
+                              ),
+                              child: ElevatedButton(
+                                onPressed: _isAnimating
+                                    ? null
+                                    : () =>
+                                        Navigator.of(context).pop(_rating),
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: Colors.transparent,
+                                  shadowColor: Colors.transparent,
+                                  disabledBackgroundColor: Colors.transparent,
+                                  padding: EdgeInsets.symmetric(
+                                    horizontal: Responsive.w(context, 8),
+                                  ),
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(999),
+                                  ),
+                                ),
+                                child: Text(
+                                  _primaryLabel,
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                  textAlign: TextAlign.center,
+                                  style: AppTextStyles.createCta(context),
+                                ),
+                              ),
+                            ),
                           ),
-                        ),
-                      ),
-                    ),
-                    SizedBox(height: Responsive.w(context, 8)),
-                    TextButton(
-                      onPressed: () => Navigator.of(context).pop(),
-                      child: Text(
-                        'rate_dialog_later'.tr,
-                        style: AppTextStyles.createRowSubtitle(
-                          context,
-                        ).copyWith(fontWeight: FontWeight.w600),
+                        ],
                       ),
                     ),
                   ],

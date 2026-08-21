@@ -367,5 +367,9 @@
   "webview": "WebView",
   "welcome": "ยินดีต้อนรับ",
   "welcome_back": "ยินดีต้อนรับกลับ",
-  "your_app": "แอปของคุณ"
+  "your_app": "แอปของคุณ",
+  "settings_upgrade_to": "อัปเกรดเป็น ",
+  "settings_premium_label": "Premium",
+  "settings_premium_benefits": "ทุกสไตล์  •  ไม่มีโฆษณา  •  ซัพพอร์ตพิเศษ",
+  "upgrade_now": "อัปเกรดเลย"
 }

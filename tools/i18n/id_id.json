@@ -367,5 +367,9 @@
   "webview": "WebView",
   "welcome": "Selamat datang",
   "welcome_back": "Selamat datang kembali",
-  "your_app": "Aplikasi Anda"
+  "your_app": "Aplikasi Anda",
+  "settings_upgrade_to": "Upgrade ke ",
+  "settings_premium_label": "Premium",
+  "settings_premium_benefits": "Semua gaya  •  Tanpa iklan  •  Dukungan prioritas",
+  "upgrade_now": "Upgrade Sekarang"
 }

@@ -367,5 +367,9 @@
   "webview": "WebView",
   "welcome": "Xush kelibsiz",
   "welcome_back": "qaytib kelganingizdan xursandmiz",
-  "your_app": "Sizning ilovangiz"
+  "your_app": "Sizning ilovangiz",
+  "settings_upgrade_to": "Upgrade to ",
+  "settings_premium_label": "Premium",
+  "settings_premium_benefits": "All styles  •  No ads  •  Priority support",
+  "upgrade_now": "Upgrade Now"
 }

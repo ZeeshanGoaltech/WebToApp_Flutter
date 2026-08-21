@@ -367,5 +367,9 @@
   "webview": "WebView",
   "welcome": "ようこそ",
   "welcome_back": "おかえりなさい",
-  "your_app": "あなたのアプリ"
+  "your_app": "あなたのアプリ",
+  "settings_upgrade_to": "",
+  "settings_premium_label": "プレミアムにアップグレード",
+  "settings_premium_benefits": "全スタイル  •  広告なし  •  優先サポート",
+  "upgrade_now": "今すぐアップグレード"
 }
