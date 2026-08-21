@@ -15,6 +15,24 @@ import 'package:web_to_app/core/services/iap_product_id_resolver.dart';
 
 Future<bool>? _earlyRestoreFuture;
 
+/// Diginotes-style pack paywall price row (sale + optional compare-at).
+class CreditsPackListedPrice {
+  const CreditsPackListedPrice({
+    required this.salePrice,
+    required this.regularPrice,
+    required this.discountPercent,
+    this.offerToken,
+  });
+
+  final String salePrice;
+  final String regularPrice;
+  final int discountPercent;
+  final String? offerToken;
+
+  bool get hasDiscount =>
+      discountPercent > 0 && regularPrice.trim() != salePrice.trim();
+}
+
 class PremiumService {
   static PremiumService? _instance;
   SharedPreferences? _prefs;
@@ -402,8 +420,64 @@ class PremiumService {
   String? getCreditsPackPrice() =>
       localizedPriceFor(_productIdResolver.getCreditsPackProductId());
 
+  /// Diginotes-style listed pack price (sale + optional strikethrough / %).
+  /// Returns `--` when the store catalog has not loaded a real price yet.
+  CreditsPackListedPrice getCreditsPackListedPrice() {
+    final productId = _productIdResolver.getCreditsPackProductId();
+    final payable = localizedPriceFor(productId)?.trim();
+    final hasStorePrice = payable != null &&
+        payable.isNotEmpty &&
+        !_isFreePriceText(payable);
+
+    if (!hasStorePrice) {
+      return const CreditsPackListedPrice(
+        salePrice: '--',
+        regularPrice: '--',
+        discountPercent: 0,
+      );
+    }
+
+    final sale = payable;
+
+    if (CreditService.instance.hasPurchasedPackBefore) {
+      return CreditsPackListedPrice(
+        salePrice: sale,
+        regularPrice: sale,
+        discountPercent: 0,
+      );
+    }
+
+    return _creditsPackCompareAt(productId) ??
+        CreditsPackListedPrice(
+          salePrice: sale,
+          regularPrice: sale,
+          discountPercent: 0,
+        );
+  }
+
+  CreditsPackListedPrice? _creditsPackCompareAt(String productId) {
+    final product = getProductById(productId, preferFreeTrial: false);
+    if (product is! GooglePlayProductDetails) return null;
+
+    // Current in_app_purchase_android exposes a single one-time offer.
+    // Multi-offer compare-at (Diginotes native dump) needs Billing Library 7+.
+    final offer = product.productDetails.oneTimePurchaseOfferDetails;
+    if (offer == null || offer.priceAmountMicros <= 0) return null;
+
+    final sale = offer.formattedPrice.trim();
+    if (sale.isEmpty) return null;
+
+    final token = product.offerToken?.trim();
+    return CreditsPackListedPrice(
+      salePrice: sale,
+      regularPrice: sale,
+      discountPercent: 0,
+      offerToken: (token != null && token.isNotEmpty) ? token : null,
+    );
+  }
+
   /// Consumable credit pack — does not grant premium / subscription.
-  Future<bool> purchaseCreditsPack() async {
+  Future<bool> purchaseCreditsPack({String? offerToken}) async {
     if (!_isAvailable) return false;
     if (_products.isEmpty) await _loadProducts();
 
@@ -433,8 +507,21 @@ class PremiumService {
         }
       }
 
+      PurchaseParam purchaseParam;
+      if (Platform.isAndroid && product is GooglePlayProductDetails) {
+        final token = (offerToken ?? product.offerToken)?.trim();
+        purchaseParam = (token != null && token.isNotEmpty)
+            ? GooglePlayPurchaseParam(
+                productDetails: product,
+                offerToken: token,
+              )
+            : PurchaseParam(productDetails: product);
+      } else {
+        purchaseParam = PurchaseParam(productDetails: product);
+      }
+
       return _iap.buyConsumable(
-        purchaseParam: PurchaseParam(productDetails: product),
+        purchaseParam: purchaseParam,
         autoConsume: true,
       );
     } catch (_) {

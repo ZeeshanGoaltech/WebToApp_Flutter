@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:web_to_app/core/theme/app_colors.dart';
 import 'package:web_to_app/core/theme/app_text_styles.dart';
 import 'package:web_to_app/core/utils/responsive.dart';
+import 'package:web_to_app/core/widgets/credits_badge_button.dart';
 import 'package:web_to_app/modules/create_app/widgets/shell/create_back_icon.dart';
 
 class CreateAppHeader extends StatelessWidget {
@@ -122,6 +123,8 @@ class CreateBuildHeader extends StatelessWidget {
               children: [
                 _BackButton(size: iconSize, onBack: onBack),
                 const Spacer(),
+                const CreditsBadgeButton(compact: true),
+                SizedBox(width: Responsive.w(context, 8)),
                 Container(
                   padding: EdgeInsets.symmetric(
                     horizontal: Responsive.w(context, 8),
@@ -154,7 +157,7 @@ class CreateBuildHeader extends StatelessWidget {
               ],
             ),
             Padding(
-              padding: EdgeInsets.symmetric(horizontal: Responsive.w(context, 88)),
+              padding: EdgeInsets.symmetric(horizontal: Responsive.w(context, 110)),
               child: Text(
                 'Build Your App',
                 textAlign: TextAlign.center,
