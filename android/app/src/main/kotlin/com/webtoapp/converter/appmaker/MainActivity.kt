@@ -45,6 +45,8 @@ class MainActivity : FlutterActivity() {
         } catch (e: Exception) {
             android.util.Log.e("MainActivity", "Failed to register mediumAd: ${e.message}", e)
         }
+
+        PackIapDebug.register(flutterEngine.dartExecutor.binaryMessenger, this)
     }
 
     override fun cleanUpFlutterEngine(flutterEngine: FlutterEngine) {

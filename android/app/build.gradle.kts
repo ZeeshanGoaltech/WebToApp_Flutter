@@ -52,3 +52,8 @@ android {
 flutter {
     source = "../.."
 }
+
+dependencies {
+    // Diginotes parity — matches in_app_purchase_android ^0.5.2.
+    implementation("com.android.billingclient:billing:8.0.0")
+}

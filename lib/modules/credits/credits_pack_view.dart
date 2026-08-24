@@ -99,6 +99,14 @@ class _CreditsPackViewState extends State<CreditsPackView> {
     _refreshPrices();
     await _premium!.reloadProducts();
     _refreshPrices();
+    // Credits-only native multi-offer pass (does not touch subscription catalog).
+    await _premium!.refreshCreditsPackOffers(force: true);
+    _refreshPrices();
+    debugPrint(
+      '[PackIAP] listed sale=$_salePrice regular=$_regularPrice '
+      'percent=$_discountPercent eligible=$_discountEligible '
+      'token=${_offerToken != null && _offerToken!.isNotEmpty}',
+    );
   }
 
   void _refreshPrices() {

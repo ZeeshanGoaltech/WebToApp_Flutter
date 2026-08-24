@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'dart:developer' as developer;
 import 'dart:io' show Platform;
 
+import 'package:flutter/services.dart';
 import 'package:in_app_purchase/in_app_purchase.dart';
 import 'package:in_app_purchase_android/billing_client_wrappers.dart';
 import 'package:in_app_purchase_android/in_app_purchase_android.dart';
@@ -33,6 +34,20 @@ class CreditsPackListedPrice {
       discountPercent > 0 && regularPrice.trim() != salePrice.trim();
 }
 
+class _NativeOneTimeOffer {
+  const _NativeOneTimeOffer({
+    required this.formattedPrice,
+    required this.priceAmountMicros,
+    this.offerToken,
+  });
+
+  final String formattedPrice;
+  final int priceAmountMicros;
+  final String? offerToken;
+
+  bool get hasToken => offerToken != null && offerToken!.isNotEmpty;
+}
+
 class PremiumService {
   static PremiumService? _instance;
   SharedPreferences? _prefs;
@@ -59,6 +74,13 @@ class PremiumService {
   Future<void>? _loadingProductsFuture;
 
   bool lastPurchaseCancelledByUser = false;
+
+  /// Play Billing 8 one-time offers for the credits pack (incl. offer tokens).
+  List<_NativeOneTimeOffer> _nativePackOffers = [];
+  Future<void>? _nativePackOffersInflight;
+
+  static const MethodChannel _packOffersChannel =
+      MethodChannel('pack_iap_debug');
 
   PremiumService._();
 
@@ -201,6 +223,106 @@ class PremiumService {
   }
 
   Future<void> reloadProducts() => _loadProducts();
+
+  /// Credits-pack only: fetch Play multi-offers (does not block subscription IAP).
+  Future<void> refreshCreditsPackOffers({bool force = false}) async {
+    await _refreshNativePackOffers(force: force);
+  }
+
+  Future<void> _refreshNativePackOffers({bool force = false}) {
+    if (!Platform.isAndroid) return Future.value();
+    if (!force && _nativePackOffers.isNotEmpty) return Future.value();
+    return _nativePackOffersInflight ??= () async {
+      try {
+        await _fetchNativePackOffers().timeout(const Duration(seconds: 8));
+      } catch (e) {
+        developer.log('native pack offers timed out/failed: $e', name: 'PackIAP');
+        _nativePackOffers = [];
+      } finally {
+        _nativePackOffersInflight = null;
+      }
+    }();
+  }
+
+  Future<void> _fetchNativePackOffers() async {
+    try {
+      final productId = _productIdResolver.getCreditsPackProductId();
+      final raw = await _packOffersChannel.invokeMethod<dynamic>(
+        'dumpPackOffers',
+        {'productId': productId},
+      );
+      final dump = _asStringKeyedMap(raw);
+      _nativePackOffers = _parseNativePackOffers(dump);
+      developer.log(
+        'native pack offers=${_nativePackOffers.length} '
+        'tokens=${_nativePackOffers.where((o) => o.hasToken).length}',
+        name: 'PackIAP',
+      );
+    } catch (e) {
+      developer.log('native pack offers failed: $e', name: 'PackIAP');
+      _nativePackOffers = [];
+    }
+  }
+
+  List<_NativeOneTimeOffer> _parseNativePackOffers(Map<String, Object?>? dump) {
+    if (dump == null) return [];
+    final collected = <_NativeOneTimeOffer>[];
+
+    void addFrom(dynamic raw) {
+      final map = _asStringKeyedMap(raw);
+      if (map == null) return;
+      final micros = _asInt(map['priceAmountMicros']);
+      final formatted = (map['formattedPrice'] as String?)?.trim() ?? '';
+      if (micros <= 0 || formatted.isEmpty) return;
+      final token = (map['offerToken'] as String?)?.trim();
+      collected.add(
+        _NativeOneTimeOffer(
+          formattedPrice: formatted,
+          priceAmountMicros: micros,
+          offerToken: (token == null || token.isEmpty) ? null : token,
+        ),
+      );
+    }
+
+    final flattened = dump['flattenedOffers'];
+    if (flattened is List) {
+      for (final item in flattened) {
+        addFrom(item);
+      }
+    }
+    if (collected.isEmpty) {
+      addFrom(dump['cheapestOffer']);
+      addFrom(dump['highestOffer']);
+    }
+    if (collected.isEmpty) {
+      final products = dump['products'];
+      if (products is List) {
+        for (final product in products) {
+          final map = _asStringKeyedMap(product);
+          if (map == null) continue;
+          final list = map['oneTimePurchaseOfferDetailsList'];
+          if (list is List) {
+            for (final item in list) {
+              addFrom(item);
+            }
+          }
+          addFrom(map['oneTimePurchaseOfferDetails']);
+        }
+      }
+    }
+    return collected;
+  }
+
+  Map<String, Object?>? _asStringKeyedMap(dynamic raw) {
+    if (raw is! Map) return null;
+    return raw.map((key, value) => MapEntry(key.toString(), value));
+  }
+
+  int _asInt(dynamic value) {
+    if (value is int) return value;
+    if (value is num) return value.toInt();
+    return int.tryParse('$value') ?? 0;
+  }
 
   Future<void> ensureProductsLoaded() {
     if (!_isAvailable) return Future.value();
@@ -421,7 +543,11 @@ class PremiumService {
       localizedPriceFor(_productIdResolver.getCreditsPackProductId());
 
   /// Diginotes-style listed pack price (sale + optional strikethrough / %).
-  /// Returns `--` when the store catalog has not loaded a real price yet.
+  ///
+  /// First pack purchase: cheapest eligible offer + strikethrough/% badge,
+  /// and that offer token is sent to Play on buy.
+  /// After a successful buy, [CreditService.hasPurchasedPackBefore] gates the
+  /// discount off even if Play still returns a cheaper option.
   CreditsPackListedPrice getCreditsPackListedPrice() {
     final productId = _productIdResolver.getCreditsPackProductId();
     final payable = localizedPriceFor(productId)?.trim();
@@ -456,23 +582,75 @@ class PremiumService {
   }
 
   CreditsPackListedPrice? _creditsPackCompareAt(String productId) {
-    final product = getProductById(productId, preferFreeTrial: false);
-    if (product is! GooglePlayProductDetails) return null;
+    _NativeOneTimeOffer? cheapest;
+    _NativeOneTimeOffer? highest;
 
-    // Current in_app_purchase_android exposes a single one-time offer.
-    // Multi-offer compare-at (Diginotes native dump) needs Billing Library 7+.
-    final offer = product.productDetails.oneTimePurchaseOfferDetails;
-    if (offer == null || offer.priceAmountMicros <= 0) return null;
+    for (final offer in _nativePackOffers) {
+      if (offer.priceAmountMicros <= 0) continue;
+      highest ??= offer;
+      if (offer.priceAmountMicros > highest.priceAmountMicros) highest = offer;
+      if (cheapest == null ||
+          offer.priceAmountMicros < cheapest.priceAmountMicros ||
+          (offer.priceAmountMicros == cheapest.priceAmountMicros &&
+              offer.hasToken &&
+              !cheapest.hasToken)) {
+        cheapest = offer;
+      }
+    }
 
-    final sale = offer.formattedPrice.trim();
-    if (sale.isEmpty) return null;
+    // Plugin fallback (0.5.x exposes offer list; tokens still come from native).
+    if (cheapest == null || highest == null) {
+      final product = getProductById(productId, preferFreeTrial: false);
+      if (product is! GooglePlayProductDetails) return null;
+      final defaultOffer = product.productDetails.oneTimePurchaseOfferDetails;
+      final wrappers = <OneTimePurchaseOfferDetailsWrapper>[
+        ...?product.productDetails.oneTimePurchaseOfferDetailsList,
+        ?defaultOffer,
+      ];
+      OneTimePurchaseOfferDetailsWrapper? cheapWrap;
+      OneTimePurchaseOfferDetailsWrapper? highWrap;
+      for (final offer in wrappers) {
+        if (offer.priceAmountMicros <= 0) continue;
+        cheapWrap ??= offer;
+        highWrap ??= offer;
+        if (offer.priceAmountMicros < cheapWrap.priceAmountMicros) {
+          cheapWrap = offer;
+        }
+        if (offer.priceAmountMicros > highWrap.priceAmountMicros) {
+          highWrap = offer;
+        }
+      }
+      if (cheapWrap == null || highWrap == null) return null;
+      cheapest = _NativeOneTimeOffer(
+        formattedPrice: cheapWrap.formattedPrice,
+        priceAmountMicros: cheapWrap.priceAmountMicros,
+      );
+      highest = _NativeOneTimeOffer(
+        formattedPrice: highWrap.formattedPrice,
+        priceAmountMicros: highWrap.priceAmountMicros,
+      );
+    }
 
-    final token = product.offerToken?.trim();
+    if (highest.priceAmountMicros <= cheapest.priceAmountMicros) {
+      return null;
+    }
+
+    // Don't advertise a cheaper price unless we can send its offer token.
+    if (!cheapest.hasToken) return null;
+
+    final percent = (((highest.priceAmountMicros - cheapest.priceAmountMicros) /
+                highest.priceAmountMicros) *
+            100)
+        .round()
+        .clamp(1, 90);
+    final sale = cheapest.formattedPrice.trim();
+    final regular = highest.formattedPrice.trim();
+    if (sale.isEmpty || regular.isEmpty || sale == regular) return null;
     return CreditsPackListedPrice(
       salePrice: sale,
-      regularPrice: sale,
-      discountPercent: 0,
-      offerToken: (token != null && token.isNotEmpty) ? token : null,
+      regularPrice: regular,
+      discountPercent: percent,
+      offerToken: cheapest.offerToken,
     );
   }
 
@@ -480,9 +658,16 @@ class PremiumService {
   Future<bool> purchaseCreditsPack({String? offerToken}) async {
     if (!_isAvailable) return false;
     if (_products.isEmpty) await _loadProducts();
+    await _refreshNativePackOffers(
+      force: _nativePackOffers.isEmpty ||
+          !_nativePackOffers.any((offer) => offer.hasToken),
+    );
 
     final product = getCreditsPackProduct();
     if (product == null) return false;
+
+    final listed = getCreditsPackListedPrice();
+    final buyToken = (offerToken ?? listed.offerToken)?.trim();
 
     lastPurchaseCancelledByUser = false;
     try {
@@ -509,7 +694,9 @@ class PremiumService {
 
       PurchaseParam purchaseParam;
       if (Platform.isAndroid && product is GooglePlayProductDetails) {
-        final token = (offerToken ?? product.offerToken)?.trim();
+        final token = (buyToken != null && buyToken.isNotEmpty)
+            ? buyToken
+            : product.offerToken?.trim();
         purchaseParam = (token != null && token.isNotEmpty)
             ? GooglePlayPurchaseParam(
                 productDetails: product,
@@ -519,6 +706,13 @@ class PremiumService {
       } else {
         purchaseParam = PurchaseParam(productDetails: product);
       }
+
+      developer.log(
+        'purchaseCreditsPack hasDiscount=${listed.hasDiscount} '
+        'sale=${listed.salePrice} regular=${listed.regularPrice} '
+        'tokenPresent=${buyToken != null && buyToken.isNotEmpty}',
+        name: 'PackIAP',
+      );
 
       return _iap.buyConsumable(
         purchaseParam: purchaseParam,
