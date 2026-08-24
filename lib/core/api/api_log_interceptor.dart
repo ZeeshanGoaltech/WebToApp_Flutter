@@ -41,11 +41,17 @@ class ApiDebugLogInterceptor extends http.Interceptor {
           : DateTime.now().millisecondsSinceEpoch - started;
 
       _logBlock([
-        '◀ RESPONSE',
+        if (_isPendingBuildLog(response))
+          '◀ PENDING'
+        else
+          '◀ RESPONSE',
         '${response.requestOptions.method} ${_fullUrl(response.requestOptions)}',
         'Status: ${response.statusCode}',
         if (ms != null) 'Duration: ${ms}ms',
-        'Body: ${_pretty(response.data)}',
+        if (_isPendingBuildLog(response))
+          'Note: Build logs not uploaded yet — retrying'
+        else
+          'Body: ${_pretty(response.data)}',
       ]);
     }
     handler.next(response);
@@ -74,6 +80,17 @@ class ApiDebugLogInterceptor extends http.Interceptor {
       _logBlock(lines, isError: true);
     }
     handler.next(err);
+  }
+
+  static bool _isPendingBuildLog(http.Response response) {
+    if (response.statusCode != 404) return false;
+    final path = response.requestOptions.path;
+    if (!path.endsWith('/logs')) return false;
+    final data = response.data;
+    if (data is! Map<String, dynamic>) return false;
+    final error = data['error'];
+    if (error is! Map<String, dynamic>) return false;
+    return error['code'] == 'not_found';
   }
 
   static String _fullUrl(http.RequestOptions options) {

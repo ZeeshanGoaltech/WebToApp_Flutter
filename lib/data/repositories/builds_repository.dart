@@ -46,8 +46,8 @@ class BuildsRepository extends GetxService {
             BuildArtifactResponse.fromJson(json as Map<String, dynamic>),
       );
 
-  Future<BuildLogsResponse> getLogs(String buildId) =>
-      _client.get<BuildLogsResponse>(
+  Future<BuildLogsResponse?> getLogs(String buildId) =>
+      _client.getOrNullIfNotFound<BuildLogsResponse>(
         '/v1/builds/$buildId/logs',
         parser: (json) =>
             BuildLogsResponse.fromJson(json as Map<String, dynamic>),

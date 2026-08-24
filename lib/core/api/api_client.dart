@@ -51,6 +51,19 @@ class ApiClient extends GetxService {
     T Function(dynamic json)? parser,
   }) => _request('GET', path, queryParameters: queryParameters, parser: parser);
 
+  /// Returns null when the server responds with 404 (e.g. logs not ready yet).
+  Future<T?> getOrNullIfNotFound<T>(
+    String path, {
+    Map<String, dynamic>? queryParameters,
+    T Function(dynamic json)? parser,
+  }) =>
+      _requestOrNullOnNotFound<T>(
+        'GET',
+        path,
+        queryParameters: queryParameters,
+        parser: parser,
+      );
+
   Future<T> post<T>(
     String path, {
     dynamic data,
@@ -87,6 +100,50 @@ class ApiClient extends GetxService {
     required http.FormData formData,
     T Function(dynamic json)? parser,
   }) => _request('POST', path, data: formData, parser: parser);
+
+  Future<T?> _requestOrNullOnNotFound<T>(
+    String method,
+    String path, {
+    dynamic data,
+    Map<String, dynamic>? queryParameters,
+    Map<String, dynamic>? headers,
+    T Function(dynamic json)? parser,
+  }) async {
+    final canRefresh = !_skipsAuthRefresh(path);
+    if (canRefresh) {
+      await _refreshIfExpiringSoon();
+    }
+
+    try {
+      return await _sendOrNullOnNotFound<T>(
+        method,
+        path,
+        data: data,
+        queryParameters: queryParameters,
+        headers: headers,
+        parser: parser,
+      );
+    } on http.DioException catch (e) {
+      if (canRefresh && e.response?.statusCode == 401) {
+        final refreshed = await _refreshAccessToken();
+        if (refreshed) {
+          try {
+            return await _sendOrNullOnNotFound<T>(
+              method,
+              path,
+              data: data,
+              queryParameters: queryParameters,
+              headers: headers,
+              parser: parser,
+            );
+          } on http.DioException catch (retryError) {
+            throw _mapDioError(retryError);
+          }
+        }
+      }
+      throw _mapDioError(e);
+    }
+  }
 
   Future<T> _request<T>(
     String method,
@@ -146,6 +203,37 @@ class ApiClient extends GetxService {
       queryParameters: queryParameters,
       options: http.Options(method: method, headers: headers),
     );
+
+    final body = response.data;
+    if (parser != null) {
+      return parser(body);
+    }
+    return body as T;
+  }
+
+  Future<T?> _sendOrNullOnNotFound<T>(
+    String method,
+    String path, {
+    dynamic data,
+    Map<String, dynamic>? queryParameters,
+    Map<String, dynamic>? headers,
+    T Function(dynamic json)? parser,
+  }) async {
+    final response = await _dio.request<dynamic>(
+      path,
+      data: data,
+      queryParameters: queryParameters,
+      options: http.Options(
+        method: method,
+        headers: headers,
+        validateStatus: (status) =>
+            status != null && (status < 400 || status == 404),
+      ),
+    );
+
+    if (response.statusCode == 404) {
+      return null;
+    }
 
     final body = response.data;
     if (parser != null) {

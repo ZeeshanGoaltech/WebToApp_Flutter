@@ -49,11 +49,15 @@ class BuildAppController extends GetxController {
   final buildLogs = <String>[r'$ Starting build process...'].obs;
 
   Timer? _pollTimer;
+  Timer? _logsRetryTimer;
   Timer? _queueEstimateTimer;
+  int _logsRetryCount = 0;
+  static const _maxLogRetries = 10;
   String? _lastBuildStatus;
   String? _preparedAppId;
   String? _preparedAppVersionId;
   bool _hydratingExistingBuild = false;
+  String? _creditChargedBuildId;
   DateTime? _queueEstimateEndsAt;
   int _queueEstimateTotalSeconds = 0;
 
@@ -286,7 +290,6 @@ class BuildAppController extends GetxController {
       buildId.value = build.id;
       buildState.value = BuildState.building;
       _applyBuild(build);
-      await CreditGate.consumeAfterSuccess();
       _startPolling(build.id);
     } on ApiException catch (e) {
       buildState.value = BuildState.ready;
@@ -313,7 +316,7 @@ class BuildAppController extends GetxController {
         _applyBuild(build);
         if (build.isTerminal) {
           _pollTimer?.cancel();
-          await _refreshLogs(id);
+          await _refreshLogs(id, logUrl: build.logUrl);
         }
       } on ApiException catch (e) {
         if (e.statusCode == 401 || e.code == 'unauthenticated') {
@@ -327,6 +330,7 @@ class BuildAppController extends GetxController {
 
   Future<void> _handleSessionExpired() async {
     _pollTimer?.cancel();
+    _stopLogRetry();
     buildState.value = BuildState.ready;
     buildProgress.value = 0;
     buildLogs.add(r'$ Session expired. Please sign in again.');
@@ -369,7 +373,10 @@ class BuildAppController extends GetxController {
         _stopQueueEstimate();
         buildProgress.value = 1.0;
         buildState.value = BuildState.success;
-        if (statusChanged) buildLogs.add(r'✓ Build successful!');
+        if (statusChanged) {
+          buildLogs.add(r'✓ Build successful!');
+          unawaited(_consumeCreditOnBuildSuccess(build.id));
+        }
       case 'failed':
         if (statusChanged) {
           _stopQueueEstimate();
@@ -441,14 +448,61 @@ class BuildAppController extends GetxController {
     estimatedWaitRemainingSeconds.value = 0;
   }
 
-  Future<void> _refreshLogs(String id) async {
+  Future<void> _consumeCreditOnBuildSuccess(String id) async {
+    if (_creditChargedBuildId == id) return;
+    final consumed = await CreditGate.consumeAfterSuccess();
+    if (consumed) {
+      _creditChargedBuildId = id;
+    }
+  }
+
+  Future<void> _refreshLogs(String id, {String? logUrl}) async {
+    if (logUrl != null && logUrl.isNotEmpty) {
+      _appendServerLogUrl(logUrl);
+      return;
+    }
+
+    _logsRetryTimer?.cancel();
+    _logsRetryCount = 0;
+    await _tryFetchLogs(id);
+  }
+
+  void _appendServerLogUrl(String logUrl) {
+    if (buildLogs.contains(logUrl)) return;
+    buildLogs.add(r'$ Logs available at server');
+    buildLogs.add(logUrl);
+    buildLogs.refresh();
+  }
+
+  Future<void> _tryFetchLogs(String id) async {
     try {
       final logs = await Get.find<BuildsRepository>().getLogs(id);
-      buildLogs.add(r'$ Logs available at server');
-      if (logs.logUrl.isNotEmpty) {
-        buildLogs.add(logs.logUrl);
+      if (logs == null) {
+        _scheduleLogRetry(id);
+        return;
       }
-    } catch (_) {}
+
+      if (logs.logUrl.isNotEmpty) {
+        _appendServerLogUrl(logs.logUrl);
+      }
+    } catch (_) {
+      _scheduleLogRetry(id);
+    }
+  }
+
+  void _scheduleLogRetry(String id) {
+    if (_logsRetryCount >= _maxLogRetries) return;
+    _logsRetryCount++;
+    _logsRetryTimer?.cancel();
+    _logsRetryTimer = Timer(const Duration(seconds: 3), () {
+      unawaited(_tryFetchLogs(id));
+    });
+  }
+
+  void _stopLogRetry() {
+    _logsRetryTimer?.cancel();
+    _logsRetryTimer = null;
+    _logsRetryCount = 0;
   }
 
   Future<void> downloadArtifact(BuildFormat format) async {
@@ -559,6 +613,7 @@ class BuildAppController extends GetxController {
 
   void _resetBuildResult({bool resetFormats = false}) {
     _pollTimer?.cancel();
+    _stopLogRetry();
     _stopQueueEstimate();
     _lastBuildStatus = null;
     isLeavingBuildScreen.value = false;
@@ -599,6 +654,7 @@ class BuildAppController extends GetxController {
     isLeavingBuildScreen.value = true;
     isCancellingBuildExit.value = true;
     _pollTimer?.cancel();
+    _stopLogRetry();
     _stopQueueEstimate();
 
     final id = buildId.value;
@@ -651,6 +707,7 @@ class BuildAppController extends GetxController {
   @override
   void onClose() {
     _pollTimer?.cancel();
+    _stopLogRetry();
     _queueEstimateTimer?.cancel();
     buildNumberController.dispose();
     keystoreStorePasswordController.dispose();
