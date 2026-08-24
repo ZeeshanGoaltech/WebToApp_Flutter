@@ -1,21 +1,27 @@
 import 'package:get/get.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:web_to_app/app/routes/app_routes.dart';
 import 'package:web_to_app/core/ads/ad_remote_config_service.dart';
 import 'package:web_to_app/core/navigation/launch_flow.dart';
+import 'package:web_to_app/core/services/credit_service.dart';
+import 'package:web_to_app/core/services/download_token_service.dart';
 import 'package:web_to_app/core/services/premium_service.dart';
 import 'package:web_to_app/core/services/session_service.dart';
 
 /// Free-use quotas for build / generate / download.
 ///
-/// Persistent (survives restart until premium):
+/// Persistent (survives restart):
 /// - RC `buildapp_sub` — opening Build App flow
 /// - RC `generatebundleapk_sub` — Generate Bundle & APK
 /// - RC `buildagain_sub` — Build Again button (default 3)
-/// - RC `downloadbundleapk_sub` — Download APK / Bundle (default 1)
-///   Limit N = N free APK downloads **and** N free AAB downloads,
-///   then IAP on further downloads until premium.
+/// - RC `apkdownload_inapp` — free APK downloads before paywall (default 1)
+/// - RC `bundledownload_inapp` — free AAB downloads before paywall (default 1)
 ///
-/// Values: `off` = unlimited, `1`/`2`/… = free uses then IAP.
+/// Buying `apkdownload_inapp` or `bundledownload_inapp` unlocks **unlimited
+/// APK + AAB downloads for that project only** (not `threescan_inapp` credits).
+/// Remaining `threescan_inapp` paid credits also allow downloads (1 credit each).
+///
+/// Values: `off` = unlimited, `1`/`2`/… = free uses then paywall.
 class BuildQuotaService {
   BuildQuotaService._();
 
@@ -24,8 +30,8 @@ class BuildQuotaService {
   static const _buildAppCountKey = 'buildapp_sub_build_count';
   static const _generateBundleApkCountKey = 'generatebundleapk_sub_count';
   static const _buildAgainCountKey = 'buildagain_sub_count';
-  static const _downloadApkCountKey = 'downloadbundleapk_sub_apk_count';
-  static const _downloadAabCountKey = 'downloadbundleapk_sub_aab_count';
+  static const _downloadApkCountKey = 'apkdownload_inapp_count';
+  static const _downloadAabCountKey = 'bundledownload_inapp_count';
 
   bool get _isPremium {
     if (Get.isRegistered<SessionService>() &&
@@ -44,6 +50,14 @@ class BuildQuotaService {
     final prefs = await SharedPreferences.getInstance();
     final next = (prefs.getInt(key) ?? 0) + 1;
     await prefs.setInt(key, next);
+  }
+
+  /// Premium (weekly/monthly/yearly/lifetime) → unlimited.
+  /// Remaining paid `threescan_inapp` credits → can download.
+  Future<bool> _hasSubscriptionOrThreescanCredits() async {
+    if (_isPremium) return true;
+    await CreditService.instance.initialize();
+    return CreditService.instance.paidCredits.value > 0;
   }
 
   Future<bool> _canUsePersisted({
@@ -85,20 +99,43 @@ class BuildQuotaService {
         ),
       );
 
-  /// RC `downloadbundleapk_sub` — Download APK or AAB.
-  ///
-  /// [isAab] selects the per-format counter. Limit `N` allows `N` APKs and
-  /// `N` AABs; further downloads open IAP until the user is premium.
-  /// Counts persist across app restarts.
+  /// Allow download when premium, threescan credits, this [appId] is unlocked,
+  /// or free RC quota remains. Else open download paywall.
   Future<bool> ensureCanDownloadBundleApkOrOpenIap({
     required bool isAab,
-  }) {
-    return _ensurePersistedOrOpenIap(
-      countKey: isAab ? _downloadAabCountKey : _downloadApkCountKey,
-      limitReader: () => AdRemoteConfigService.instance.getQuotaLimit(
-        RemoteConfigKeys.downloadBundleApkSub,
-      ),
+    String? appId,
+  }) async {
+    if (await _hasSubscriptionOrThreescanCredits()) return true;
+
+    if (await DownloadTokenService.instance.isProjectUnlocked(appId)) {
+      return true;
+    }
+
+    final countKey = isAab ? _downloadAabCountKey : _downloadApkCountKey;
+    final rcKey = isAab
+        ? RemoteConfigKeys.bundleDownloadInapp
+        : RemoteConfigKeys.apkDownloadInapp;
+
+    if (await _canUsePersisted(
+      countKey: countKey,
+      limitReader: () => AdRemoteConfigService.instance.getQuotaLimit(rcKey),
+    )) {
+      return true;
+    }
+
+    final bought = await Get.toNamed(
+      AppRoutes.downloadInApp,
+      arguments: <String, dynamic>{
+        'isAab': isAab,
+        'appId': appId,
+      },
     );
+    if (bought == true) return true;
+
+    if (await DownloadTokenService.instance.isProjectUnlocked(appId)) {
+      return true;
+    }
+    return _hasSubscriptionOrThreescanCredits();
   }
 
   /// RC `buildagain_sub` — Build Again button (persists; default 3).
@@ -120,8 +157,24 @@ class BuildQuotaService {
     await _incrementPersisted(_buildAgainCountKey);
   }
 
-  /// Record a successful APK/AAB download (persists per format).
-  Future<void> recordSuccessfulDownload({required bool isAab}) async {
+  /// Consume order: premium / project unlock → no count;
+  /// threescan credit → free RC counter.
+  Future<void> recordSuccessfulDownload({
+    required bool isAab,
+    String? appId,
+  }) async {
+    if (_isPremium) return;
+
+    if (await DownloadTokenService.instance.isProjectUnlocked(appId)) {
+      return;
+    }
+
+    await CreditService.instance.initialize();
+    if (CreditService.instance.paidCredits.value > 0) {
+      await CreditService.instance.consume();
+      return;
+    }
+
     await _incrementPersisted(
       isAab ? _downloadAabCountKey : _downloadApkCountKey,
     );

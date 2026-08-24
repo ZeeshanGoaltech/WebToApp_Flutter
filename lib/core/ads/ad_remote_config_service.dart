@@ -17,10 +17,13 @@ abstract final class RemoteConfigKeys {
   /// Persists across restarts (not reset).
   static const generateBundleApkSub = 'generatebundleapk_sub';
 
-  /// Download APK & Bundle quota: `off` = unlimited, `1`/`2`/… = free downloads
-  /// per format (APK and AAB counted separately), then IAP until premium.
-  /// Persists across restarts. Default: `1` (1 free APK + 1 free AAB).
-  static const downloadBundleApkSub = 'downloadbundleapk_sub';
+  /// Download APK free quota: `off` = unlimited, `1`/`2`/… = free APK downloads
+  /// then download in-app paywall. Persists across restarts. Default: `1`.
+  static const apkDownloadInapp = 'apkdownload_inapp';
+
+  /// Download AAB free quota: `off` = unlimited, `1`/`2`/… = free AAB downloads
+  /// then download in-app paywall. Persists across restarts. Default: `1`.
+  static const bundleDownloadInapp = 'bundledownload_inapp';
 
   /// Build Again quota: `off` = unlimited, `1`/`2`/… = then IAP.
   /// Persists across restarts. Default: `3`.
@@ -59,7 +62,8 @@ const Map<String, dynamic> _adRemoteConfigBaseDefaults = {
   RemoteConfigKeys.splashSub: true,
   RemoteConfigKeys.buildAppSub: 'off',
   RemoteConfigKeys.generateBundleApkSub: 'off',
-  RemoteConfigKeys.downloadBundleApkSub: '1',
+  RemoteConfigKeys.apkDownloadInapp: '1',
+  RemoteConfigKeys.bundleDownloadInapp: '1',
   RemoteConfigKeys.buildAgainSub: '3',
   RemoteConfigKeys.aiModuleFreeCredits: 3,
   RemoteConfigKeys.aiModulePackCredits: 3,

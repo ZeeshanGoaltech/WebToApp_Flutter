@@ -29,6 +29,7 @@ abstract final class ShellBack {
   static Future<bool> handle(BuildContext context) async {
     final route = Get.currentRoute;
     if (route == AppRoutes.lifetimePremium ||
+        route == AppRoutes.downloadInApp ||
         route == AppRoutes.iap ||
         route == AppRoutes.creditsPack) {
       return true;

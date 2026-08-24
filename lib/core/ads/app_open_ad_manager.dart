@@ -121,6 +121,8 @@ class AppOpenAdManager {
     final route = Get.currentRoute;
     if (route == AppRoutes.splash ||
         route == AppRoutes.iap ||
+        route == AppRoutes.lifetimePremium ||
+        route == AppRoutes.downloadInApp ||
         route == AppRoutes.creditsPack ||
         route == AppRoutes.intro ||
         route == AppRoutes.language ||

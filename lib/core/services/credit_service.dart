@@ -1,6 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:web_to_app/core/ads/ad_remote_config_service.dart';
+import 'package:web_to_app/core/services/iap_product_id_resolver.dart';
 
 /// Diginotes-style local credits for API actions (build / download).
 /// Subscription IAP stays separate and does not grant these credits.
@@ -8,7 +9,8 @@ class CreditService {
   CreditService._();
   static final CreditService instance = CreditService._();
 
-  /// Play / App Store consumable product id (configure in store console).
+  /// Consumable credit pack (+3 builds). Separate from subscription SKUs.
+  /// Also recognizes Download APK/AAB consumables that grant the same credits.
   static const String packProductId = 'threescan_inapp';
   static const String packFallbackPrice = r'$1.99';
   static const int defaultFreeLimit = 3;
@@ -144,5 +146,5 @@ class CreditService {
   }
 
   static bool isPackProductId(String productId) =>
-      productId == packProductId;
+      IapProductIdResolver.instance.isCreditsGrantingProductId(productId);
 }

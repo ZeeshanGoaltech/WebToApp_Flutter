@@ -12,6 +12,7 @@ import 'package:in_app_purchase_storekit/store_kit_2_wrappers.dart';
 import 'package:in_app_purchase_storekit/store_kit_wrappers.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:web_to_app/core/services/credit_service.dart';
+import 'package:web_to_app/core/services/download_token_service.dart';
 import 'package:web_to_app/core/services/iap_product_id_resolver.dart';
 
 Future<bool>? _earlyRestoreFuture;
@@ -423,6 +424,26 @@ class PremiumService {
       return;
     }
 
+    if (_productIdResolver.isDownloadInappProductId(purchase.productID)) {
+      final key = purchase.purchaseID?.trim().isNotEmpty == true
+          ? purchase.purchaseID!.trim()
+          : purchase.verificationData.serverVerificationData;
+      final appId = DownloadTokenService.instance.pendingPurchaseAppId?.trim();
+      if (appId != null && appId.isNotEmpty) {
+        await DownloadTokenService.instance.unlockProjectFromPurchase(
+          appId: appId,
+          purchaseKey: key,
+        );
+      } else {
+        developer.log(
+          'Download in-app purchase without pending appId '
+          '(product=${purchase.productID})',
+          name: 'PremiumService',
+        );
+      }
+      return;
+    }
+
     if (!_isPurchaseCurrentlyActive(purchase)) {
       developer.log(
         'Ignoring inactive/expired purchase: ${purchase.productID}',
@@ -669,6 +690,52 @@ class PremiumService {
     final listed = getCreditsPackListedPrice();
     final buyToken = (offerToken ?? listed.offerToken)?.trim();
 
+    return _purchaseConsumableProduct(
+      product: product,
+      offerToken: buyToken,
+      logName: 'purchaseCreditsPack',
+      logDetail:
+          'hasDiscount=${listed.hasDiscount} sale=${listed.salePrice} '
+          'regular=${listed.regularPrice} '
+          'tokenPresent=${buyToken != null && buyToken.isNotEmpty}',
+    );
+  }
+
+  ProductDetails? getDownloadInappProduct({required bool isAab}) {
+    return getProductById(
+      _productIdResolver.getDownloadInappProductId(isAab: isAab),
+      preferFreeTrial: false,
+    );
+  }
+
+  String? getDownloadInappPrice({required bool isAab}) => localizedPriceFor(
+        _productIdResolver.getDownloadInappProductId(isAab: isAab),
+      );
+
+  /// Consumable Download APK / AAB pack — grants credits, not premium.
+  Future<bool> purchaseDownloadInapp({required bool isAab}) async {
+    if (!_isAvailable) return false;
+    if (_products.isEmpty) await _loadProducts();
+
+    final product = getDownloadInappProduct(isAab: isAab);
+    if (product == null) return false;
+
+    final productId =
+        _productIdResolver.getDownloadInappProductId(isAab: isAab);
+    return _purchaseConsumableProduct(
+      product: product,
+      offerToken: null,
+      logName: 'purchaseDownloadInapp',
+      logDetail: 'productId=$productId',
+    );
+  }
+
+  Future<bool> _purchaseConsumableProduct({
+    required ProductDetails product,
+    required String? offerToken,
+    required String logName,
+    required String logDetail,
+  }) async {
     lastPurchaseCancelledByUser = false;
     try {
       if (Platform.isIOS) {
@@ -686,7 +753,7 @@ class PremiumService {
           }
         } catch (e) {
           developer.log(
-            'SK2 credit pack failed, falling back to buyConsumable: $e',
+            'SK2 $logName failed, falling back to buyConsumable: $e',
             name: 'PremiumService',
           );
         }
@@ -694,8 +761,8 @@ class PremiumService {
 
       PurchaseParam purchaseParam;
       if (Platform.isAndroid && product is GooglePlayProductDetails) {
-        final token = (buyToken != null && buyToken.isNotEmpty)
-            ? buyToken
+        final token = (offerToken != null && offerToken.isNotEmpty)
+            ? offerToken
             : product.offerToken?.trim();
         purchaseParam = (token != null && token.isNotEmpty)
             ? GooglePlayPurchaseParam(
@@ -707,12 +774,7 @@ class PremiumService {
         purchaseParam = PurchaseParam(productDetails: product);
       }
 
-      developer.log(
-        'purchaseCreditsPack hasDiscount=${listed.hasDiscount} '
-        'sale=${listed.salePrice} regular=${listed.regularPrice} '
-        'tokenPresent=${buyToken != null && buyToken.isNotEmpty}',
-        name: 'PackIAP',
-      );
+      developer.log('$logName $logDetail', name: 'PackIAP');
 
       return _iap.buyConsumable(
         purchaseParam: purchaseParam,

@@ -180,14 +180,24 @@
           "description": "iOS — Generate Bundle & APK free quota.",
           "valueType": "STRING"
         },
-        "downloadbundleapk_sub": {
+        "apkdownload_inapp": {
           "defaultValue": { "value": "1" },
-          "description": "Android — Download APK/AAB free quota.",
+          "description": "Android — Download APK free quota before paywall (also Play/App Store product id apkdownload_inapp). off | 1 | 2 | 3…",
           "valueType": "STRING"
         },
-        "downloadbundleapk_sub_ios": {
+        "apkdownload_inapp_ios": {
           "defaultValue": { "value": "1" },
-          "description": "iOS — Download APK/AAB free quota.",
+          "description": "iOS — Download APK free quota before paywall (also store product id apkdownload_inapp). off | 1 | 2 | 3…",
+          "valueType": "STRING"
+        },
+        "bundledownload_inapp": {
+          "defaultValue": { "value": "1" },
+          "description": "Android — Download AAB free quota before paywall (also Play/App Store product id bundledownload_inapp). off | 1 | 2 | 3…",
+          "valueType": "STRING"
+        },
+        "bundledownload_inapp_ios": {
+          "defaultValue": { "value": "1" },
+          "description": "iOS — Download AAB free quota before paywall (also store product id bundledownload_inapp). off | 1 | 2 | 3…",
           "valueType": "STRING"
         },
         "buildagain_sub": {

@@ -8,5 +8,6 @@ abstract class AppRoutes {
   static const buildApp = '/build-app';
   static const iap = '/iap';
   static const lifetimePremium = '/premium/lifetime';
+  static const downloadInApp = '/premium/download-inapp';
   static const creditsPack = '/credits/pack';
 }

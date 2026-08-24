@@ -21,6 +21,8 @@ class AdPresentationGate {
         route.startsWith('${AppRoutes.iap}?') ||
         route == AppRoutes.lifetimePremium ||
         route.startsWith('${AppRoutes.lifetimePremium}?') ||
+        route == AppRoutes.downloadInApp ||
+        route.startsWith('${AppRoutes.downloadInApp}?') ||
         route == AppRoutes.creditsPack ||
         route.startsWith('${AppRoutes.creditsPack}?');
   }

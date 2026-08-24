@@ -12,6 +12,7 @@ import 'package:web_to_app/core/ads/ad_placements.dart';
 import 'package:web_to_app/core/ads/app_open_ad_manager.dart';
 import 'package:web_to_app/core/ads/interstitial_ad_trigger.dart';
 import 'package:web_to_app/core/services/build_login_gate.dart';
+import 'package:web_to_app/core/services/build_quota_service.dart';
 import 'package:web_to_app/core/services/credit_gate.dart';
 import 'package:web_to_app/core/services/session_service.dart';
 import 'package:web_to_app/core/services/token_storage.dart';
@@ -527,7 +528,13 @@ class BuildAppController extends GetxController {
     final id = buildId.value;
     if (id == null || buildState.value == BuildState.downloading) return;
 
-    if (!await CreditGate.ensureOrOpenPaywall()) {
+    final isAab = format == BuildFormat.aab;
+    final appId = Get.find<CreateAppController>().appId.value;
+    // Paywall only on Download tap when free quota is over — nothing after download.
+    if (!await BuildQuotaService.instance.ensureCanDownloadBundleApkOrOpenIap(
+      isAab: isAab,
+      appId: appId,
+    )) {
       return;
     }
 
@@ -550,7 +557,10 @@ class BuildAppController extends GetxController {
       downloadProgress.value = 1.0;
       buildState.value = launched ? BuildState.downloaded : BuildState.success;
       if (launched) {
-        await CreditGate.consumeAfterSuccess();
+        await BuildQuotaService.instance.recordSuccessfulDownload(
+          isAab: isAab,
+          appId: appId,
+        );
       } else {
         AppToast.info('download'.tr, description: 'could_not_open_download'.tr);
       }

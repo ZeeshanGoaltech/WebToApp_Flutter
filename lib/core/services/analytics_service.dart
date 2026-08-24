@@ -102,6 +102,14 @@ class AnalyticsService {
     await logScreenView('credits_pack');
   }
 
+  Future<void> logDownloadInappOpen({required bool isAab}) async {
+    await logEvent(
+      'download_inapp_open',
+      parameters: {'format': isAab ? 'aab' : 'apk'},
+    );
+    await logScreenView('download_inapp');
+  }
+
   Future<void> recordNonFatal(
     Object error,
     StackTrace stack, {
@@ -128,6 +136,7 @@ class AnalyticsService {
     if (path == AppRoutes.buildApp) return 'build_app';
     if (path == AppRoutes.iap) return 'iap_premium';
     if (path == AppRoutes.lifetimePremium) return 'lifetime_premium';
+    if (path == AppRoutes.downloadInApp) return 'download_inapp';
     if (path == AppRoutes.creditsPack) return 'credits_pack';
     return path.replaceAll('/', '_').replaceFirst(RegExp(r'^_'), '');
   }
