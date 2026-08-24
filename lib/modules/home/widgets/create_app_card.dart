@@ -37,125 +37,124 @@ class CreateAppCard extends StatelessWidget {
     final radius = Responsive.w(context, 22);
     final cardHeight = Responsive.w(context, 173.377);
 
-    return SizedBox(
-      height: cardHeight,
-      child: ClipRRect(
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: _openFreshCreateApp,
         borderRadius: BorderRadius.circular(radius),
-        child: Stack(
-          children: [
-            Positioned.fill(
-              child: DecoratedBox(
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                    transform: GradientRotation(156.127 * math.pi / 180),
-                    colors: const [
-                      AppColors.homeCardGradientStart,
-                      AppColors.homeCardGradientMid,
-                      AppColors.homeCardGradientEnd,
-                    ],
-                    stops: const [0.0, 0.6, 1.0],
-                  ),
-                ),
-              ),
-            ),
-            Positioned(
-              left: Responsive.w(context, 279.75),
-              top: Responsive.w(context, -32),
-              child: Container(
-                width: Responsive.w(context, 143.991),
-                height: Responsive.w(context, 143.991),
-                decoration: BoxDecoration(
-                  color: Colors.white.withValues(alpha: 0.1),
-                  shape: BoxShape.circle,
-                ),
-              ),
-            ),
-            Positioned(
-              left: Responsive.w(context, 303.75),
-              top: Responsive.w(context, 101.37),
-              child: Container(
-                width: Responsive.w(context, 95.988),
-                height: Responsive.w(context, 95.988),
-                decoration: BoxDecoration(
-                  color: Colors.white.withValues(alpha: 0.08),
-                  shape: BoxShape.circle,
-                ),
-              ),
-            ),
-            Positioned(
-              left: Responsive.w(context, 319.76),
-              top: Responsive.w(context, 15.99),
-              child: Container(
-                width: Responsive.w(context, 55.997),
-                height: Responsive.w(context, 55.997),
-                decoration: BoxDecoration(
-                  color: Colors.white.withValues(alpha: 0.15),
-                  borderRadius:
-                      BorderRadius.circular(Responsive.w(context, 16)),
-                ),
-                child: Center(
-                  child: FigmaSvgIcon(
-                    asset: AppAssets.cardRocket,
-                    size: Responsive.w(context, 27.99),
-                  ),
-                ),
-              ),
-            ),
-            Positioned(
-              left: Responsive.w(context, 24),
-              top: Responsive.w(context, 24),
-              width: Responsive.w(context, 344),
-              height: Responsive.w(context, 145),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Container(
-                    height: Responsive.w(context, 24.473),
-                    padding: EdgeInsets.symmetric(
-                      horizontal: Responsive.w(context, 10),
-                      vertical: Responsive.w(context, 4),
+        child: SizedBox(
+          height: cardHeight,
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(radius),
+            child: Stack(
+              children: [
+                Positioned.fill(
+                  child: DecoratedBox(
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                        transform: GradientRotation(156.127 * math.pi / 180),
+                        colors: const [
+                          AppColors.homeCardGradientStart,
+                          AppColors.homeCardGradientMid,
+                          AppColors.homeCardGradientEnd,
+                        ],
+                        stops: const [0.0, 0.6, 1.0],
+                      ),
                     ),
+                  ),
+                ),
+                Positioned(
+                  left: Responsive.w(context, 279.75),
+                  top: Responsive.w(context, -32),
+                  child: Container(
+                    width: Responsive.w(context, 143.991),
+                    height: Responsive.w(context, 143.991),
+                    decoration: BoxDecoration(
+                      color: Colors.white.withValues(alpha: 0.1),
+                      shape: BoxShape.circle,
+                    ),
+                  ),
+                ),
+                Positioned(
+                  left: Responsive.w(context, 303.75),
+                  top: Responsive.w(context, 101.37),
+                  child: Container(
+                    width: Responsive.w(context, 95.988),
+                    height: Responsive.w(context, 95.988),
+                    decoration: BoxDecoration(
+                      color: Colors.white.withValues(alpha: 0.08),
+                      shape: BoxShape.circle,
+                    ),
+                  ),
+                ),
+                Positioned(
+                  left: Responsive.w(context, 319.76),
+                  top: Responsive.w(context, 15.99),
+                  child: Container(
+                    width: Responsive.w(context, 55.997),
+                    height: Responsive.w(context, 55.997),
                     decoration: BoxDecoration(
                       color: Colors.white.withValues(alpha: 0.15),
-                      borderRadius: BorderRadius.circular(999),
-                    ),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        FigmaSvgIcon(
-                          asset: AppAssets.cardSparkle,
-                          size: Responsive.w(context, 11.983),
-                        ),
-                        SizedBox(width: Responsive.w(context, 6)),
-                        Text(
-                          'new_badge'.tr,
-                          style: AppTextStyles.homeCardBadge(context),
-                        ),
-                      ],
-                    ),
-                  ),
-                  SizedBox(height: Responsive.w(context, 12.46)),
-                  Text(
-                    'create_new_app'.tr,
-                    style: AppTextStyles.homeCardTitle(context),
-                  ),
-                  Padding(
-                    padding: EdgeInsets.only(top: Responsive.w(context, 4)),
-                    child: Text(
-                      'create_new_app_subtitle'.tr,
-                      style: AppTextStyles.homeCardSubtitle(context),
-                    ),
-                  ),
-                  SizedBox(height: Responsive.w(context, 8)),
-                  Material(
-                    color: Colors.transparent,
-                    child: InkWell(
-                      onTap: _openFreshCreateApp,
                       borderRadius:
-                          BorderRadius.circular(Responsive.w(context, 9)),
-                      child: Ink(
+                          BorderRadius.circular(Responsive.w(context, 16)),
+                    ),
+                    child: Center(
+                      child: FigmaSvgIcon(
+                        asset: AppAssets.cardRocket,
+                        size: Responsive.w(context, 27.99),
+                      ),
+                    ),
+                  ),
+                ),
+                Positioned(
+                  left: Responsive.w(context, 24),
+                  top: Responsive.w(context, 24),
+                  width: Responsive.w(context, 344),
+                  height: Responsive.w(context, 145),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Container(
+                        height: Responsive.w(context, 24.473),
+                        padding: EdgeInsets.symmetric(
+                          horizontal: Responsive.w(context, 10),
+                          vertical: Responsive.w(context, 4),
+                        ),
+                        decoration: BoxDecoration(
+                          color: Colors.white.withValues(alpha: 0.15),
+                          borderRadius: BorderRadius.circular(999),
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            FigmaSvgIcon(
+                              asset: AppAssets.cardSparkle,
+                              size: Responsive.w(context, 11.983),
+                            ),
+                            SizedBox(width: Responsive.w(context, 6)),
+                            Text(
+                              'new_badge'.tr,
+                              style: AppTextStyles.homeCardBadge(context),
+                            ),
+                          ],
+                        ),
+                      ),
+                      SizedBox(height: Responsive.w(context, 12.46)),
+                      Text(
+                        'create_new_app'.tr,
+                        style: AppTextStyles.homeCardTitle(context),
+                      ),
+                      Padding(
+                        padding: EdgeInsets.only(top: Responsive.w(context, 4)),
+                        child: Text(
+                          'create_new_app_subtitle'.tr,
+                          style: AppTextStyles.homeCardSubtitle(context),
+                        ),
+                      ),
+                      SizedBox(height: Responsive.w(context, 8)),
+                      Container(
                         width: Responsive.w(context, 104),
                         height: Responsive.w(context, 36),
                         decoration: BoxDecoration(
@@ -179,12 +178,12 @@ class CreateAppCard extends StatelessWidget {
                           ],
                         ),
                       ),
-                    ),
+                    ],
                   ),
-                ],
-              ),
+                ),
+              ],
             ),
-          ],
+          ),
         ),
       ),
     );
