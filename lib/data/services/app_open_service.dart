@@ -1,6 +1,5 @@
 import 'package:get/get.dart';
 import 'package:web_to_app/app/routes/app_routes.dart';
-import 'package:web_to_app/core/services/credit_gate.dart';
 import 'package:web_to_app/data/models/app_models.dart';
 import 'package:web_to_app/data/repositories/apps_repository.dart';
 import 'package:web_to_app/modules/create_app/bindings/create_app_binding.dart';
@@ -12,11 +11,8 @@ class AppOpenService extends GetxService {
 
   final AppsRepository _appsRepository;
 
+  /// Opens an existing app's build screen (no credit gate — gated on build actions).
   Future<void> openBuildScreen(AppSummary summary) async {
-    if (!await CreditGate.ensureOrOpenPaywall()) {
-      return;
-    }
-
     await _prepareExistingApp(summary);
 
     Get.find<BuildAppController>().buildAgain();

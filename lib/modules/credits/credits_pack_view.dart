@@ -488,7 +488,7 @@ class _CreditsPackViewState extends State<CreditsPackView> {
                   children: [
                     Text(
                       'credits_pack_card_title'.tr,
-                      maxLines: 1,
+                      maxLines: 2,
                       overflow: TextOverflow.ellipsis,
                       style: GoogleFonts.inter(
                         color: _text,
@@ -500,7 +500,7 @@ class _CreditsPackViewState extends State<CreditsPackView> {
                     const SizedBox(height: 4),
                     Text(
                       'credits_pack_card_desc'.tr,
-                      maxLines: 1,
+                      maxLines: 3,
                       overflow: TextOverflow.ellipsis,
                       style: GoogleFonts.inter(
                         color: _subText,
