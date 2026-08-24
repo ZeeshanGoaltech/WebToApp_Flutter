@@ -7,10 +7,14 @@ import 'package:share_plus/share_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:web_to_app/app/routes/app_routes.dart';
 import 'package:web_to_app/core/api/api_exception.dart';
+import 'package:web_to_app/core/navigation/auth_redirect.dart';
 import 'package:web_to_app/core/ads/ad_placements.dart';
+import 'package:web_to_app/core/ads/app_open_ad_manager.dart';
 import 'package:web_to_app/core/ads/interstitial_ad_trigger.dart';
+import 'package:web_to_app/core/services/build_login_gate.dart';
 import 'package:web_to_app/core/services/credit_gate.dart';
 import 'package:web_to_app/core/services/session_service.dart';
+import 'package:web_to_app/core/services/token_storage.dart';
 import 'package:web_to_app/core/utils/app_error_handler.dart';
 import 'package:web_to_app/core/utils/app_toast.dart';
 import 'package:web_to_app/data/models/build_models.dart';
@@ -250,6 +254,10 @@ class BuildAppController extends GetxController {
   }
 
   Future<void> startBuild() async {
+    if (!await BuildLoginGate.ensureForBuild(retry: startBuild)) {
+      return;
+    }
+
     if (!await CreditGate.ensureOrOpenPaywall()) {
       return;
     }
@@ -331,17 +339,22 @@ class BuildAppController extends GetxController {
   Future<void> _handleSessionExpired() async {
     _pollTimer?.cancel();
     _stopLogRetry();
-    buildState.value = BuildState.ready;
-    buildProgress.value = 0;
     buildLogs.add(r'$ Session expired. Please sign in again.');
     buildLogs.refresh();
+
+    final activeBuildId = buildId.value;
+    AuthRedirect.setPendingAction(() async {
+      if (activeBuildId != null) {
+        _startPolling(activeBuildId);
+      }
+    });
 
     await Get.find<SessionService>().setGuest();
     AppToast.error(
       'Session expired',
       description: 'Sign in again to continue checking this build.',
     );
-    Get.offAllNamed(AppRoutes.auth);
+    await Get.toNamed(AppRoutes.auth);
   }
 
   void _applyBuild(BuildDto build) {
@@ -376,6 +389,7 @@ class BuildAppController extends GetxController {
         if (statusChanged) {
           buildLogs.add(r'✓ Build successful!');
           unawaited(_consumeCreditOnBuildSuccess(build.id));
+          unawaited(_markFirstBuildComplete());
         }
       case 'failed':
         if (statusChanged) {
@@ -446,6 +460,10 @@ class BuildAppController extends GetxController {
     _queueEstimateEndsAt = null;
     _queueEstimateTotalSeconds = 0;
     estimatedWaitRemainingSeconds.value = 0;
+  }
+
+  Future<void> _markFirstBuildComplete() async {
+    await Get.find<TokenStorage>().markFirstBuildComplete();
   }
 
   Future<void> _consumeCreditOnBuildSuccess(String id) async {
@@ -589,6 +607,10 @@ class BuildAppController extends GetxController {
 
   /// Build Again button — need credits available, then interstitial, then reset.
   Future<void> onBuildAgainTapped() async {
+    if (!await BuildLoginGate.ensureForBuild(retry: onBuildAgainTapped)) {
+      return;
+    }
+
     if (!await CreditGate.ensureOrOpenPaywall()) {
       return;
     }
@@ -635,6 +657,7 @@ class BuildAppController extends GetxController {
 
   void backToHome() {
     isLeavingBuildScreen.value = true;
+    AppOpenAdManager.instance.blockNextResume();
     Get.offAllNamed(AppRoutes.home);
   }
 

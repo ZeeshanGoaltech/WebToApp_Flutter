@@ -23,6 +23,15 @@ class SessionService extends GetxService {
     return PremiumService.isPremiumCached;
   }
 
+  Future<void> setGuestAuthResult(AuthResult result) async {
+    isGuest.value = true;
+    await Get.find<TokenStorage>().setGuestMode(true);
+    final enriched = _enrichUser(result.user);
+    user.value = enriched;
+    await Get.find<AuthRepository>().persistTokens(result.tokens);
+    await _persistProfile(enriched);
+  }
+
   Future<void> setAuthResult(
     AuthResult result, {
     String? displayName,

@@ -195,15 +195,17 @@ class _AuthCard extends GetView<AuthController> {
                   : controller.onPrimaryAction,
             ),
           ),
-          SizedBox(height: Responsive.w(context, 18)),
-          Obx(
-            () => AuthGuestButton(
-              isLoading: controller.isGuestLoading.value,
-              onPressed: controller.isGuestLoading.value
-                  ? null
-                  : controller.onGuestContinue,
+          if (controller.canContinueAsGuest) ...[
+            SizedBox(height: Responsive.w(context, 18)),
+            Obx(
+              () => AuthGuestButton(
+                isLoading: controller.isGuestLoading.value,
+                onPressed: controller.isGuestLoading.value
+                    ? null
+                    : controller.onGuestContinue,
+              ),
             ),
-          ),
+          ],
         ],
       ),
     );

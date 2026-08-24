@@ -4,6 +4,7 @@ import 'package:web_to_app/app/routes/app_routes.dart';
 import 'package:web_to_app/core/localization/l10n.dart';
 import 'package:web_to_app/core/api/api_exception.dart';
 import 'package:web_to_app/core/services/credit_gate.dart';
+import 'package:web_to_app/core/services/build_login_gate.dart';
 import 'package:web_to_app/core/utils/app_error_handler.dart';
 import 'package:web_to_app/core/utils/app_toast.dart';
 import 'package:web_to_app/data/services/app_sync_service.dart';
@@ -107,6 +108,10 @@ class CreateAppController extends GetxController {
 
   Future<void> _saveAndOpenBuild() async {
     if (!await CreditGate.ensureOrOpenPaywall()) {
+      return;
+    }
+
+    if (!await BuildLoginGate.ensureForBuild(retry: _saveAndOpenBuild)) {
       return;
     }
 

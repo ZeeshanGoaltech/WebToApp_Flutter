@@ -5,6 +5,7 @@ import 'package:get/get.dart';
 import 'package:web_to_app/app/routes/app_routes.dart';
 import 'package:web_to_app/core/ads/ad_placements.dart';
 import 'package:web_to_app/core/ads/widgets/medium_native_ad_widget.dart';
+import 'package:web_to_app/core/services/build_login_gate.dart';
 import 'package:web_to_app/core/constants/help_guide_assets.dart';
 import 'package:web_to_app/core/theme/app_colors.dart';
 import 'package:web_to_app/core/theme/app_text_styles.dart';
@@ -17,7 +18,16 @@ import 'package:web_to_app/modules/home/controllers/home_controller.dart';
 import 'package:web_to_app/modules/home/data/help_guide_steps.dart';
 
 /// Figma Help & Guide screen (node 5:2444).
-void _openFreshCreateApp() {
+Future<void> _openFreshCreateApp() async {
+  if (!await BuildLoginGate.ensureForNewApp(
+    openCreateApp: _openFreshCreateAppInternal,
+  )) {
+    return;
+  }
+  await _openFreshCreateAppInternal();
+}
+
+Future<void> _openFreshCreateAppInternal() async {
   if (Get.isRegistered<CreateAppController>()) {
     Get.find<CreateAppController>().resetForNewApp();
   }

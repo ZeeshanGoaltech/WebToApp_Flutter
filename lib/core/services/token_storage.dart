@@ -14,10 +14,25 @@ class TokenStorage {
   static const _onboardingCompleteKey = 'onboarding_complete';
   static const _guestKey = 'guest_mode';
   static const _splashInter1stShownKey = 'splash_inter_1st_shown';
+  static const _firstBuildCompleteKey = 'first_build_complete';
+  static const _deviceIdKey = 'device_id';
+  static const _guestEmailKey = 'guest_email';
+  static const _guestPasswordKey = 'guest_password';
 
   static Future<TokenStorage> create() async {
     final prefs = await SharedPreferences.getInstance();
-    return TokenStorage(prefs);
+    final storage = TokenStorage(prefs);
+    await storage._ensureDeviceId();
+    return storage;
+  }
+
+  Future<void> _ensureDeviceId() async {
+    final existing = _prefs.getString(_deviceIdKey);
+    if (existing != null && existing.isNotEmpty) return;
+
+    final generated =
+        '${DateTime.now().microsecondsSinceEpoch}_${identityHashCode(_prefs)}';
+    await _prefs.setString(_deviceIdKey, generated);
   }
 
   String? get accessToken => _prefs.getString(_accessKey);
@@ -40,6 +55,18 @@ class TokenStorage {
 
   bool get isGuestMode => _prefs.getBool(_guestKey) ?? false;
 
+  bool get hasCompletedFirstBuild =>
+      _prefs.getBool(_firstBuildCompleteKey) ?? false;
+
+  String? get guestEmail => _prefs.getString(_guestEmailKey);
+  String? get guestPassword => _prefs.getString(_guestPasswordKey);
+
+  String get deviceId {
+    final existing = _prefs.getString(_deviceIdKey);
+    if (existing != null && existing.isNotEmpty) return existing;
+    return '${DateTime.now().microsecondsSinceEpoch}_${identityHashCode(_prefs)}';
+  }
+
   Future<void> markOnboardingComplete() =>
       _prefs.setBool(_onboardingCompleteKey, true);
 
@@ -49,6 +76,17 @@ class TokenStorage {
 
   Future<void> markSplashInter1stShown() =>
       _prefs.setBool(_splashInter1stShownKey, true);
+
+  Future<void> markFirstBuildComplete() =>
+      _prefs.setBool(_firstBuildCompleteKey, true);
+
+  Future<void> saveGuestCredentials({
+    required String email,
+    required String password,
+  }) async {
+    await _prefs.setString(_guestEmailKey, email);
+    await _prefs.setString(_guestPasswordKey, password);
+  }
 
   Future<void> setGuestMode(bool value) async {
     if (value) {

@@ -4,6 +4,7 @@ import 'package:web_to_app/core/api/api_client.dart';
 import 'package:web_to_app/core/services/language_service.dart';
 import 'package:web_to_app/core/services/push_notification_service.dart';
 import 'package:web_to_app/core/services/credit_service.dart';
+import 'package:web_to_app/core/services/guest_auth_service.dart';
 import 'package:web_to_app/core/services/premium_service.dart';
 import 'package:web_to_app/core/services/session_service.dart';
 import 'package:web_to_app/core/services/token_storage.dart';
@@ -44,6 +45,14 @@ class InitialBinding extends Bindings {
     Get.put<PushRepository>(PushRepository(apiClient), permanent: true);
 
     final session = Get.put<SessionService>(SessionService(), permanent: true);
+    Get.put<GuestAuthService>(
+      GuestAuthService(
+        Get.find<AuthRepository>(),
+        session,
+        tokenStorage,
+      ),
+      permanent: true,
+    );
 
     PremiumService.onPremiumChanged = () {
       session.notifyIapPremiumChanged();

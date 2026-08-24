@@ -27,10 +27,17 @@ class AppOpenAdManager {
   DateTime? _lastDismissTime;
   DateTime? _lastShownTime;
   DateTime? _lastInterstitialDismissTime;
+  DateTime? _lastExternalActionTime;
 
   bool _isShowing = false;
   bool _isResuming = false;
   bool blockAppOpenAds = false;
+
+  /// Block app open ad on next resume after specific user actions:
+  /// rate us dialog, privacy policy, terms, share app, generate APK screen.
+  void blockNextResume() {
+    _lastExternalActionTime = DateTime.now();
+  }
 
   /// Set only on real [AppLifecycleState.paused] (Home / app switch).
   bool _wasBackgrounded = false;
@@ -117,7 +124,8 @@ class AppOpenAdManager {
         route == AppRoutes.creditsPack ||
         route == AppRoutes.intro ||
         route == AppRoutes.language ||
-        route == AppRoutes.auth) {
+        route == AppRoutes.auth ||
+        route == AppRoutes.buildApp) {
       developer.log('[AppOpen] skip — route=$route');
       return;
     }
@@ -151,6 +159,13 @@ class AppOpenAdManager {
         now.difference(_lastInterstitialDismissTime!) <
             const Duration(seconds: 5)) {
       developer.log('[AppOpen] skip — post-interstitial cooldown');
+      return;
+    }
+
+    if (_lastExternalActionTime != null &&
+        now.difference(_lastExternalActionTime!) <
+            const Duration(seconds: 30)) {
+      developer.log('[AppOpen] skip — post-external-action cooldown');
       return;
     }
 

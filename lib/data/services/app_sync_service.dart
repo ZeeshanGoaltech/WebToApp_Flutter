@@ -1,6 +1,8 @@
 import 'package:get/get.dart';
 import 'package:web_to_app/core/api/api_exception.dart';
+import 'package:web_to_app/core/services/guest_auth_service.dart';
 import 'package:web_to_app/core/services/session_service.dart';
+import 'package:web_to_app/core/services/token_storage.dart';
 import 'package:web_to_app/data/mappers/app_config_mapper.dart';
 import 'package:web_to_app/data/repositories/apps_repository.dart';
 import 'package:web_to_app/data/repositories/assets_repository.dart';
@@ -18,12 +20,7 @@ class AppSyncService extends GetxService {
   final SessionService _sessionService;
 
   Future<AppSyncResult> persistWizard(CreateAppController controller) async {
-    if (!_sessionService.isAuthenticated) {
-      throw ApiException(
-        code: 'unauthenticated',
-        message: 'Sign in to save and build your app.',
-      );
-    }
+    await _ensureApiAccess();
 
     String appId = controller.appId.value ?? '';
     final slideAssetIds = <String, String>{};
@@ -100,6 +97,21 @@ class AppSyncService extends GetxService {
       appId: appId,
       appVersionId: version.id,
       configVersion: updated.configVersion,
+    );
+  }
+
+  Future<void> _ensureApiAccess() async {
+    if (_sessionService.isAuthenticated) return;
+
+    final storage = Get.find<TokenStorage>();
+    if (_sessionService.isGuest.value && !storage.hasCompletedFirstBuild) {
+      await Get.find<GuestAuthService>().ensureGuestApiSession();
+      return;
+    }
+
+    throw ApiException(
+      code: 'unauthenticated',
+      message: 'Sign in to save and build your app.',
     );
   }
 }

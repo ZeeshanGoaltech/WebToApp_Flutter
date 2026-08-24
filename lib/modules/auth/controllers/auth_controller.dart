@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:web_to_app/core/api/api_exception.dart';
+import 'package:web_to_app/core/navigation/auth_redirect.dart';
 import 'package:web_to_app/core/navigation/launch_flow.dart';
 import 'package:web_to_app/core/services/session_service.dart';
+import 'package:web_to_app/core/services/token_storage.dart';
 import 'package:web_to_app/core/utils/app_error_handler.dart';
 import 'package:web_to_app/core/utils/app_toast.dart';
 import 'package:web_to_app/data/models/auth_models.dart';
@@ -26,6 +28,11 @@ class AuthController extends GetxController {
   final formFilled = false.obs;
 
   bool get isSignIn => activeTab.value == AuthTab.signIn;
+
+  bool get canContinueAsGuest {
+    if (AuthRedirect.hasPendingAction) return false;
+    return !Get.find<TokenStorage>().hasCompletedFirstBuild;
+  }
 
   @override
   void onInit() {
@@ -120,7 +127,7 @@ class AuthController extends GetxController {
 
       await session.setAuthResult(result);
       await session.refreshProfile();
-      LaunchFlow.goHome();
+      await _completeAuthNavigation();
     } on ApiException catch (e) {
       await AppErrorHandler.show(
         e,
@@ -130,6 +137,18 @@ class AuthController extends GetxController {
     } finally {
       isLoading.value = false;
     }
+  }
+
+  Future<void> _completeAuthNavigation() async {
+    final pending = AuthRedirect.takePendingAction();
+    if (pending != null) {
+      if (Get.key.currentState?.canPop() ?? false) {
+        Get.back();
+      }
+      await pending();
+      return;
+    }
+    LaunchFlow.goHome();
   }
 
   bool _validateAuthForm({required String email, required String password}) {

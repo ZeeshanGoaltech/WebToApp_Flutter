@@ -2,6 +2,7 @@ import 'package:get/get.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:web_to_app/app/routes/app_routes.dart';
+import 'package:web_to_app/core/ads/app_open_ad_manager.dart';
 import 'package:web_to_app/core/constants/app_info.dart';
 import 'package:web_to_app/core/navigation/launch_flow.dart';
 import 'package:web_to_app/core/services/session_service.dart';
@@ -32,10 +33,12 @@ class SettingsController extends GetxController {
     final context = Get.context;
     if (context == null) return;
 
+    AppOpenAdManager.instance.blockNextResume();
     final rating = await showRateUsDialog(
       context,
       initial: appRating.value > 0 ? appRating.value : 5,
     );
+    AppOpenAdManager.instance.blockNextResume();
     if (rating == null) return;
 
     appRating.value = rating;
@@ -70,15 +73,19 @@ class SettingsController extends GetxController {
       _openExternalUrl(AppInfo.termsAndConditionsUrl);
 
   Future<void> shareApp() async {
+    AppOpenAdManager.instance.blockNextResume();
     final text = '${AppInfo.name}\n${AppInfo.playStoreUrl}';
     await SharePlus.instance.share(ShareParams(text: text));
+    AppOpenAdManager.instance.blockNextResume();
   }
 
   Future<void> _openExternalUrl(String url) async {
+    AppOpenAdManager.instance.blockNextResume();
     final opened = await launchUrl(
       Uri.parse(url),
       mode: LaunchMode.externalApplication,
     );
+    AppOpenAdManager.instance.blockNextResume();
     if (!opened) {
       AppToast.info('request_failed'.tr, description: url);
     }
