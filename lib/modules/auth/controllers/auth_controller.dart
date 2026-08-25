@@ -32,8 +32,9 @@ class AuthController extends GetxController {
   bool get isSignIn => activeTab.value == AuthTab.signIn;
 
   bool get canContinueAsGuest {
+    // Hide guest CTA when user was sent here specifically to unlock APK generate.
     if (AuthRedirect.hasPendingAction) return false;
-    return !Get.find<TokenStorage>().hasCompletedFirstBuild;
+    return true;
   }
 
   @override
@@ -117,10 +118,19 @@ class AuthController extends GetxController {
       final authRepo = Get.find<AuthRepository>();
       final session = Get.find<SessionService>();
       final storage = Get.find<TokenStorage>();
-      final guestRefreshToken =
-          session.isGuest.value && storage.hasTokens
-              ? storage.refreshToken
-              : null;
+      final wasGuest = session.isGuest.value && storage.hasTokens;
+      final guestRefreshToken = wasGuest ? storage.refreshToken : null;
+
+      List<GuestAppExport> exportedProjects = const [];
+      if (wasGuest) {
+        try {
+          exportedProjects =
+              await Get.find<GuestMigrationService>().exportGuestProjects();
+        } catch (_) {
+          exportedProjects = const [];
+        }
+      }
+
       final AuthResult result;
 
       if (isSignIn) {
@@ -133,15 +143,28 @@ class AuthController extends GetxController {
       }
 
       await session.setAuthResult(result);
-      if (guestRefreshToken != null) {
+
+      if (wasGuest) {
         try {
-          await Get.find<GuestMigrationService>().migrateGuestApps(
+          final migrated = await Get.find<GuestMigrationService>()
+              .migrateGuestApps(
             guestRefreshToken: guestRefreshToken,
+            exportedProjects: exportedProjects,
           );
+          if (migrated != 0) {
+            AppToast.success(
+              'guest_projects_migrated'.tr,
+              description: migrated > 0
+                  ? 'guest_projects_migrated_desc'
+                      .trParams({'count': '$migrated'})
+                  : 'guest_login_benefit_projects'.tr,
+            );
+          }
         } catch (_) {
-          // Migration is best-effort until backend merge is available.
+          // Migration is best-effort; user can still use the signed-in account.
         }
       }
+
       await session.refreshProfile();
       if (Get.isRegistered<HomeController>()) {
         await Get.find<HomeController>().loadApps();

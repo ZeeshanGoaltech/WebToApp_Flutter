@@ -55,7 +55,10 @@ class InitialBinding extends Bindings {
       permanent: true,
     );
     Get.put<GuestMigrationService>(
-      GuestMigrationService(Get.find<AuthRepository>()),
+      GuestMigrationService(
+        Get.find<AuthRepository>(),
+        Get.find<AppsRepository>(),
+      ),
       permanent: true,
     );
 

@@ -3,8 +3,9 @@ import 'package:get/get.dart';
 import 'package:web_to_app/app/routes/app_routes.dart';
 import 'package:web_to_app/core/localization/l10n.dart';
 import 'package:web_to_app/core/api/api_exception.dart';
-import 'package:web_to_app/core/services/credit_gate.dart';
 import 'package:web_to_app/core/services/build_login_gate.dart';
+import 'package:web_to_app/core/services/guest_auth_service.dart';
+import 'package:web_to_app/core/services/session_service.dart';
 import 'package:web_to_app/core/utils/app_error_handler.dart';
 import 'package:web_to_app/core/utils/app_toast.dart';
 import 'package:web_to_app/data/services/app_sync_service.dart';
@@ -107,12 +108,14 @@ class CreateAppController extends GetxController {
   }
 
   Future<void> _saveAndOpenBuild() async {
-    if (!await CreditGate.ensureOrOpenPaywall()) {
-      return;
-    }
-
-    if (!await BuildLoginGate.ensureForBuild(retry: _saveAndOpenBuild)) {
-      return;
+    // Guests may create/save unlimited projects. APK generate is gated later.
+    final session = Get.find<SessionService>();
+    if (session.isGuest.value) {
+      await Get.find<GuestAuthService>().ensureGuestApiSession();
+    } else if (!session.isAuthenticated) {
+      if (!await BuildLoginGate.ensureForBuild(retry: _saveAndOpenBuild)) {
+        return;
+      }
     }
 
     isSaving.value = true;
