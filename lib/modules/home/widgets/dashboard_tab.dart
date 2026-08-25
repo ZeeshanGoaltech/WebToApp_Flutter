@@ -8,7 +8,6 @@ import 'package:web_to_app/core/services/session_service.dart';
 import 'package:web_to_app/core/theme/app_colors.dart';
 import 'package:web_to_app/core/theme/app_text_styles.dart';
 import 'package:web_to_app/core/utils/responsive.dart';
-import 'package:web_to_app/core/widgets/credits_badge_button.dart';
 import 'package:web_to_app/core/widgets/figma_svg_icon.dart';
 import 'package:web_to_app/modules/home/widgets/create_app_card.dart';
 import 'package:web_to_app/modules/home/widgets/recent_section.dart';
@@ -44,7 +43,6 @@ class DashboardTab extends StatelessWidget {
                       style: AppTextStyles.homeHeaderTitle(context),
                     ),
                   ),
-                  const CreditsBadgeButton(),
                   const _HomeProIcon(),
                 ],
               ),
