@@ -15,7 +15,7 @@ import 'package:web_to_app/core/services/premium_service.dart';
 import 'package:web_to_app/core/utils/app_toast.dart';
 
 const String kDownloadInappMissingPrice = '--';
-const Duration kDownloadInappCloseRevealDelay = Duration(seconds: 3);
+const Duration kDownloadInappCloseRevealDelay = Duration(seconds: 2);
 
 /// Lifetime-style paywall for Download APK / AAB.
 ///

@@ -97,35 +97,40 @@ class _IapCanvas extends StatelessWidget {
   }
 }
 
-class _CloseButton extends StatelessWidget {
+class _CloseButton extends GetView<IapController> {
   const _CloseButton();
 
   @override
   Widget build(BuildContext context) {
-    return Positioned(
-      top: 19,
-      left: 11,
-      child: Material(
-        color: Colors.transparent,
-        child: InkWell(
-          onTap: LaunchFlow.completeIap,
-          customBorder: const CircleBorder(),
-          child: Container(
-            width: 28,
-            height: 28,
-            decoration: const BoxDecoration(
-              color: AppColors.iapCloseBg,
-              shape: BoxShape.circle,
-            ),
-            alignment: Alignment.center,
-            child: const FigmaSvgIcon(
-              asset: AppAssets.iapCloseIcon,
-              size: 20,
+    return Obx(() {
+      if (!controller.showCloseButton.value) {
+        return const SizedBox.shrink();
+      }
+      return Positioned(
+        top: 19,
+        left: 11,
+        child: Material(
+          color: Colors.transparent,
+          child: InkWell(
+            onTap: LaunchFlow.completeIap,
+            customBorder: const CircleBorder(),
+            child: Container(
+              width: 28,
+              height: 28,
+              decoration: const BoxDecoration(
+                color: AppColors.iapCloseBg,
+                shape: BoxShape.circle,
+              ),
+              alignment: Alignment.center,
+              child: const FigmaSvgIcon(
+                asset: AppAssets.iapCloseIcon,
+                size: 20,
+              ),
             ),
           ),
         ),
-      ),
-    );
+      );
+    });
   }
 }
 

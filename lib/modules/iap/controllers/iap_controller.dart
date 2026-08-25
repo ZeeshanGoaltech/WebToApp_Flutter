@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/foundation.dart';
 import 'package:get/get.dart';
 import 'package:in_app_purchase/in_app_purchase.dart';
@@ -16,11 +18,14 @@ import 'package:web_to_app/core/utils/app_toast.dart';
 /// iOS fallback (no monthly): weekly (trial CTA) → yearly → lifetime.
 enum IapPlan { yearly, monthly, weekly, lifetime }
 
+const Duration kIapCloseRevealDelay = Duration(seconds: 2);
+
 class IapController extends GetxController {
   final isPurchasing = false.obs;
   final isRestoring = false.obs;
   final isLoadingProducts = true.obs;
   final selectedPlan = IapPlan.yearly.obs;
+  final showCloseButton = false.obs;
 
   final weeklyPrice = RxnString();
   final monthlyPrice = RxnString();
@@ -31,6 +36,7 @@ class IapController extends GetxController {
   final weeklyHasTrial = false.obs;
 
   PremiumService? _premiumService;
+  Timer? _closeRevealTimer;
 
   /// True from buy tap until a terminal purchase status (or failed launch).
   /// Kept separate from [isPurchasing] because Android clears the spinner when
@@ -88,6 +94,9 @@ class IapController extends GetxController {
       fromLaunch: LaunchFlow.iapOpenedFromLaunch,
       fromSettings: !LaunchFlow.iapOpenedFromLaunch,
     );
+    _closeRevealTimer = Timer(kIapCloseRevealDelay, () {
+      showCloseButton.value = true;
+    });
     _initPremium();
   }
 
@@ -262,6 +271,7 @@ class IapController extends GetxController {
 
   @override
   void onClose() {
+    _closeRevealTimer?.cancel();
     AdPresentationGate.markIapClosed();
     AdPresentationGate.reconcileIapVisibility();
     AppOpenAdManager.instance.blockAppOpenAds =

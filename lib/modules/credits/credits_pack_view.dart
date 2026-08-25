@@ -69,7 +69,7 @@ class _CreditsPackViewState extends State<CreditsPackView> {
     _creditsWhenOpened = CreditService.instance.paidCredits.value;
     CreditService.instance.paidCredits.addListener(_onCreditsChanged);
     unawaited(_loadPrice());
-    _closeRevealTimer = Timer(const Duration(seconds: 3), () {
+    _closeRevealTimer = Timer(const Duration(seconds: 2), () {
       if (mounted) setState(() => _showCloseButton = true);
     });
   }

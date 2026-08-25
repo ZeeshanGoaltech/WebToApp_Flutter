@@ -15,7 +15,7 @@ import 'package:web_to_app/core/services/session_service.dart';
 import 'package:web_to_app/core/utils/app_toast.dart';
 
 const String kMissingStorePrice = '--';
-const Duration kLifetimeCloseRevealDelay = Duration(seconds: 3);
+const Duration kLifetimeCloseRevealDelay = Duration(seconds: 2);
 
 class LifetimePremiumController extends GetxController {
   final isPurchasing = false.obs;
