@@ -1,0 +1,11 @@
+{
+  "rate_dialog_feedback": "Feedback",
+  "rate_dialog_later": "Forse più tardi",
+  "rate_dialog_rate_now": "Valuta ora",
+  "rate_dialog_subtitle": "Aiutaci a migliorare Web to App per sviluppatori come te.",
+  "rate_dialog_thanks": "Grazie per la valutazione!",
+  "rate_dialog_store_unavailable": "Impossibile aprire la scheda dello store.",
+  "complete_current_slide_to_add": "Completa la slide corrente prima di aggiungerne un'altra",
+  "err_slide_description_required": "La descrizione della slide è obbligatoria",
+  "err_slide_image_required": "L'immagine della slide è obbligatoria"
+}

@@ -1,0 +1,11 @@
+{
+  "rate_dialog_feedback": "Відгук",
+  "rate_dialog_later": "Можливо пізніше",
+  "rate_dialog_rate_now": "Оцінити зараз",
+  "rate_dialog_subtitle": "Допоможіть нам покращити Web to App для творців, як ви.",
+  "rate_dialog_thanks": "Дякуємо за оцінку!",
+  "rate_dialog_store_unavailable": "Не вдалося відкрити сторінку в магазині.",
+  "complete_current_slide_to_add": "Завершіть поточний слайд, перш ніж додавати інший",
+  "err_slide_description_required": "Опис слайда обов’язковий",
+  "err_slide_image_required": "Зображення слайда обов’язкове"
+}

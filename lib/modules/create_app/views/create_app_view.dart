@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:web_to_app/core/localization/l10n.dart';
 import 'package:web_to_app/core/theme/app_colors.dart';
 import 'package:web_to_app/modules/create_app/controllers/create_app_controller.dart';
 import 'package:web_to_app/modules/create_app/widgets/shell/create_app_bottom_bar.dart';
@@ -29,7 +30,7 @@ class CreateAppView extends GetView<CreateAppController> {
             children: [
               CreateAppHeader(
                 title: controller.title,
-                stepLabel: '${controller.currentStep.value + 1} of 6',
+                stepLabel: L10n.stepOf(controller.currentStep.value + 1, 6),
                 onBack: controller.back,
               ),
               CreateAppProgressBar(

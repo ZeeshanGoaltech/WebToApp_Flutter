@@ -9,6 +9,9 @@ class L10n {
   static String slideOf(int current, int total) =>
       'slide_of'.trParams({'current': '$current', 'total': '$total'});
 
+  static String stepOf(int current, int total) =>
+      'step_of'.trParams({'current': '$current', 'total': '$total'});
+
   static String navTabLabel(NavTabType type) => switch (type) {
     NavTabType.home => 'tab_home'.tr,
     NavTabType.privacyPolicy => 'tab_privacy_policy'.tr,

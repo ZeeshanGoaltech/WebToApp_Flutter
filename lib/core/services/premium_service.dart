@@ -11,6 +11,7 @@ import 'package:in_app_purchase_storekit/in_app_purchase_storekit.dart';
 import 'package:in_app_purchase_storekit/store_kit_2_wrappers.dart';
 import 'package:in_app_purchase_storekit/store_kit_wrappers.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:get/get.dart';
 import 'package:web_to_app/core/services/credit_service.dart';
 import 'package:web_to_app/core/services/download_token_service.dart';
 import 'package:web_to_app/core/services/iap_product_id_resolver.dart';
@@ -395,23 +396,22 @@ class PremiumService {
         errorMessage.contains('billing is not available') ||
         errorCode == 'BILLING_UNAVAILABLE' ||
         errorCode == 'DEVELOPER_ERROR') {
-      return 'Billing not configured. Upload the app to Play Console and '
-          'configure the in-app products.';
+      return 'billing_not_configured'.tr;
     }
 
     if (errorMessage.contains('product not found') ||
         errorCode == 'ITEM_UNAVAILABLE') {
-      return 'Product not found in the store.';
+      return 'product_not_found_store'.tr;
     }
 
     if (errorMessage.contains('network') || errorCode == 'NETWORK_ERROR') {
-      return 'Network error. Please check your connection and try again.';
+      return 'network_error_retry'.tr;
     }
 
     if (errorCode == 'USER_CANCELED' ||
         errorCode == '2' ||
         errorCode == '15') {
-      return 'Purchase cancelled.';
+      return 'purchase_cancelled'.tr;
     }
 
     return error.message;

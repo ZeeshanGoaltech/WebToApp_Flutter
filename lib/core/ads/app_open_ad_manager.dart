@@ -127,6 +127,7 @@ class AppOpenAdManager {
         route == AppRoutes.intro ||
         route == AppRoutes.language ||
         route == AppRoutes.auth ||
+        route == AppRoutes.createApp ||
         route == AppRoutes.buildApp) {
       developer.log('[AppOpen] skip — route=$route');
       return;

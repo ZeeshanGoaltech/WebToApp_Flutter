@@ -86,7 +86,7 @@ class AppSyncService extends GetxService {
     if (version == null) {
       throw ApiException(
         code: 'internal_error',
-        message: 'Could not resolve app version after save.',
+        message: 'could_not_resolve_version'.tr,
       );
     }
 
@@ -109,7 +109,7 @@ class AppSyncService extends GetxService {
 
     throw ApiException(
       code: 'unauthenticated',
-      message: 'Sign in to save and build your app.',
+      message: 'sign_in_to_save_build'.tr,
     );
   }
 }

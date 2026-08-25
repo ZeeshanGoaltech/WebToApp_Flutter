@@ -404,8 +404,8 @@ class BuildAppController extends GetxController {
 
     await Get.find<SessionService>().setGuest();
     AppToast.error(
-      'Session expired',
-      description: 'Sign in again to continue checking this build.',
+      'session_expired'.tr,
+      description: 'sign_in_again_build'.tr,
     );
     await Get.toNamed(AppRoutes.auth);
   }
@@ -669,20 +669,24 @@ class BuildAppController extends GetxController {
       );
       final appName = Get.find<CreateAppController>().appNameController.text
           .trim();
-      final title = appName.isEmpty ? 'Your app' : appName;
+      final title = appName.isEmpty ? 'your_app'.tr : appName;
       final label = artifactLabel(format);
 
       await SharePlus.instance.share(
         ShareParams(
           title: title,
           subject: title,
-          text: 'Download $title $label:\n${artifact.downloadUrl}',
+          text: 'share_download_text'.trParams({
+            'title': title,
+            'label': label,
+            'url': artifact.downloadUrl,
+          }),
         ),
       );
     } on ApiException catch (e) {
-      await AppErrorHandler.show(e, title: 'Could not share app');
+      await AppErrorHandler.show(e, title: 'could_not_share_app'.tr);
     } catch (e) {
-      await AppErrorHandler.show(e, title: 'Could not share app');
+      await AppErrorHandler.show(e, title: 'could_not_share_app'.tr);
     } finally {
       isSharingApp.value = false;
       sharingFormat.value = null;

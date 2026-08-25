@@ -1,0 +1,11 @@
+{
+  "rate_dialog_feedback": "피드백",
+  "rate_dialog_later": "나중에",
+  "rate_dialog_rate_now": "지금 평가하기",
+  "rate_dialog_subtitle": "여러분과 같은 제작자를 위해 Web to App을 개선할 수 있도록 도와주세요.",
+  "rate_dialog_thanks": "평가해 주셔서 감사합니다!",
+  "rate_dialog_store_unavailable": "스토어 페이지를 열 수 없습니다.",
+  "complete_current_slide_to_add": "다른 슬라이드를 추가하기 전에 현재 슬라이드를 완료해 주세요",
+  "err_slide_description_required": "슬라이드 설명이 필요합니다",
+  "err_slide_image_required": "슬라이드 이미지가 필요합니다"
+}

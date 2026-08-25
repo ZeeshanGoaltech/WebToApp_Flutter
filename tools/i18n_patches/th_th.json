@@ -1,0 +1,11 @@
+{
+  "rate_dialog_feedback": "ความคิดเห็น",
+  "rate_dialog_later": "ไว้ทีหลัง",
+  "rate_dialog_rate_now": "ให้คะแนนเลย",
+  "rate_dialog_subtitle": "ช่วยเราพัฒนา Web to App สำหรับผู้สร้างอย่างคุณ",
+  "rate_dialog_thanks": "ขอบคุณที่ให้คะแนนเรา!",
+  "rate_dialog_store_unavailable": "ไม่สามารถเปิดหน้าร้านค้าได้",
+  "complete_current_slide_to_add": "โปรดทำสไลด์ปัจจุบันให้เสร็จก่อนเพิ่มสไลด์ใหม่",
+  "err_slide_description_required": "ต้องระบุคำอธิบายสไลด์",
+  "err_slide_image_required": "ต้องระบุรูปภาพสไลด์"
+}

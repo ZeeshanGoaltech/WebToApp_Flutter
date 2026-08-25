@@ -1,0 +1,11 @@
+{
+  "rate_dialog_feedback": "フィードバック",
+  "rate_dialog_later": "後で",
+  "rate_dialog_rate_now": "今すぐ評価",
+  "rate_dialog_subtitle": "あなたのような開発者のために、Web to App の改善にご協力ください。",
+  "rate_dialog_thanks": "評価ありがとうございます！",
+  "rate_dialog_store_unavailable": "ストアのページを開けませんでした。",
+  "complete_current_slide_to_add": "別のスライドを追加する前に、現在のスライドを完成させてください",
+  "err_slide_description_required": "スライドの説明は必須です",
+  "err_slide_image_required": "スライドの画像は必須です"
+}

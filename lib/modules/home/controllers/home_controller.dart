@@ -212,8 +212,8 @@ class HomeController extends GetxController {
     }
     if (!session.canAccessApps) {
       AppToast.info(
-        'Sign in required',
-        description: 'Sign in to open and build your apps.',
+        'sign_in_required'.tr,
+        description: 'sign_in_to_open_apps'.tr,
       );
       return;
     }
@@ -236,8 +236,8 @@ class HomeController extends GetxController {
     }
     if (!session.canAccessApps) {
       AppToast.info(
-        'Sign in required',
-        description: 'Sign in to open and build your apps.',
+        'sign_in_required'.tr,
+        description: 'sign_in_to_open_apps'.tr,
       );
       return;
     }

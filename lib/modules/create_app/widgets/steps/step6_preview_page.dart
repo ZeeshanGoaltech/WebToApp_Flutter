@@ -700,7 +700,7 @@ class _NavigationBody extends StatelessWidget {
           Text(
             bottomNavEnabled
                 ? '${tabs.length} ${'tab_home'.tr.toLowerCase()} / ${'browser'.tr}'
-                : 'Single webview layout',
+                : 'single_webview_layout'.tr,
             style: const TextStyle(color: AppColors.createMuted, fontSize: 10),
           ),
           const SizedBox(height: 16),

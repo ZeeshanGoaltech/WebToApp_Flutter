@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:web_to_app/core/theme/app_colors.dart';
 import 'package:web_to_app/core/theme/app_text_styles.dart';
 import 'package:web_to_app/core/utils/responsive.dart';
@@ -121,7 +122,7 @@ class CreateBuildHeader extends StatelessWidget {
             _BackButton(size: iconSize, onBack: onBack),
             Expanded(
               child: Text(
-                'Build Your App',
+                'build_your_app'.tr,
                 textAlign: TextAlign.center,
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
@@ -170,7 +171,7 @@ class _ReadyBadge extends StatelessWidget {
           ),
           SizedBox(width: Responsive.w(context, 6)),
           Text(
-            'Ready',
+            'ready'.tr,
             maxLines: 1,
             style: AppTextStyles.createReadyBadge(context),
           ),

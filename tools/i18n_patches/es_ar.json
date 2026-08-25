@@ -1,0 +1,11 @@
+{
+  "rate_dialog_feedback": "Comentarios",
+  "rate_dialog_later": "Tal vez más tarde",
+  "rate_dialog_rate_now": "Calificar ahora",
+  "rate_dialog_subtitle": "Ayudanos a mejorar Web to App para creadores como vos.",
+  "rate_dialog_thanks": "¡Gracias por calificarnos!",
+  "rate_dialog_store_unavailable": "No se pudo abrir la ficha de la tienda.",
+  "complete_current_slide_to_add": "Completá la diapositiva actual antes de agregar otra",
+  "err_slide_description_required": "La descripción de la diapositiva es obligatoria",
+  "err_slide_image_required": "La imagen de la diapositiva es obligatoria"
+}

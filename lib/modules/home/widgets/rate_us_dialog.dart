@@ -38,36 +38,19 @@ class _RateUsDialogState extends State<_RateUsDialog> {
   String get _primaryLabel =>
       _rating <= 3 ? 'rate_dialog_feedback'.tr : 'rate_dialog_rate_now'.tr;
 
-  static const Map<String, List<String>> _ratingStatusesByLanguage = {
-    'en': ['Bad', 'Poor', 'Good', 'Very Good', 'Excellent'],
-    'de': ['Schlecht', 'Schwach', 'Gut', 'Sehr gut', 'Ausgezeichnet'],
-    'es': ['Malo', 'Regular', 'Bueno', 'Muy bueno', 'Excelente'],
-    'fr': ['Mauvais', 'Faible', 'Bon', 'Tres bien', 'Excellent'],
-    'it': ['Scarso', 'Discreto', 'Buono', 'Molto buono', 'Eccellente'],
-    'nl': ['Slecht', 'Matig', 'Goed', 'Zeer goed', 'Uitstekend'],
-    'pl': ['Slabo', 'Przecietnie', 'Dobrze', 'Bardzo dobrze', 'Doskonale'],
-    'pt': ['Ruim', 'Fraco', 'Bom', 'Muito bom', 'Excelente'],
-    'ru': ['Плохо', 'Слабо', 'Хорошо', 'Очень хорошо', 'Отлично'],
-    'sv': ['Daligt', 'Svagt', 'Bra', 'Mycket bra', 'Utmarkt'],
-    'uk': ['Погано', 'Слабко', 'Добре', 'Дуже добре', 'Відмінно'],
-    'ja': ['悪い', 'いまいち', '良い', 'とても良い', '最高'],
-    'ko': ['별로예요', '아쉬워요', '좋아요', '아주 좋아요', '최고예요'],
-    'zh': ['差', '一般', '好', '很好', '优秀'],
-    'th': ['แย่', 'พอใช้', 'ดี', 'ดีมาก', 'ยอดเยี่ยม'],
-    'vi': ['Te', 'Tam on', 'Tot', 'Rat tot', 'Xuat sac'],
-    'id': ['Buruk', 'Kurang', 'Bagus', 'Sangat bagus', 'Luar biasa'],
-    'ms': ['Lemah', 'Kurang', 'Bagus', 'Sangat bagus', 'Cemerlang'],
-    'fil': ['Hindi maganda', 'Pwede na', 'Maganda', 'Napakaganda', 'Napakahusay'],
-  };
+  static const _ratingStatusKeys = [
+    'rate_status_bad',
+    'rate_status_poor',
+    'rate_status_good',
+    'rate_status_very_good',
+    'rate_status_excellent',
+  ];
 
   String get _ratingStatus {
     final shown = _isAnimating ? _displayRating : _rating;
     if (shown <= 0) return 'rate_dialog_subtitle'.tr;
-    final languageCode = Get.locale?.languageCode.toLowerCase() ?? 'en';
-    final localized = _ratingStatusesByLanguage[languageCode] ??
-        _ratingStatusesByLanguage['en']!;
     final index = shown.clamp(_minRating, _maxRating) - 1;
-    return localized[index];
+    return _ratingStatusKeys[index].tr;
   }
 
   int _clampRating(int value) {

@@ -315,12 +315,12 @@ class ApiClient extends GetxService {
     if (e.type == http.DioExceptionType.connectionTimeout ||
         e.type == http.DioExceptionType.receiveTimeout ||
         e.type == http.DioExceptionType.connectionError) {
-      return ApiException.network('Network error. Check your connection.');
+      return ApiException.network('network_error_check'.tr);
     }
 
     return ApiException(
       code: 'internal_error',
-      message: e.message ?? 'Request failed',
+      message: e.message ?? 'request_failed'.tr,
       statusCode: response?.statusCode,
     );
   }

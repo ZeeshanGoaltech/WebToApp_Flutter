@@ -1,5 +1,6 @@
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/services.dart';
+import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
 
 class CreateAppPickerService {
@@ -36,7 +37,7 @@ class CreateAppPickerService {
       if (ext.isNotEmpty && !_keystoreExtensions.contains(ext)) {
         throw PlatformException(
           code: 'invalid_keystore',
-          message: 'Choose a .jks, .keystore, .p12, or .pfx file.',
+          message: 'choose_keystore_file'.tr,
         );
       }
 
