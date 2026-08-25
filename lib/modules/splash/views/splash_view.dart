@@ -29,13 +29,13 @@ class SplashView extends GetView<SplashController> {
                   // Rebuild instantly when restore unlocks premium.
                   final sessionPremium = Get.isRegistered<SessionService>() &&
                       Get.find<SessionService>().hasPremiumAccess;
-                  final showAdsDisclaimer = !controller.isPremium.value &&
-                      !sessionPremium &&
-                      !PremiumService.isPremiumCached;
+                  final isPremium = controller.isPremium.value ||
+                      sessionPremium ||
+                      PremiumService.isPremiumCached;
 
                   return SplashProgressBar(
                     progress: controller.progress.value,
-                    showAdsDisclaimer: showAdsDisclaimer,
+                    statusText: isPremium ? null : 'splash_ads_notice'.tr,
                   );
                 }),
               ),

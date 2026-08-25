@@ -32,6 +32,11 @@ class IapController extends GetxController {
 
   PremiumService? _premiumService;
 
+  /// True from buy tap until a terminal purchase status (or failed launch).
+  /// Kept separate from [isPurchasing] because Android clears the spinner when
+  /// the Play sheet opens, before the purchase stream completes.
+  bool _awaitingPurchaseResult = false;
+
   bool get useMonthlyLayout => AppFeatureFlags.monthlyPlanEnabled;
 
   Future<PremiumService> get _service async {
@@ -44,7 +49,11 @@ class IapController extends GetxController {
 
     if (status == PurchaseStatus.purchased ||
         status == PurchaseStatus.restored) {
+      final fromUserBuy = _awaitingPurchaseResult;
+      _awaitingPurchaseResult = false;
       isPurchasing.value = false;
+      // Restore button flow handles its own toast + dismiss.
+      if (!fromUserBuy || isRestoring.value) return;
       AppToast.success('purchase_success'.tr);
       if (PremiumService.isPremiumCached) {
         Get.find<SessionService>().notifyIapPremiumChanged();
@@ -54,11 +63,13 @@ class IapController extends GetxController {
     }
 
     if (status == PurchaseStatus.canceled) {
+      _awaitingPurchaseResult = false;
       isPurchasing.value = false;
       return;
     }
 
     if (status == PurchaseStatus.error) {
+      _awaitingPurchaseResult = false;
       isPurchasing.value = false;
       final message = _premiumService?.getLastPurchaseError(purchase) ??
           'purchase_failed'.tr;
@@ -157,10 +168,13 @@ class IapController extends GetxController {
       useMonthlyLayout ? IapPlan.yearly : IapPlan.weekly;
 
   Future<void> purchase(IapPlan plan) async {
-    if (isPurchasing.value || isRestoring.value) return;
+    if (isPurchasing.value || isRestoring.value || _awaitingPurchaseResult) {
+      return;
+    }
 
     selectedPlan.value = plan;
     isPurchasing.value = true;
+    _awaitingPurchaseResult = true;
 
     try {
       final service = await _service;
@@ -170,6 +184,7 @@ class IapController extends GetxController {
           'purchase_failed'.tr,
           description: 'iap_billing_unavailable'.tr,
         );
+        _awaitingPurchaseResult = false;
         return;
       }
 
@@ -177,22 +192,26 @@ class IapController extends GetxController {
       await service.reloadProducts();
       _applyStorePrices(service);
 
-      final launched = switch (plan) {
+      final launched = await switch (plan) {
         IapPlan.yearly => service.purchaseYearlySubscription(),
         IapPlan.monthly => service.purchaseMonthlySubscription(),
         IapPlan.weekly => service.purchaseWeeklySubscription(),
         IapPlan.lifetime => service.purchaseLifetime(),
       };
 
-      final success = await launched;
-      if (!success) {
+      if (!launched) {
+        _awaitingPurchaseResult = false;
         if (service.lastPurchaseCancelledByUser) return;
         AppToast.error(
           'purchase_failed'.tr,
           description: 'iap_product_unavailable'.tr,
         );
       }
+      // On successful launch, [_onPurchaseStatus] clears the flag and dismisses.
+    } catch (_) {
+      _awaitingPurchaseResult = false;
     } finally {
+      // Android: clear spinner when Play sheet opens; keep awaiting flag.
       if (!PremiumService.isPremiumCached) {
         isPurchasing.value = false;
       }

@@ -50,6 +50,21 @@ class CreditService {
     return left > 0 ? left.clamp(0, freeLimit) : 0;
   }
 
+  /// Denominator for badge label (`remaining/total`).
+  int get displayTotal {
+    if (paidCredits.value > 0 || _hasPurchased) {
+      if (paidCredits.value <= 0) return packCredits;
+      return paidCredits.value >= packCredits
+          ? paidCredits.value
+          : packCredits;
+    }
+    return freeLimit;
+  }
+
+  String get displayLabel => '$remaining/$displayTotal';
+
+  bool get isExhausted => remaining <= 0;
+
   Future<void> initialize() async {
     if (_initialized) return;
     await _loadLocal();

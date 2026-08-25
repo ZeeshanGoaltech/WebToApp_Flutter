@@ -365,13 +365,17 @@ class PremiumService {
 
   void _onPurchaseUpdate(List<PurchaseDetails> purchases) async {
     for (final purchase in purchases) {
-      _notifyPurchaseStatus(purchase.status, purchase);
-
+      // Persist premium / unlock state before UI callbacks so paywalls can
+      // dismiss on success (they check [isPremiumCached]).
       if (purchase.status == PurchaseStatus.error) {
         _handlePurchaseError(purchase);
+        _notifyPurchaseStatus(purchase.status, purchase);
       } else if (purchase.status == PurchaseStatus.purchased ||
           purchase.status == PurchaseStatus.restored) {
         await _handlePurchaseSuccess(purchase);
+        _notifyPurchaseStatus(purchase.status, purchase);
+      } else {
+        _notifyPurchaseStatus(purchase.status, purchase);
       }
 
       if (purchase.pendingCompletePurchase) {

@@ -8,13 +8,13 @@ class SplashProgressBar extends StatelessWidget {
   const SplashProgressBar({
     super.key,
     required this.progress,
-    this.showAdsDisclaimer = true,
+    this.statusText,
   });
 
   final double progress;
 
-  /// Free users see "This action may contain ads"; Pro sees "Loading".
-  final bool showAdsDisclaimer;
+  /// Text below the bar; `null` hides it (e.g. subscribed users).
+  final String? statusText;
 
   @override
   Widget build(BuildContext context) {
@@ -46,11 +46,13 @@ class SplashProgressBar extends StatelessWidget {
             ),
           ),
         ),
-        SizedBox(height: Responsive.w(context, 12)),
-        Text(
-          showAdsDisclaimer ? 'splash_ads_notice'.tr : 'splash_loading'.tr,
-          style: AppTextStyles.splashStatus(context),
-        ),
+        if (statusText != null) ...[
+          SizedBox(height: Responsive.w(context, 12)),
+          Text(
+            statusText!,
+            style: AppTextStyles.splashStatus(context),
+          ),
+        ],
       ],
     );
   }

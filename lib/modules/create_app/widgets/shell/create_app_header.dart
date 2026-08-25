@@ -116,48 +116,10 @@ class CreateBuildHeader extends StatelessWidget {
       ),
       child: SizedBox(
         height: iconSize,
-        child: Stack(
-          alignment: Alignment.center,
+        child: Row(
           children: [
-            Row(
-              children: [
-                _BackButton(size: iconSize, onBack: onBack),
-                const Spacer(),
-                const CreditsBadgeButton(compact: true),
-                SizedBox(width: Responsive.w(context, 8)),
-                Container(
-                  padding: EdgeInsets.symmetric(
-                    horizontal: Responsive.w(context, 8),
-                    vertical: Responsive.w(context, 4),
-                  ),
-                  decoration: BoxDecoration(
-                    color: AppColors.createSuccessBg,
-                    borderRadius: BorderRadius.circular(999),
-                  ),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Container(
-                        width: Responsive.w(context, 5.982),
-                        height: Responsive.w(context, 5.982),
-                        decoration: const BoxDecoration(
-                          color: AppColors.createSuccess,
-                          shape: BoxShape.circle,
-                        ),
-                      ),
-                      SizedBox(width: Responsive.w(context, 6)),
-                      Text(
-                        'Ready',
-                        maxLines: 1,
-                        style: AppTextStyles.createReadyBadge(context),
-                      ),
-                    ],
-                  ),
-                ),
-              ],
-            ),
-            Padding(
-              padding: EdgeInsets.symmetric(horizontal: Responsive.w(context, 110)),
+            _BackButton(size: iconSize, onBack: onBack),
+            Expanded(
               child: Text(
                 'Build Your App',
                 textAlign: TextAlign.center,
@@ -166,8 +128,53 @@ class CreateBuildHeader extends StatelessWidget {
                 style: AppTextStyles.createHeaderTitle(context),
               ),
             ),
+            Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const CreditsBadgeButton(compact: true),
+                SizedBox(width: Responsive.w(context, 8)),
+                const _ReadyBadge(),
+              ],
+            ),
           ],
         ),
+      ),
+    );
+  }
+}
+
+class _ReadyBadge extends StatelessWidget {
+  const _ReadyBadge();
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: EdgeInsets.symmetric(
+        horizontal: Responsive.w(context, 8),
+        vertical: Responsive.w(context, 4),
+      ),
+      decoration: BoxDecoration(
+        color: AppColors.createSuccessBg,
+        borderRadius: BorderRadius.circular(999),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Container(
+            width: Responsive.w(context, 5.982),
+            height: Responsive.w(context, 5.982),
+            decoration: const BoxDecoration(
+              color: AppColors.createSuccess,
+              shape: BoxShape.circle,
+            ),
+          ),
+          SizedBox(width: Responsive.w(context, 6)),
+          Text(
+            'Ready',
+            maxLines: 1,
+            style: AppTextStyles.createReadyBadge(context),
+          ),
+        ],
       ),
     );
   }

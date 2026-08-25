@@ -25,6 +25,10 @@ class LifetimePremiumController extends GetxController {
   PremiumService? _premiumService;
   Timer? _closeRevealTimer;
 
+  /// True from buy tap until a terminal purchase status (or failed launch).
+  bool _awaitingPurchaseResult = false;
+  bool _finishing = false;
+
   Future<PremiumService> get _service async {
     _premiumService ??= await PremiumService.getInstance();
     return _premiumService!;
@@ -69,7 +73,11 @@ class LifetimePremiumController extends GetxController {
 
     if (status == PurchaseStatus.purchased ||
         status == PurchaseStatus.restored) {
+      final fromUserBuy = _awaitingPurchaseResult;
+      _awaitingPurchaseResult = false;
       isPurchasing.value = false;
+      // Silent finish for already-premium users is handled in [_loadPremiumStatus].
+      if (!fromUserBuy) return;
       if (PremiumService.isPremiumCached) {
         Get.find<SessionService>().notifyIapPremiumChanged();
         showSuccessAndFinish();
@@ -78,11 +86,13 @@ class LifetimePremiumController extends GetxController {
     }
 
     if (status == PurchaseStatus.canceled) {
+      _awaitingPurchaseResult = false;
       isPurchasing.value = false;
       return;
     }
 
     if (status == PurchaseStatus.error) {
+      _awaitingPurchaseResult = false;
       isPurchasing.value = false;
       final message = _premiumService?.getLastPurchaseError(purchase) ??
           'premium_purchase_failed'.tr;
@@ -91,14 +101,16 @@ class LifetimePremiumController extends GetxController {
   }
 
   Future<void> buyLifetime() async {
-    if (isPurchasing.value) return;
+    if (isPurchasing.value || _awaitingPurchaseResult) return;
     isPurchasing.value = true;
+    _awaitingPurchaseResult = true;
 
     try {
       final service = await _service;
 
       if (!service.isAvailable) {
         AppToast.error('premium_unavailable'.tr);
+        _awaitingPurchaseResult = false;
         return;
       }
 
@@ -109,14 +121,18 @@ class LifetimePremiumController extends GetxController {
       final product = service.getLifetimeProduct();
       if (product == null) {
         AppToast.error('premium_unavailable'.tr);
+        _awaitingPurchaseResult = false;
         return;
       }
 
       final launched = await service.purchaseLifetime();
       if (!launched) {
+        _awaitingPurchaseResult = false;
         if (service.lastPurchaseCancelledByUser) return;
         AppToast.error('premium_purchase_failed'.tr);
       }
+    } catch (_) {
+      _awaitingPurchaseResult = false;
     } finally {
       if (!PremiumService.isPremiumCached) {
         isPurchasing.value = false;
@@ -125,6 +141,8 @@ class LifetimePremiumController extends GetxController {
   }
 
   Future<void> showSuccessAndFinish() async {
+    if (_finishing) return;
+    _finishing = true;
     await Get.dialog<void>(
       AlertDialog(
         title: Text('premium_activated_title'.tr),
@@ -142,6 +160,7 @@ class LifetimePremiumController extends GetxController {
   }
 
   void finish() {
+    _finishing = true;
     if (Get.key.currentState?.canPop() ?? false) {
       Get.back();
     } else {

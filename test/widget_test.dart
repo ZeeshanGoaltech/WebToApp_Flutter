@@ -36,7 +36,10 @@ void main() {
 
               SplashLogoSection(),
 
-              SplashProgressBar(progress: 0.5),
+              SplashProgressBar(
+                progress: 0.5,
+                statusText: 'splash_ads_notice'.tr,
+              ),
 
             ],
 
@@ -54,7 +57,7 @@ void main() {
 
     expect(find.text('Turn any website into a mobile app'), findsOneWidget);
 
-    expect(find.text('Getting things ready…'), findsOneWidget);
+    expect(find.text('This action may contain ads'), findsOneWidget);
 
   });
 
