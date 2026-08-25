@@ -3,19 +3,30 @@ import 'package:get/get.dart';
 import 'package:web_to_app/core/theme/app_colors.dart';
 import 'package:web_to_app/core/utils/responsive.dart';
 
-/// Premium-style prompt that asks guests to sign in before generating an APK.
-Future<bool> showGuestLoginPremiumDialog(BuildContext context) async {
-  final result = await showDialog<bool>(
+enum GuestLoginGuideAction {
+  /// Continue as guest (create / generate APK).
+  continueAsGuest,
+
+  /// Optional: open login / signup.
+  login,
+}
+
+/// Soft guide only — login is optional. Guests can always continue.
+Future<GuestLoginGuideAction> showGuestLoginGuideDialog(
+  BuildContext context,
+) async {
+  final result = await showDialog<GuestLoginGuideAction>(
     context: context,
     barrierDismissible: true,
     barrierColor: Colors.black.withValues(alpha: 0.45),
-    builder: (_) => const _GuestLoginPremiumDialog(),
+    builder: (_) => const _GuestLoginGuideDialog(),
   );
-  return result == true;
+  // Dismiss / close = continue without login.
+  return result ?? GuestLoginGuideAction.continueAsGuest;
 }
 
-class _GuestLoginPremiumDialog extends StatelessWidget {
-  const _GuestLoginPremiumDialog();
+class _GuestLoginGuideDialog extends StatelessWidget {
+  const _GuestLoginGuideDialog();
 
   static const _heading = Color(0xFF101828);
   static const _body = Color(0xFF6A7282);
@@ -80,7 +91,7 @@ class _GuestLoginPremiumDialog extends StatelessWidget {
                       ],
                     ),
                     child: Icon(
-                      Icons.lock_open_rounded,
+                      Icons.cloud_done_rounded,
                       color: Colors.white,
                       size: Responsive.w(context, 34),
                     ),
@@ -91,7 +102,7 @@ class _GuestLoginPremiumDialog extends StatelessWidget {
                     textAlign: TextAlign.center,
                     style: TextStyle(
                       color: _heading,
-                      fontSize: Responsive.w(context, 22),
+                      fontSize: Responsive.w(context, 21),
                       fontWeight: FontWeight.w900,
                       height: 1.2,
                       letterSpacing: -0.3,
@@ -149,23 +160,24 @@ class _GuestLoginPremiumDialog extends StatelessWidget {
                     child: Column(
                       children: [
                         _BenefitRow(
-                          icon: Icons.folder_special_rounded,
+                          icon: Icons.phonelink_erase_rounded,
                           text: 'guest_login_benefit_projects'.tr,
                         ),
                         SizedBox(height: Responsive.w(context, 12)),
                         _BenefitRow(
-                          icon: Icons.cloud_done_rounded,
+                          icon: Icons.lock_clock_rounded,
                           text: 'guest_login_benefit_sync'.tr,
                         ),
                         SizedBox(height: Responsive.w(context, 12)),
                         _BenefitRow(
-                          icon: Icons.android_rounded,
+                          icon: Icons.devices_rounded,
                           text: 'guest_login_benefit_apk'.tr,
                         ),
                       ],
                     ),
                   ),
                   SizedBox(height: Responsive.w(context, 20)),
+                  // Primary: continue without forcing login
                   SizedBox(
                     width: double.infinity,
                     height: Responsive.w(context, 52),
@@ -195,10 +207,12 @@ class _GuestLoginPremiumDialog extends StatelessWidget {
                           borderRadius: BorderRadius.circular(
                             Responsive.w(context, 16),
                           ),
-                          onTap: () => Navigator.of(context).pop(true),
+                          onTap: () => Navigator.of(context).pop(
+                            GuestLoginGuideAction.continueAsGuest,
+                          ),
                           child: Center(
                             child: Text(
-                              'guest_login_dialog_cta'.tr,
+                              'guest_login_dialog_continue'.tr,
                               style: TextStyle(
                                 color: Colors.white,
                                 fontSize: Responsive.w(context, 16),
@@ -210,15 +224,33 @@ class _GuestLoginPremiumDialog extends StatelessWidget {
                       ),
                     ),
                   ),
-                  SizedBox(height: Responsive.w(context, 10)),
+                  SizedBox(height: Responsive.w(context, 8)),
+                  // Optional login
                   TextButton(
-                    onPressed: () => Navigator.of(context).pop(false),
+                    onPressed: () => Navigator.of(context).pop(
+                      GuestLoginGuideAction.login,
+                    ),
                     child: Text(
-                      'guest_login_dialog_later'.tr,
+                      'guest_login_dialog_cta'.tr,
+                      style: TextStyle(
+                        color: AppColors.homeAccent,
+                        fontSize: Responsive.w(context, 14),
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                  ),
+                  Padding(
+                    padding: EdgeInsets.symmetric(
+                      horizontal: Responsive.w(context, 8),
+                    ),
+                    child: Text(
+                      'guest_login_dialog_later_hint'.tr,
+                      textAlign: TextAlign.center,
                       style: TextStyle(
                         color: _body,
-                        fontSize: Responsive.w(context, 14),
-                        fontWeight: FontWeight.w600,
+                        fontSize: Responsive.w(context, 12),
+                        fontWeight: FontWeight.w500,
+                        height: 1.4,
                       ),
                     ),
                   ),
@@ -233,7 +265,9 @@ class _GuestLoginPremiumDialog extends StatelessWidget {
                 shape: const CircleBorder(),
                 child: InkWell(
                   customBorder: const CircleBorder(),
-                  onTap: () => Navigator.of(context).pop(false),
+                  onTap: () => Navigator.of(context).pop(
+                    GuestLoginGuideAction.continueAsGuest,
+                  ),
                   child: Padding(
                     padding: EdgeInsets.all(Responsive.w(context, 8)),
                     child: Icon(
@@ -267,7 +301,7 @@ class _BenefitRow extends StatelessWidget {
           width: Responsive.w(context, 36),
           height: Responsive.w(context, 36),
           decoration: BoxDecoration(
-            color: _GuestLoginPremiumDialog._iconBg,
+            color: _GuestLoginGuideDialog._iconBg,
             borderRadius: BorderRadius.circular(Responsive.w(context, 12)),
           ),
           child: Icon(
@@ -283,7 +317,7 @@ class _BenefitRow extends StatelessWidget {
             child: Text(
               text,
               style: TextStyle(
-                color: _GuestLoginPremiumDialog._heading,
+                color: _GuestLoginGuideDialog._heading,
                 fontSize: Responsive.w(context, 13.5),
                 fontWeight: FontWeight.w600,
                 height: 1.35,
