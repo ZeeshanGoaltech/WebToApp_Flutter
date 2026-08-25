@@ -115,15 +115,15 @@ class _HelpGuideHeader extends GetView<HomeController> {
       child: Padding(
         padding: EdgeInsets.fromLTRB(
           Responsive.w(context, 24),
-          Responsive.w(context, 26),
           Responsive.w(context, 24),
-          Responsive.w(context, 21),
+          Responsive.w(context, 24),
+          Responsive.w(context, 16),
         ),
         child: Row(
           children: [
             Container(
-              width: Responsive.w(context, 31.996),
-              height: Responsive.w(context, 31.996),
+              width: Responsive.w(context, 36),
+              height: Responsive.w(context, 36),
               decoration: BoxDecoration(
                 color: AppColors.homeAccentLight,
                 borderRadius: BorderRadius.circular(Responsive.w(context, 10)),
@@ -131,7 +131,7 @@ class _HelpGuideHeader extends GetView<HomeController> {
               child: Center(
                 child: FigmaSvgIcon(
                   asset: HelpGuideAssets.book,
-                  size: Responsive.w(context, 15.989),
+                  size: Responsive.w(context, 18),
                   color: AppColors.homeAccent,
                   tinted: true,
                 ),
@@ -140,7 +140,7 @@ class _HelpGuideHeader extends GetView<HomeController> {
             SizedBox(width: Responsive.w(context, 10)),
             Text(
               'help_guide'.tr,
-              style: AppTextStyles.helpGuideHeaderTitle(context),
+              style: AppTextStyles.homeHeaderTitle(context),
             ),
           ],
         ),

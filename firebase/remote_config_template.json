@@ -182,22 +182,22 @@
         },
         "apkdownload_inapp": {
           "defaultValue": { "value": "1" },
-          "description": "Android — Download APK free quota before paywall (also Play/App Store product id apkdownload_inapp). off | 1 | 2 | 3…",
+          "description": "Android — Download APK free quota. off=no free (paywall first) | 1 | 2 | 3… | unlimited. Product: apkdownload_inapp",
           "valueType": "STRING"
         },
         "apkdownload_inapp_ios": {
           "defaultValue": { "value": "1" },
-          "description": "iOS — Download APK free quota before paywall (also store product id apkdownload_inapp). off | 1 | 2 | 3…",
+          "description": "iOS — Download APK free quota. off=no free (paywall first) | 1 | 2 | 3… | unlimited. Product: apkdownload_inapp",
           "valueType": "STRING"
         },
         "bundledownload_inapp": {
           "defaultValue": { "value": "1" },
-          "description": "Android — Download AAB free quota before paywall (also Play/App Store product id bundledownload_inapp). off | 1 | 2 | 3…",
+          "description": "Android — Download AAB free quota. off=no free (paywall first) | 1 | 2 | 3… | unlimited. Product: bundledownload_inapp",
           "valueType": "STRING"
         },
         "bundledownload_inapp_ios": {
           "defaultValue": { "value": "1" },
-          "description": "iOS — Download AAB free quota before paywall (also store product id bundledownload_inapp). off | 1 | 2 | 3…",
+          "description": "iOS — Download AAB free quota. off=no free (paywall first) | 1 | 2 | 3… | unlimited. Product: bundledownload_inapp",
           "valueType": "STRING"
         },
         "buildagain_sub": {

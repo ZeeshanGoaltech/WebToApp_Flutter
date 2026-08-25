@@ -14,14 +14,15 @@ import 'package:web_to_app/core/services/session_service.dart';
 /// - RC `buildapp_sub` — opening Build App flow
 /// - RC `generatebundleapk_sub` — Generate Bundle & APK
 /// - RC `buildagain_sub` — Build Again button (default 3)
-/// - RC `apkdownload_inapp` — free APK downloads before paywall (default 1)
-/// - RC `bundledownload_inapp` — free AAB downloads before paywall (default 1)
+/// - RC `apkdownload_inapp` — free APK downloads (`off` = none, default `1`)
+/// - RC `bundledownload_inapp` — free AAB downloads (`off` = none, default `1`)
 ///
 /// Buying `apkdownload_inapp` or `bundledownload_inapp` unlocks **unlimited
 /// APK + AAB downloads for that project only** (not `threescan_inapp` credits).
 /// Remaining `threescan_inapp` paid credits also allow downloads (1 credit each).
 ///
-/// Values: `off` = unlimited, `1`/`2`/… = free uses then paywall.
+/// Download free quota values: `off` = no free (paywall first), `1`/`2`/… = free
+/// then paywall, `unlimited` = unlimited free.
 class BuildQuotaService {
   BuildQuotaService._();
 
@@ -118,7 +119,8 @@ class BuildQuotaService {
 
     if (await _canUsePersisted(
       countKey: countKey,
-      limitReader: () => AdRemoteConfigService.instance.getQuotaLimit(rcKey),
+      limitReader: () =>
+          AdRemoteConfigService.instance.getDownloadFreeQuotaLimit(rcKey),
     )) {
       return true;
     }

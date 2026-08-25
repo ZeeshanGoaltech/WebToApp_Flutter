@@ -17,12 +17,14 @@ abstract final class RemoteConfigKeys {
   /// Persists across restarts (not reset).
   static const generateBundleApkSub = 'generatebundleapk_sub';
 
-  /// Download APK free quota: `off` = unlimited, `1`/`2`/… = free APK downloads
-  /// then download in-app paywall. Persists across restarts. Default: `1`.
+  /// Download APK free quota (STRING).
+  /// `off` = no free (paywall on first tap) | `1`/`2`/… = free then paywall.
+  /// Default: `1`.
   static const apkDownloadInapp = 'apkdownload_inapp';
 
-  /// Download AAB free quota: `off` = unlimited, `1`/`2`/… = free AAB downloads
-  /// then download in-app paywall. Persists across restarts. Default: `1`.
+  /// Download AAB free quota (STRING).
+  /// `off` = no free (paywall on first tap) | `1`/`2`/… = free then paywall.
+  /// Default: `1`.
   static const bundleDownloadInapp = 'bundledownload_inapp';
 
   /// Build Again quota: `off` = unlimited, `1`/`2`/… = then IAP.
@@ -197,6 +199,23 @@ class AdRemoteConfigService {
     final thresholds = getFrequencyThresholds(baseKey);
     if (thresholds.isEmpty) return null;
     return thresholds.reduce((a, b) => a > b ? a : b);
+  }
+
+  /// Free-download quota for `apkdownload_inapp` / `bundledownload_inapp`.
+  ///
+  /// Unlike [getQuotaLimit] (where `off` = unlimited), here:
+  /// - `off` → `0` (no free — paywall on first tap)
+  /// - `1`/`2`/… → that many free downloads
+  /// - `unlimited` → unlimited free (`null`)
+  int? getDownloadFreeQuotaLimit(String baseKey) {
+    final trimmed = getFrequency(baseKey).trim().toLowerCase();
+    if (trimmed.isEmpty || trimmed == 'off') return 0;
+    if (trimmed == 'unlimited') return null;
+
+    final single = int.tryParse(trimmed);
+    if (single != null && single >= 0) return single;
+
+    return 0;
   }
 
   /// Free-build limit for `buildapp_sub`.

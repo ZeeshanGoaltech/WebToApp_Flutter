@@ -136,13 +136,13 @@ class _SettingsHeader extends StatelessWidget {
       child: Padding(
         padding: EdgeInsets.fromLTRB(
           Responsive.w(context, 24),
-          Responsive.w(context, 20),
           Responsive.w(context, 24),
-          Responsive.w(context, 22),
+          Responsive.w(context, 24),
+          Responsive.w(context, 16),
         ),
         child: Text(
           'settings'.tr,
-          style: AppTextStyles.settingsHeaderTitle(context),
+          style: AppTextStyles.homeHeaderTitle(context),
         ),
       ),
     );

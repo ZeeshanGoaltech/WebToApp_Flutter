@@ -511,13 +511,7 @@ class AppTextStyles {
   }
 
   static TextStyle helpGuideHeaderTitle(BuildContext context) {
-    return GoogleFonts.inter(
-      fontWeight: FontWeight.w700,
-      fontSize: Responsive.sp(context, 18),
-      height: 27 / 18,
-      letterSpacing: -0.4395,
-      color: AppColors.homeTitle,
-    );
+    return homeHeaderTitle(context);
   }
 
   static TextStyle helpGuideQuickBadge(BuildContext context) {
@@ -600,13 +594,7 @@ class AppTextStyles {
   }
 
   static TextStyle settingsHeaderTitle(BuildContext context) {
-    return GoogleFonts.inter(
-      fontWeight: FontWeight.w700,
-      fontSize: Responsive.sp(context, 18),
-      height: 27.849 / 18,
-      letterSpacing: -0.4533,
-      color: AppColors.homeTitle,
-    );
+    return homeHeaderTitle(context);
   }
 
   static TextStyle settingsSectionLabel(BuildContext context) {
