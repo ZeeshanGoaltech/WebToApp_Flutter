@@ -1,4 +1,3 @@
-import 'package:web_to_app/data/models/app_models.dart';
 import 'package:web_to_app/data/models/build_models.dart';
 
 enum ProjectDisplayStatus {
@@ -39,7 +38,6 @@ class ProjectStatusResolver {
   ProjectStatusResolver._();
 
   static ProjectDisplayStatus resolve({
-    required AppSummary summary,
     AppBuildSnapshot snapshot = const AppBuildSnapshot(),
   }) {
     final latest = snapshot.latest;
@@ -66,7 +64,8 @@ class ProjectStatusResolver {
       }
     }
 
-    if (hasSuccessfulBuild || (summary.currentVersionCode ?? 0) > 0) {
+    // Built only when a successful APK/AAB build exists.
+    if (hasSuccessfulBuild) {
       return ProjectDisplayStatus.built;
     }
 

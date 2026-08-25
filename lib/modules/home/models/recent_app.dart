@@ -27,7 +27,6 @@ class RecentApp {
     AppBuildSnapshot snapshot = const AppBuildSnapshot(),
   }) {
     final status = ProjectStatusResolver.resolve(
-      summary: summary,
       snapshot: snapshot,
     );
 
