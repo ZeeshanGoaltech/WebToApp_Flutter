@@ -4,6 +4,7 @@ import 'package:get/get.dart';
 import 'package:web_to_app/core/ads/interstitial_ad_trigger.dart';
 import 'package:web_to_app/core/services/analytics_service.dart';
 import 'package:web_to_app/core/services/push_notification_service.dart';
+import 'package:web_to_app/core/services/guest_auth_service.dart';
 import 'package:web_to_app/core/services/session_service.dart';
 import 'package:web_to_app/core/utils/app_error_handler.dart';
 import 'package:web_to_app/core/utils/app_toast.dart';
@@ -59,7 +60,10 @@ class HomeController extends GetxController {
 
   Future<void> loadApps() async {
     final session = Get.find<SessionService>();
-    if (!session.isAuthenticated) {
+    if (session.isGuest.value) {
+      await Get.find<GuestAuthService>().ensureGuestApiSession();
+    }
+    if (!session.canAccessApps) {
       apps.clear();
       return;
     }
@@ -82,7 +86,10 @@ class HomeController extends GetxController {
 
   Future<void> openAppBuild(AppSummary app) async {
     final session = Get.find<SessionService>();
-    if (!session.isAuthenticated) {
+    if (session.isGuest.value) {
+      await Get.find<GuestAuthService>().ensureGuestApiSession();
+    }
+    if (!session.canAccessApps) {
       AppToast.info(
         'Sign in required',
         description: 'Sign in to open and build your apps.',
@@ -103,7 +110,10 @@ class HomeController extends GetxController {
 
   Future<void> openAppBuildFlow(AppSummary app) async {
     final session = Get.find<SessionService>();
-    if (!session.isAuthenticated) {
+    if (session.isGuest.value) {
+      await Get.find<GuestAuthService>().ensureGuestApiSession();
+    }
+    if (!session.canAccessApps) {
       AppToast.info(
         'Sign in required',
         description: 'Sign in to open and build your apps.',

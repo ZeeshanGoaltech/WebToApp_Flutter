@@ -5,6 +5,7 @@ import 'package:web_to_app/core/services/language_service.dart';
 import 'package:web_to_app/core/services/push_notification_service.dart';
 import 'package:web_to_app/core/services/credit_service.dart';
 import 'package:web_to_app/core/services/guest_auth_service.dart';
+import 'package:web_to_app/core/services/guest_migration_service.dart';
 import 'package:web_to_app/core/services/premium_service.dart';
 import 'package:web_to_app/core/services/session_service.dart';
 import 'package:web_to_app/core/services/token_storage.dart';
@@ -51,6 +52,10 @@ class InitialBinding extends Bindings {
         session,
         tokenStorage,
       ),
+      permanent: true,
+    );
+    Get.put<GuestMigrationService>(
+      GuestMigrationService(Get.find<AuthRepository>()),
       permanent: true,
     );
 

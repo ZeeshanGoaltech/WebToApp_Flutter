@@ -3,12 +3,14 @@ import 'package:get/get.dart';
 import 'package:web_to_app/core/api/api_exception.dart';
 import 'package:web_to_app/core/navigation/auth_redirect.dart';
 import 'package:web_to_app/core/navigation/launch_flow.dart';
+import 'package:web_to_app/core/services/guest_migration_service.dart';
 import 'package:web_to_app/core/services/session_service.dart';
 import 'package:web_to_app/core/services/token_storage.dart';
 import 'package:web_to_app/core/utils/app_error_handler.dart';
 import 'package:web_to_app/core/utils/app_toast.dart';
 import 'package:web_to_app/data/models/auth_models.dart';
 import 'package:web_to_app/data/repositories/auth_repository.dart';
+import 'package:web_to_app/modules/home/controllers/home_controller.dart';
 
 enum AuthTab { signIn, signUp }
 
@@ -114,6 +116,11 @@ class AuthController extends GetxController {
     try {
       final authRepo = Get.find<AuthRepository>();
       final session = Get.find<SessionService>();
+      final storage = Get.find<TokenStorage>();
+      final guestRefreshToken =
+          session.isGuest.value && storage.hasTokens
+              ? storage.refreshToken
+              : null;
       final AuthResult result;
 
       if (isSignIn) {
@@ -126,7 +133,19 @@ class AuthController extends GetxController {
       }
 
       await session.setAuthResult(result);
+      if (guestRefreshToken != null) {
+        try {
+          await Get.find<GuestMigrationService>().migrateGuestApps(
+            guestRefreshToken: guestRefreshToken,
+          );
+        } catch (_) {
+          // Migration is best-effort until backend merge is available.
+        }
+      }
       await session.refreshProfile();
+      if (Get.isRegistered<HomeController>()) {
+        await Get.find<HomeController>().loadApps();
+      }
       await _completeAuthNavigation();
     } on ApiException catch (e) {
       await AppErrorHandler.show(

@@ -11,6 +11,7 @@ import 'package:web_to_app/core/ads/ads_consent_gate.dart';
 import 'package:web_to_app/core/ads/interstitial_ad_trigger.dart';
 import 'package:web_to_app/core/constants/app_debug_flags.dart';
 import 'package:web_to_app/core/navigation/launch_flow.dart';
+import 'package:web_to_app/core/services/guest_auth_service.dart';
 import 'package:web_to_app/core/services/premium_service.dart';
 import 'package:web_to_app/core/services/session_service.dart';
 import 'package:web_to_app/core/services/token_storage.dart';
@@ -88,6 +89,9 @@ class SplashController extends GetxController {
 
     if (storage.isGuestMode) {
       session.restoreGuestSession();
+      if (storage.hasTokens || storage.guestEmail != null) {
+        await Get.find<GuestAuthService>().ensureGuestApiSession();
+      }
     } else {
       await session.restoreSession();
     }

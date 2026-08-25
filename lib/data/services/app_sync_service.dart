@@ -2,7 +2,6 @@ import 'package:get/get.dart';
 import 'package:web_to_app/core/api/api_exception.dart';
 import 'package:web_to_app/core/services/guest_auth_service.dart';
 import 'package:web_to_app/core/services/session_service.dart';
-import 'package:web_to_app/core/services/token_storage.dart';
 import 'package:web_to_app/data/mappers/app_config_mapper.dart';
 import 'package:web_to_app/data/repositories/apps_repository.dart';
 import 'package:web_to_app/data/repositories/assets_repository.dart';
@@ -103,8 +102,7 @@ class AppSyncService extends GetxService {
   Future<void> _ensureApiAccess() async {
     if (_sessionService.isAuthenticated) return;
 
-    final storage = Get.find<TokenStorage>();
-    if (_sessionService.isGuest.value && !storage.hasCompletedFirstBuild) {
+    if (_sessionService.isGuest.value) {
       await Get.find<GuestAuthService>().ensureGuestApiSession();
       return;
     }

@@ -64,6 +64,12 @@ class AuthRepository extends GetxService {
     data: {'email': email},
   );
 
+  Future<void> mergeGuestAccount({required String guestRefreshToken}) =>
+      _client.post<void>(
+        '/v1/auth/merge-guest',
+        data: {'guestRefreshToken': guestRefreshToken},
+      );
+
   Future<void> logout() async {
     final refreshToken = _tokenStorage.refreshToken;
     try {

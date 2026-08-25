@@ -24,6 +24,7 @@ import 'package:web_to_app/data/repositories/builds_repository.dart';
 import 'package:web_to_app/data/repositories/signing_repository.dart';
 import 'package:web_to_app/data/services/app_sync_service.dart';
 import 'package:web_to_app/modules/create_app/controllers/create_app_controller.dart';
+import 'package:web_to_app/modules/home/controllers/home_controller.dart';
 import 'package:web_to_app/modules/create_app/models/preview_mode.dart';
 import 'package:web_to_app/modules/create_app/services/create_app_picker_service.dart';
 
@@ -496,6 +497,9 @@ class BuildAppController extends GetxController {
 
   Future<void> _markFirstBuildComplete() async {
     await Get.find<TokenStorage>().markFirstBuildComplete();
+    if (Get.isRegistered<HomeController>()) {
+      unawaited(Get.find<HomeController>().loadApps());
+    }
   }
 
   Future<void> _consumeCreditOnBuildSuccess(String id) async {

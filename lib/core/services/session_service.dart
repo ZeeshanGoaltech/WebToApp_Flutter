@@ -15,6 +15,12 @@ class SessionService extends GetxService {
 
   bool get isAuthenticated => !isGuest.value && user.value != null;
 
+  /// Guest users with an active API session can list and open their apps.
+  bool get canAccessApps {
+    if (isAuthenticated) return true;
+    return isGuest.value && Get.find<TokenStorage>().hasTokens;
+  }
+
   void notifyIapPremiumChanged() => _iapPremiumTick.value++;
 
   bool get hasPremiumAccess {

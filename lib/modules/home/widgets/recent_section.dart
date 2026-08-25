@@ -73,7 +73,7 @@ class MyAppsTab extends GetView<HomeController> {
                 ..sort((a, b) => b.createdAt.compareTo(a.createdAt));
               final session = Get.find<SessionService>();
 
-              if (!session.isAuthenticated) {
+              if (!session.canAccessApps) {
                 return Center(
                   child: Padding(
                     padding: EdgeInsets.all(Responsive.w(context, 24)),
