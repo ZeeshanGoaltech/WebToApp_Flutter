@@ -82,6 +82,7 @@ flutter:
 
   assets:
     - assets/images/app_ic.png
+    - assets/images/webto_app_icon.png
     - assets/images/splash/
     - assets/images/intro/
     - assets/images/home/
@@ -124,15 +125,15 @@ flutter:
 flutter_launcher_icons:
   android: true
   ios: false
-  image_path: assets/images/app_ic.png
+  image_path: assets/images/webto_app_icon.png
   min_sdk_android: 21
   remove_alpha_ios: true
 
 flutter_native_splash:
   color: "#F7F8FC"
-  image: assets/images/app_ic.png
+  image: assets/images/webto_app_icon.png
   android: true
   ios: false
   android_12:
     color: "#F7F8FC"
-    image: assets/images/app_ic.png
+    image: assets/images/webto_app_icon.png

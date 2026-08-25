@@ -1,8 +1,8 @@
 class AppAssets {
   AppAssets._();
 
-  static const String appIcon = 'assets/images/app_ic.png';
-  static const String splashLogo = 'assets/images/splash/app_logo_export.png';
+  static const String appIcon = 'assets/images/webto_app_icon.png';
+  static const String splashLogo = 'assets/images/webto_app_icon.png';
   static const String intro1 = 'assets/images/intro/intro1.png';
   static const String intro2 = 'assets/images/intro/intro2.png';
   static const String intro3 = 'assets/images/intro/intro3.png';
