@@ -45,6 +45,8 @@
   "build_successful": "Build Successful!",
   "build_uploading": "Uploading artifacts...",
   "built": "Built",
+  "project_status_building": "Building",
+  "project_status_canceled": "Canceled",
   "button_label": "Button Label",
   "button_label_hint": "Get Started",
   "checkout_unavailable": "Checkout is not available right now.",
@@ -381,5 +383,15 @@
   "credits_pack_info_bold": "up to @count Apps",
   "credits_pack_info_end": "with this purchase. After that, you'll need to buy again.",
   "credits_pack_discount": "@percent% OFF",
-  "credits_pack_unlock_cta": "Unlock @count @unit Now"
+  "credits_pack_unlock_cta": "Unlock @count @unit Now",
+  "download_inapp_access_subtitle": "Get more downloads with credits",
+  "download_inapp_access_title": "Download Credits",
+  "download_inapp_feat_ads": "Ad-free Experience, Always",
+  "download_inapp_feat_builds": "Unlimited App Builds",
+  "download_inapp_feat_download": "Download APK & AAB anytime",
+  "download_inapp_hero_aab": "Download your AAB file.",
+  "download_inapp_hero_apk": "Download your APK file.",
+  "download_inapp_pay_once": "one-time",
+  "download_inapp_purchase_success": "Purchase successful. Unlimited downloads unlocked for this project.",
+  "download_inapp_unlock_cta": "Unlock Downloads Now"
 }

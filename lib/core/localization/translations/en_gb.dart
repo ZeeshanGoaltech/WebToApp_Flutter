@@ -39,8 +39,6 @@ const Map<String, String> EnGbTranslations = {
   'build_exit_stay': 'Stay',
   'build_exit_title': 'Exit build?',
   'build_failed': 'Build failed',
-  'build_failed_generic':
-      'The server could not compile this app. Save again and retry. If it keeps failing, the build worker needs a restart.',
   'build_format': 'Build Format',
   'build_in_2_minutes': 'Build an Android App\nin 2 Minutes',
   'build_number': 'Build Number',
@@ -303,6 +301,8 @@ const Map<String, String> EnGbTranslations = {
   'privacy_policy_subtitle': 'How we handle your data',
   'pro': 'PRO',
   'profile': 'PROFILE',
+  'project_status_building': 'Building',
+  'project_status_canceled': 'Canceled',
   'pull_to_refresh': 'Pull to Refresh',
   'pull_to_refresh_sub': 'Swipe down to reload',
   'purchase_failed': 'Purchase failed',

@@ -133,6 +133,42 @@ class BuildAppController extends GetxController {
       final builds = await Get.find<BuildsRepository>().listBuilds(appId);
       final sorted = List.of(builds)
         ..sort((a, b) => b.createdAt.compareTo(a.createdAt));
+      if (sorted.isEmpty) return;
+
+      final latest = sorted.first;
+
+      if (!latest.isTerminal) {
+        buildId.value = latest.id;
+        buildState.value = BuildState.building;
+        _applyBuild(latest);
+        _startPolling(latest.id);
+        return;
+      }
+
+      if (latest.status == 'failed') {
+        buildId.value = latest.id;
+        lastBuildError.value = _friendlyBuildError(latest.error);
+        buildState.value = BuildState.failed;
+        buildProgress.value = 0;
+        logExpanded.value = true;
+        buildLogs.assignAll([
+          r'$ Previous build failed.',
+          '✗ ${lastBuildError.value}',
+        ]);
+        return;
+      }
+
+      if (latest.status == 'canceled' || latest.status == 'cancelled') {
+        buildId.value = latest.id;
+        buildState.value = BuildState.ready;
+        buildProgress.value = 0;
+        buildLogs.assignAll([
+          r'$ Previous build was canceled.',
+          r'$ Ready to build again.',
+        ]);
+        return;
+      }
+
       BuildDto? latestSuccess;
       for (final build in sorted) {
         if (build.isSuccess) {
@@ -312,6 +348,7 @@ class BuildAppController extends GetxController {
       buildState.value = BuildState.building;
       _applyBuild(build);
       _startPolling(build.id);
+      _refreshHomeProjectStatuses();
     } on ApiException catch (e) {
       buildState.value = BuildState.ready;
       buildProgress.value = 0;
@@ -432,7 +469,15 @@ class BuildAppController extends GetxController {
       default:
         break;
     }
-    if (statusChanged) buildLogs.refresh();
+    if (statusChanged) {
+      buildLogs.refresh();
+      _refreshHomeProjectStatuses();
+    }
+  }
+
+  void _refreshHomeProjectStatuses() {
+    if (!Get.isRegistered<HomeController>()) return;
+    unawaited(Get.find<HomeController>().loadApps(silent: true));
   }
 
   String _friendlyBuildError(String? raw) {
@@ -705,6 +750,9 @@ class BuildAppController extends GetxController {
     isLeavingBuildScreen.value = true;
     AppOpenAdManager.instance.blockNextResume();
     Get.offAllNamed(AppRoutes.home);
+    if (Get.isRegistered<HomeController>()) {
+      unawaited(Get.find<HomeController>().loadApps());
+    }
   }
 
   /// Go to Home after generate — interstitial then home (RC: gotohome_inter).
@@ -744,6 +792,9 @@ class BuildAppController extends GetxController {
       buildState.value = BuildState.ready;
       buildProgress.value = 0;
       isCancellingBuildExit.value = false;
+      if (Get.isRegistered<HomeController>()) {
+        unawaited(Get.find<HomeController>().loadApps());
+      }
     }
   }
 

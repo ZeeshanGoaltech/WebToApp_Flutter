@@ -10,6 +10,7 @@ import 'package:web_to_app/core/utils/responsive.dart';
 import 'package:web_to_app/core/widgets/figma_svg_icon.dart';
 import 'package:web_to_app/data/models/app_models.dart';
 import 'package:web_to_app/modules/home/controllers/home_controller.dart';
+import 'package:web_to_app/modules/home/models/project_display_status.dart';
 import 'package:web_to_app/modules/home/models/recent_app.dart';
 import 'package:web_to_app/modules/home/widgets/recent_app_tile.dart';
 
@@ -22,6 +23,7 @@ class RecentSection extends GetView<HomeController> {
       padding: EdgeInsets.only(top: Responsive.w(context, 20)),
       child: Obx(() {
         final recentApps = controller.recentApps;
+        controller.buildSnapshots;
         final isLoading = controller.isLoadingApps.value;
         final error = controller.appsError.value;
         final openingId = controller.openingAppId.value;
@@ -32,6 +34,7 @@ class RecentSection extends GetView<HomeController> {
           actionLabel: 'see_all'.tr,
           onAction: controller.openMyAppsTab,
           apps: recentApps,
+          snapshotFor: controller.snapshotFor,
           isLoading: isLoading,
           error: error,
           openingAppId: openingId,
@@ -71,6 +74,7 @@ class MyAppsTab extends GetView<HomeController> {
             child: Obx(() {
               final apps = List<AppSummary>.from(controller.apps)
                 ..sort((a, b) => b.createdAt.compareTo(a.createdAt));
+              controller.buildSnapshots;
               final session = Get.find<SessionService>();
 
               if (!session.canAccessApps) {
@@ -99,6 +103,7 @@ class MyAppsTab extends GetView<HomeController> {
                   actionLabel: 'refresh'.tr,
                   onAction: controller.loadApps,
                   apps: apps,
+                  snapshotFor: controller.snapshotFor,
                   isLoading: controller.isLoadingApps.value,
                   error: controller.appsError.value,
                   openingAppId: controller.openingAppId.value,
@@ -135,6 +140,7 @@ class _AppsListSection extends StatelessWidget {
     required this.actionAppId,
     required this.onAppTap,
     required this.onAppMoreTap,
+    required this.snapshotFor,
     required this.emptyMessage,
     this.showHeader = true,
     this.actionLabel,
@@ -152,6 +158,7 @@ class _AppsListSection extends StatelessWidget {
   final String? actionAppId;
   final ValueChanged<AppSummary> onAppTap;
   final ValueChanged<AppSummary> onAppMoreTap;
+  final AppBuildSnapshot Function(String appId) snapshotFor;
   final String emptyMessage;
   final bool showHeader;
   final String? actionLabel;
@@ -314,6 +321,7 @@ class _AppsListSection extends StatelessWidget {
           actionAppId: actionAppId,
           onAppTap: onAppTap,
           onAppMoreTap: onAppMoreTap,
+          snapshotFor: snapshotFor,
         ),
         if (showAd) ...[
           SizedBox(height: Responsive.w(context, 12)),
@@ -329,6 +337,7 @@ class _AppsListSection extends StatelessWidget {
             actionAppId: actionAppId,
             onAppTap: onAppTap,
             onAppMoreTap: onAppMoreTap,
+            snapshotFor: snapshotFor,
           ),
       ],
     );
@@ -344,6 +353,7 @@ class _AppsCard extends StatelessWidget {
     required this.actionAppId,
     required this.onAppTap,
     required this.onAppMoreTap,
+    required this.snapshotFor,
   });
 
   final List<AppSummary> apps;
@@ -353,6 +363,7 @@ class _AppsCard extends StatelessWidget {
   final String? actionAppId;
   final ValueChanged<AppSummary> onAppTap;
   final ValueChanged<AppSummary> onAppMoreTap;
+  final AppBuildSnapshot Function(String appId) snapshotFor;
 
   @override
   Widget build(BuildContext context) {
@@ -377,7 +388,10 @@ class _AppsCard extends StatelessWidget {
         children: List.generate(apps.length, (index) {
           final summary = apps[index];
           return RecentAppTile(
-            app: RecentApp.fromSummary(summary),
+            app: RecentApp.fromSummary(
+              summary,
+              snapshot: snapshotFor(summary.id),
+            ),
             showDivider: index < apps.length - 1,
             onTap: () => onAppTap(summary),
             isLoading: openingAppId == summary.id,

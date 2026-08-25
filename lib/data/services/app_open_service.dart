@@ -14,8 +14,6 @@ class AppOpenService extends GetxService {
   /// Opens an existing app's build screen (no credit gate — gated on build actions).
   Future<void> openBuildScreen(AppSummary summary) async {
     await _prepareExistingApp(summary);
-
-    Get.find<BuildAppController>().buildAgain();
     await Get.toNamed(AppRoutes.buildApp);
   }
 

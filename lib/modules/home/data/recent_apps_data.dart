@@ -1,4 +1,5 @@
 import 'package:web_to_app/core/theme/app_colors.dart';
+import 'package:web_to_app/modules/home/models/project_display_status.dart';
 import 'package:web_to_app/modules/home/models/recent_app.dart';
 
 class RecentAppsData {
@@ -11,7 +12,7 @@ class RecentAppsData {
       url: 'myshop.com',
       initial: 'M',
       iconColor: AppColors.homeBuilt,
-      status: AppStatus.built,
+      status: ProjectDisplayStatus.built,
     ),
     RecentApp(
       id: '2',
@@ -19,7 +20,7 @@ class RecentAppsData {
       url: 'portfolio.me',
       initial: 'P',
       iconColor: AppColors.homeOrange,
-      status: AppStatus.draft,
+      status: ProjectDisplayStatus.draft,
     ),
     RecentApp(
       id: '3',
@@ -27,7 +28,7 @@ class RecentAppsData {
       url: 'myblog.com',
       initial: 'B',
       iconColor: AppColors.homeAccent,
-      status: AppStatus.built,
+      status: ProjectDisplayStatus.built,
     ),
   ];
 }

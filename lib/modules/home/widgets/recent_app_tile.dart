@@ -4,6 +4,7 @@ import 'package:web_to_app/core/theme/app_colors.dart';
 import 'package:web_to_app/core/theme/app_text_styles.dart';
 import 'package:web_to_app/core/utils/responsive.dart';
 import 'package:web_to_app/core/widgets/rtl_flip.dart';
+import 'package:web_to_app/modules/home/models/project_display_status.dart';
 import 'package:web_to_app/modules/home/models/recent_app.dart';
 
 class RecentAppTile extends StatelessWidget {
@@ -26,13 +27,7 @@ class RecentAppTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final isBuilt = app.status == AppStatus.built;
-    final statusColor = isBuilt ? AppColors.homeBuilt : AppColors.homeDraft;
-    final statusBg = isBuilt ? AppColors.homeBuiltBg : AppColors.homeDraftBg;
-    final statusIcon = isBuilt
-        ? Icons.check_circle_rounded
-        : Icons.schedule_rounded;
-    final statusLabel = isBuilt ? 'built'.tr : 'draft'.tr;
+    final style = _statusStyle(app.status, app.buildStatus);
     final iconSize = Responsive.w(context, 11.983);
 
     return Column(
@@ -96,19 +91,33 @@ class RecentAppTile extends StatelessWidget {
                         vertical: Responsive.w(context, 2),
                       ),
                       decoration: BoxDecoration(
-                        color: statusBg,
+                        color: style.backgroundColor,
                         borderRadius: BorderRadius.circular(999),
                       ),
                       child: Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          Icon(statusIcon, size: iconSize, color: statusColor),
+                          if (style.showSpinner)
+                            SizedBox(
+                              width: iconSize,
+                              height: iconSize,
+                              child: CircularProgressIndicator(
+                                strokeWidth: 2,
+                                color: style.foregroundColor,
+                              ),
+                            )
+                          else
+                            Icon(
+                              style.icon,
+                              size: iconSize,
+                              color: style.foregroundColor,
+                            ),
                           SizedBox(width: Responsive.w(context, 4)),
                           Text(
-                            statusLabel,
+                            style.labelKey.tr,
                             style: AppTextStyles.homeStatusBadge(
                               context,
-                              statusColor,
+                              style.foregroundColor,
                             ),
                           ),
                         ],
@@ -158,4 +167,59 @@ class RecentAppTile extends StatelessWidget {
       ],
     );
   }
+
+  _StatusStyle _statusStyle(
+    ProjectDisplayStatus status,
+    String? buildStatus,
+  ) {
+    return switch (status) {
+      ProjectDisplayStatus.built => _StatusStyle(
+        labelKey: 'built',
+        icon: Icons.check_circle_rounded,
+        foregroundColor: AppColors.homeBuilt,
+        backgroundColor: AppColors.homeBuiltBg,
+      ),
+      ProjectDisplayStatus.buildFailed => _StatusStyle(
+        labelKey: 'build_failed',
+        icon: Icons.error_outline_rounded,
+        foregroundColor: AppColors.homeFailed,
+        backgroundColor: AppColors.homeFailedBg,
+      ),
+      ProjectDisplayStatus.building => _StatusStyle(
+        labelKey: ProjectStatusResolver.buildingDetailLabel(buildStatus),
+        icon: Icons.sync_rounded,
+        foregroundColor: AppColors.homeBuilding,
+        backgroundColor: AppColors.homeBuildingBg,
+        showSpinner: true,
+      ),
+      ProjectDisplayStatus.canceled => _StatusStyle(
+        labelKey: 'project_status_canceled',
+        icon: Icons.cancel_outlined,
+        foregroundColor: AppColors.homeCanceled,
+        backgroundColor: AppColors.homeCanceledBg,
+      ),
+      ProjectDisplayStatus.draft => _StatusStyle(
+        labelKey: 'draft',
+        icon: Icons.edit_note_rounded,
+        foregroundColor: AppColors.homeDraft,
+        backgroundColor: AppColors.homeDraftBg,
+      ),
+    };
+  }
+}
+
+class _StatusStyle {
+  const _StatusStyle({
+    required this.labelKey,
+    required this.icon,
+    required this.foregroundColor,
+    required this.backgroundColor,
+    this.showSpinner = false,
+  });
+
+  final String labelKey;
+  final IconData icon;
+  final Color foregroundColor;
+  final Color backgroundColor;
+  final bool showSpinner;
 }

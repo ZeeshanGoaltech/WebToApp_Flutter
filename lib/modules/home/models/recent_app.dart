@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:web_to_app/core/theme/app_colors.dart';
 import 'package:web_to_app/data/models/app_models.dart';
-
-enum AppStatus { built, draft }
+import 'package:web_to_app/modules/home/models/project_display_status.dart';
 
 class RecentApp {
   const RecentApp({
@@ -12,6 +11,7 @@ class RecentApp {
     required this.initial,
     required this.iconColor,
     required this.status,
+    this.buildStatus,
   });
 
   final String id;
@@ -19,17 +19,36 @@ class RecentApp {
   final String url;
   final String initial;
   final Color iconColor;
-  final AppStatus status;
+  final ProjectDisplayStatus status;
+  final String? buildStatus;
 
-  factory RecentApp.fromSummary(AppSummary summary) {
-    final built = (summary.currentVersionCode ?? 0) > 0;
+  factory RecentApp.fromSummary(
+    AppSummary summary, {
+    AppBuildSnapshot snapshot = const AppBuildSnapshot(),
+  }) {
+    final status = ProjectStatusResolver.resolve(
+      summary: summary,
+      snapshot: snapshot,
+    );
+
     return RecentApp(
       id: summary.id,
       name: summary.name,
       url: summary.androidPackage,
       initial: summary.initial,
-      iconColor: built ? AppColors.homeBuilt : AppColors.homeAccent,
-      status: built ? AppStatus.built : AppStatus.draft,
+      iconColor: _iconColorFor(status),
+      status: status,
+      buildStatus: snapshot.latest?.status,
     );
+  }
+
+  static Color _iconColorFor(ProjectDisplayStatus status) {
+    return switch (status) {
+      ProjectDisplayStatus.built => AppColors.homeBuilt,
+      ProjectDisplayStatus.buildFailed => AppColors.homeFailed,
+      ProjectDisplayStatus.building => AppColors.homeAccent,
+      ProjectDisplayStatus.canceled => AppColors.homeMuted,
+      ProjectDisplayStatus.draft => AppColors.homeAccent,
+    };
   }
 }

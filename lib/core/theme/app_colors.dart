@@ -30,6 +30,12 @@ class AppColors {
   static const Color homeBuiltBg = Color(0xFFF0FDF4);
   static const Color homeDraft = Color(0xFFF59E0B);
   static const Color homeDraftBg = Color(0xFFFFFBEB);
+  static const Color homeBuilding = Color(0xFF6C63FF);
+  static const Color homeBuildingBg = Color(0xFFF0EFFF);
+  static const Color homeFailed = Color(0xFFEF4444);
+  static const Color homeFailedBg = Color(0xFFFEF2F2);
+  static const Color homeCanceled = Color(0xFF9999AA);
+  static const Color homeCanceledBg = Color(0xFFF3F4F6);
   static const Color homeOrange = Color(0xFFF59E0B);
 
   // Settings premium card (Figma 343:5)
