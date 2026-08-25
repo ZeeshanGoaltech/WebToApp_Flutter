@@ -39,6 +39,8 @@ const Map<String, String> EnUsTranslations = {
   'build_exit_stay': 'Stay',
   'build_exit_title': 'Exit build?',
   'build_failed': 'Build failed',
+  'build_failed_generic':
+      'The server could not compile this app. Save again and retry. If it keeps failing, the build worker needs a restart.',
   'build_format': 'Build Format',
   'build_in_2_minutes': 'Build an Android App\nin 2 Minutes',
   'build_number': 'Build Number',

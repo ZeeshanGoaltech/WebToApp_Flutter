@@ -24,7 +24,7 @@ class NavTabModel {
       case NavTabType.whatsapp:
         return 'whatsapp';
       case NavTabType.externalLink:
-        return 'externalLink';
+        return 'link';
     }
   }
 }

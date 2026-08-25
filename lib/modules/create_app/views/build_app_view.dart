@@ -279,7 +279,8 @@ class _BuildAppBody extends GetView<BuildAppController> {
                   ),
                   SizedBox(height: Responsive.h(context, 20)),
                   _KeystoreSection(),
-                  if (state == BuildState.building) ...[
+                  if (state == BuildState.building ||
+                      state == BuildState.failed) ...[
                     SizedBox(height: Responsive.h(context, 24)),
                     const _BuildProgressCard(),
                   ],
@@ -818,6 +819,9 @@ class _BuildProgressCard extends GetView<BuildAppController> {
       child: Obx(() {
         final progress = controller.buildProgress.value;
         final percent = (progress * 100).round();
+        final failed = controller.buildState.value == BuildState.failed;
+        final accent =
+            failed ? AppColors.createDelete : AppColors.createAccent;
 
         return Column(
           children: [
@@ -830,17 +834,17 @@ class _BuildProgressCard extends GetView<BuildAppController> {
                   Transform.rotate(
                     angle: -math.pi / 2,
                     child: CircularProgressIndicator(
-                      value: progress,
+                      value: failed ? 1 : progress,
                       strokeWidth: Responsive.w(context, 4),
                       backgroundColor: AppColors.createFieldBorder,
-                      color: AppColors.createAccent,
+                      color: accent,
                     ),
                   ),
                   Text(
-                    '$percent%',
+                    failed ? '!' : '$percent%',
                     style: AppTextStyles.createFieldValue(context, size: 13)
                         .copyWith(
-                          color: AppColors.createAccent,
+                          color: accent,
                           fontWeight: FontWeight.w600,
                         ),
                   ),
@@ -850,9 +854,13 @@ class _BuildProgressCard extends GetView<BuildAppController> {
             SizedBox(height: Responsive.w(context, 8)),
             Text(
               controller.buildStatusMessage,
+              textAlign: TextAlign.center,
               style: AppTextStyles.createRowSubtitle(
                 context,
-              ).copyWith(fontSize: Responsive.sp(context, 13)),
+              ).copyWith(
+                fontSize: Responsive.sp(context, 13),
+                color: failed ? AppColors.createDelete : null,
+              ),
             ),
             GestureDetector(
               onTap: controller.toggleLogExpanded,
@@ -1063,6 +1071,7 @@ class _PrimaryActionButton extends GetView<BuildAppController> {
 
       switch (state) {
         case BuildState.ready:
+        case BuildState.failed:
           label = isEnqueueing ? 'starting_build'.tr : 'generate_apk_aab'.tr;
           leading = isEnqueueing
               ? const ButtonLoadingIndicator()

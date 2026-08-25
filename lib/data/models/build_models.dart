@@ -30,7 +30,8 @@ class BuildDto {
   bool get isTerminal =>
       status == 'succeeded' ||
       status == 'failed' ||
-      status == 'canceled';
+      status == 'canceled' ||
+      status == 'cancelled';
 
   bool get isSuccess => status == 'succeeded';
 
@@ -46,8 +47,23 @@ class BuildDto {
         aabDownloadUrl: json['aabDownloadUrl'] as String?,
         apkDownloadUrl: json['apkDownloadUrl'] as String?,
         logUrl: json['logUrl'] as String?,
-        error: json['error'] as String?,
+        error: _readError(json['error']),
       );
+
+  static String? _readError(dynamic value) {
+    if (value == null) return null;
+    if (value is String) {
+      final trimmed = value.trim();
+      return trimmed.isEmpty ? null : trimmed;
+    }
+    if (value is Map) {
+      final message = value['message'];
+      if (message is String && message.trim().isNotEmpty) {
+        return message.trim();
+      }
+    }
+    return value.toString();
+  }
 }
 
 class BuildArtifactResponse {

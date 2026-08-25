@@ -8,19 +8,19 @@ class CreateAppDefaults {
 
   static List<NavTabModel> defaultNavTabs() => [
         NavTabModel(
-          id: '1',
+          id: 'home',
           type: NavTabType.home,
           label: L10n.navTabLabel(NavTabType.home),
         ),
         NavTabModel(
-          id: '2',
+          id: 'privacy',
           type: NavTabType.privacyPolicy,
           label: L10n.navTabLabel(NavTabType.privacyPolicy),
         ),
       ];
 
   static List<OnboardingSlideModel> defaultSlides() => [
-        OnboardingSlideModel(id: '1'),
+        OnboardingSlideModel(id: 'slide_1'),
       ];
 
   static const Map<String, bool> defaultPermissions = {

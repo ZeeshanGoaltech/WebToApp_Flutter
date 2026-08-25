@@ -64,22 +64,31 @@ class ApiDebugLogInterceptor extends http.Interceptor {
       final ms = started == null
           ? null
           : DateTime.now().millisecondsSinceEpoch - started;
+      final pendingLog = _isPendingBuildLogError(err);
 
       final lines = <String>[
-        '✖ ERROR',
+        if (pendingLog) '◀ PENDING' else '✖ ERROR',
         '${err.requestOptions.method} ${_fullUrl(err.requestOptions)}',
         'Type: ${err.type.name}',
         if (err.response?.statusCode != null)
           'Status: ${err.response!.statusCode}',
         if (ms != null) 'Duration: ${ms}ms',
-        if (err.response?.data != null)
+        if (pendingLog)
+          'Note: Build logs not uploaded yet — retrying'
+        else if (err.response?.data != null)
           'Body: ${_pretty(err.response!.data)}'
         else if (err.message != null)
           'Message: ${err.message}',
       ];
-      _logBlock(lines, isError: true);
+      _logBlock(lines, isError: !pendingLog);
     }
     handler.next(err);
+  }
+
+  static bool _isPendingBuildLogError(http.DioException err) {
+    final response = err.response;
+    if (response == null) return false;
+    return _isPendingBuildLog(response);
   }
 
   static bool _isPendingBuildLog(http.Response response) {

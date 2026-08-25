@@ -22,6 +22,7 @@ import 'package:web_to_app/data/models/build_models.dart';
 import 'package:web_to_app/data/models/signing_models.dart';
 import 'package:web_to_app/data/repositories/builds_repository.dart';
 import 'package:web_to_app/data/repositories/signing_repository.dart';
+import 'package:web_to_app/data/services/app_sync_service.dart';
 import 'package:web_to_app/modules/create_app/controllers/create_app_controller.dart';
 import 'package:web_to_app/modules/create_app/models/preview_mode.dart';
 import 'package:web_to_app/modules/create_app/services/create_app_picker_service.dart';
@@ -51,6 +52,7 @@ class BuildAppController extends GetxController {
   final downloadingFormat = Rxn<BuildFormat>();
   final sharingFormat = Rxn<BuildFormat>();
 
+  final lastBuildError = RxnString();
   final buildLogs = <String>[r'$ Starting build process...'].obs;
 
   Timer? _pollTimer;
@@ -95,6 +97,9 @@ class BuildAppController extends GetxController {
   }
 
   String get buildStatusMessage {
+    if (buildState.value == BuildState.failed) {
+      return lastBuildError.value ?? 'build_failed'.tr;
+    }
     final p = buildProgress.value;
     if (buildState.value == BuildState.success) return 'build_complete'.tr;
     if (p < 0.25) return 'build_queued'.tr;
@@ -267,19 +272,14 @@ class BuildAppController extends GetxController {
     await InterstitialAdTrigger.showGenerateBundleApkInterstitial();
 
     final create = Get.find<CreateAppController>();
-    final appId = create.appId.value;
-    final appVersionId = create.appVersionId.value;
-
-    if (appId == null || appVersionId == null) {
-      AppToast.error('error'.tr, description: 'save_before_build'.tr);
-      return;
-    }
 
     isEnqueueing.value = true;
     isLeavingBuildScreen.value = false;
+    lastBuildError.value = null;
     buildProgress.value = 0.1;
     logExpanded.value = false;
     buildLogs.assignAll([
+      r'$ Saving latest app config...',
       r'$ Configuring signing...',
       r'$ Enqueueing build...',
     ]);
@@ -287,6 +287,17 @@ class BuildAppController extends GetxController {
     _pollTimer?.cancel();
 
     try {
+      await Get.find<AppSyncService>().persistWizard(create);
+
+      final appId = create.appId.value;
+      final appVersionId = create.appVersionId.value;
+      if (appId == null || appVersionId == null) {
+        throw ApiException(
+          code: 'validation_error',
+          message: 'save_before_build'.tr,
+        );
+      }
+
       await _ensureSigningConfigured(appId);
 
       final buildsRepo = Get.find<BuildsRepository>();
@@ -325,7 +336,10 @@ class BuildAppController extends GetxController {
         _applyBuild(build);
         if (build.isTerminal) {
           _pollTimer?.cancel();
-          await _refreshLogs(id, logUrl: build.logUrl);
+          final logUrl = build.logUrl;
+          if (build.isSuccess || (logUrl != null && logUrl.isNotEmpty)) {
+            await _refreshLogs(id, logUrl: logUrl);
+          }
         }
       } on ApiException catch (e) {
         if (e.statusCode == 401 || e.code == 'unauthenticated') {
@@ -395,16 +409,19 @@ class BuildAppController extends GetxController {
       case 'failed':
         if (statusChanged) {
           _stopQueueEstimate();
-          buildState.value = BuildState.ready;
-          buildProgress.value = 0;
-          buildLogs.add('✗ ${build.error ?? 'build_failed'.tr}');
+          final message = _friendlyBuildError(build.error);
+          lastBuildError.value = message;
+          buildState.value = BuildState.failed;
+          logExpanded.value = true;
+          buildLogs.add('✗ $message');
           AppToast.error(
             'build_failed'.tr,
-            description: build.error ?? 'unknown_error'.tr,
+            description: message,
           );
           _pollTimer?.cancel();
         }
       case 'canceled':
+      case 'cancelled':
         if (statusChanged) {
           _stopQueueEstimate();
           buildState.value = BuildState.ready;
@@ -415,6 +432,20 @@ class BuildAppController extends GetxController {
         break;
     }
     if (statusChanged) buildLogs.refresh();
+  }
+
+  String _friendlyBuildError(String? raw) {
+    final value = (raw ?? '').trim();
+    if (value.isEmpty) return 'build_failed_generic'.tr;
+    final normalized =
+        value.toLowerCase().replaceAll(RegExp(r'[_-]+'), ' ').trim();
+    if (normalized == 'build error' ||
+        normalized == 'build failed' ||
+        normalized == 'unknown error' ||
+        normalized == 'internal error') {
+      return 'build_failed_generic'.tr;
+    }
+    return value;
   }
 
   void _startQueueEstimate(int? estimatedWaitSeconds) {
@@ -648,6 +679,7 @@ class BuildAppController extends GetxController {
     _stopLogRetry();
     _stopQueueEstimate();
     _lastBuildStatus = null;
+    lastBuildError.value = null;
     isLeavingBuildScreen.value = false;
     buildState.value = BuildState.ready;
     buildProgress.value = 0;
