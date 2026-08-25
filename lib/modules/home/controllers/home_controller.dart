@@ -5,7 +5,9 @@ import 'package:web_to_app/core/ads/interstitial_ad_trigger.dart';
 import 'package:web_to_app/core/services/analytics_service.dart';
 import 'package:web_to_app/core/services/push_notification_service.dart';
 import 'package:web_to_app/core/services/guest_auth_service.dart';
+import 'package:web_to_app/core/services/guest_migration_service.dart';
 import 'package:web_to_app/core/services/session_service.dart';
+import 'package:web_to_app/core/services/token_storage.dart';
 import 'package:web_to_app/core/utils/app_error_handler.dart';
 import 'package:web_to_app/core/utils/app_toast.dart';
 import 'package:web_to_app/data/models/app_models.dart';
@@ -58,8 +60,30 @@ class HomeController extends GetxController {
   @override
   void onInit() {
     super.onInit();
-    loadApps();
-    _requestNotificationPermission();
+    unawaited(_bootstrap());
+  }
+
+  Future<void> _bootstrap() async {
+    await _recoverGuestProjectsIfNeeded();
+    await loadApps();
+    await _requestNotificationPermission();
+  }
+
+  Future<void> _recoverGuestProjectsIfNeeded() async {
+    final session = Get.find<SessionService>();
+    if (!session.isAuthenticated) return;
+
+    try {
+      final created = await Get.find<GuestMigrationService>()
+          .recoverGuestProjectsIfNeeded(Get.find<TokenStorage>());
+      if (created > 0) {
+        AppToast.success(
+          'guest_projects_migrated'.tr,
+          description: 'guest_projects_migrated_desc'
+              .trParams({'count': '$created'}),
+        );
+      }
+    } catch (_) {}
   }
 
   @override

@@ -118,16 +118,32 @@ class AuthController extends GetxController {
       final authRepo = Get.find<AuthRepository>();
       final session = Get.find<SessionService>();
       final storage = Get.find<TokenStorage>();
-      final wasGuest = session.isGuest.value && storage.hasTokens;
-      final guestRefreshToken = wasGuest ? storage.refreshToken : null;
+      final migration = Get.find<GuestMigrationService>();
 
-      List<GuestAppExport> exportedProjects = const [];
-      if (wasGuest) {
+      // Guest projects must be exported BEFORE login overwrites tokens.
+      final wasGuestSession =
+          session.isGuest.value || storage.isGuestMode;
+      final guestRefreshToken =
+          wasGuestSession && storage.hasTokens ? storage.refreshToken : null;
+
+      var exportedProjects = <GuestAppExport>[];
+      if (wasGuestSession) {
         try {
-          exportedProjects =
-              await Get.find<GuestMigrationService>().exportGuestProjects();
+          if (storage.hasTokens) {
+            exportedProjects = await migration.exportGuestProjects();
+          } else {
+            final guestEmail = storage.guestEmail;
+            final guestPassword = storage.guestPassword;
+            if (guestEmail != null &&
+                guestEmail.isNotEmpty &&
+                guestPassword != null &&
+                guestPassword.isNotEmpty) {
+              await authRepo.login(email: guestEmail, password: guestPassword);
+              exportedProjects = await migration.exportGuestProjects();
+            }
+          }
         } catch (_) {
-          exportedProjects = const [];
+          exportedProjects = <GuestAppExport>[];
         }
       }
 
@@ -144,14 +160,66 @@ class AuthController extends GetxController {
 
       await session.setAuthResult(result);
 
-      if (wasGuest) {
+      // If export was empty (or session flags missed), recover via saved guest creds.
+      if (exportedProjects.isEmpty) {
+        final guestEmail = storage.guestEmail;
+        final guestPassword = storage.guestPassword;
+        if (guestEmail != null &&
+            guestEmail.isNotEmpty &&
+            guestPassword != null &&
+            guestPassword.isNotEmpty) {
+          try {
+            final userAccess = storage.accessToken;
+            final userRefresh = storage.refreshToken;
+            final userExpires = storage.accessExpiresAt;
+
+            await authRepo.login(email: guestEmail, password: guestPassword);
+            exportedProjects = await migration.exportGuestProjects();
+
+            if (userAccess != null &&
+                userRefresh != null &&
+                userExpires != null) {
+              final remainingSec = ((userExpires -
+                          DateTime.now().millisecondsSinceEpoch) /
+                      1000)
+                  .ceil()
+                  .clamp(60, 86400);
+              await storage.saveTokens(
+                accessToken: userAccess,
+                refreshToken: userRefresh,
+                expiresInSec: remainingSec,
+              );
+            } else {
+              // Fallback: re-login as the real user.
+              if (isSignIn) {
+                await authRepo.login(email: email, password: password);
+              } else {
+                await authRepo.login(email: email, password: password);
+              }
+            }
+          } catch (_) {
+            try {
+              if (isSignIn) {
+                await authRepo.login(email: email, password: password);
+              } else {
+                await authRepo.login(email: email, password: password);
+              }
+            } catch (_) {}
+          }
+        }
+      }
+
+      if (exportedProjects.isNotEmpty) {
         try {
-          final migrated = await Get.find<GuestMigrationService>()
-              .migrateGuestApps(
+          final migrated = await migration.migrateGuestApps(
             guestRefreshToken: guestRefreshToken,
             exportedProjects: exportedProjects,
           );
-          if (migrated != 0) {
+          await migration.markMigrationCompleted(storage);
+
+          final verified = migrated > 0 ||
+              await migration.areProjectsPresent(exportedProjects);
+          if (verified) {
             AppToast.success(
               'guest_projects_migrated'.tr,
               description: migrated > 0
@@ -159,9 +227,17 @@ class AuthController extends GetxController {
                       .trParams({'count': '$migrated'})
                   : 'guest_login_benefit_projects'.tr,
             );
+          } else {
+            AppToast.info(
+              'guest_projects_migrate_failed'.tr,
+              description: 'guest_projects_migrate_failed_desc'.tr,
+            );
           }
         } catch (_) {
-          // Migration is best-effort; user can still use the signed-in account.
+          AppToast.info(
+            'guest_projects_migrate_failed'.tr,
+            description: 'guest_projects_migrate_failed_desc'.tr,
+          );
         }
       }
 

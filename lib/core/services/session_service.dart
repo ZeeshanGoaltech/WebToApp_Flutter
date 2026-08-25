@@ -60,6 +60,7 @@ class SessionService extends GetxService {
     final storage = Get.find<TokenStorage>();
     await storage.clearAuth();
     await storage.setGuestMode(true);
+    await storage.clearGuestProjectsRecoveredFlag();
   }
 
   void restoreGuestSession() {

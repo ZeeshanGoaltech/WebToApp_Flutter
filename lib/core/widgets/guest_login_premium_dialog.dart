@@ -97,18 +97,45 @@ class _GuestLoginPremiumDialog extends StatelessWidget {
                       letterSpacing: -0.3,
                     ),
                   ),
-                  SizedBox(height: Responsive.w(context, 10)),
+                  SizedBox(height: Responsive.w(context, 12)),
+                  Container(
+                    width: double.infinity,
+                    padding: EdgeInsets.symmetric(
+                      horizontal: Responsive.w(context, 14),
+                      vertical: Responsive.w(context, 12),
+                    ),
+                    decoration: BoxDecoration(
+                      color: AppColors.homeAccentLight,
+                      borderRadius: BorderRadius.circular(
+                        Responsive.w(context, 14),
+                      ),
+                      border: Border.all(
+                        color: AppColors.homeAccent.withValues(alpha: 0.18),
+                      ),
+                    ),
+                    child: Text(
+                      'guest_login_dialog_highlight'.tr,
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        color: AppColors.homeAccent,
+                        fontSize: Responsive.w(context, 14),
+                        fontWeight: FontWeight.w700,
+                        height: 1.4,
+                      ),
+                    ),
+                  ),
+                  SizedBox(height: Responsive.w(context, 12)),
                   Text(
                     'guest_login_dialog_subtitle'.tr,
                     textAlign: TextAlign.center,
                     style: TextStyle(
                       color: _body,
-                      fontSize: Responsive.w(context, 14),
+                      fontSize: Responsive.w(context, 13.5),
                       fontWeight: FontWeight.w500,
                       height: 1.45,
                     ),
                   ),
-                  SizedBox(height: Responsive.w(context, 18)),
+                  SizedBox(height: Responsive.w(context, 16)),
                   Container(
                     width: double.infinity,
                     padding: EdgeInsets.all(Responsive.w(context, 14)),

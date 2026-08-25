@@ -18,6 +18,7 @@ class TokenStorage {
   static const _deviceIdKey = 'device_id';
   static const _guestEmailKey = 'guest_email';
   static const _guestPasswordKey = 'guest_password';
+  static const _guestProjectsRecoveredKey = 'guest_projects_recovered';
 
   static Future<TokenStorage> create() async {
     final prefs = await SharedPreferences.getInstance();
@@ -60,6 +61,20 @@ class TokenStorage {
 
   String? get guestEmail => _prefs.getString(_guestEmailKey);
   String? get guestPassword => _prefs.getString(_guestPasswordKey);
+
+  bool get hasRecoveredGuestProjects =>
+      _prefs.getBool(_guestProjectsRecoveredKey) ?? false;
+
+  Future<void> markGuestProjectsRecovered() =>
+      _prefs.setBool(_guestProjectsRecoveredKey, true);
+
+  Future<void> clearGuestProjectsRecoveredFlag() =>
+      _prefs.remove(_guestProjectsRecoveredKey);
+
+  Future<void> clearGuestCredentials() async {
+    await _prefs.remove(_guestEmailKey);
+    await _prefs.remove(_guestPasswordKey);
+  }
 
   String get deviceId {
     final existing = _prefs.getString(_deviceIdKey);
