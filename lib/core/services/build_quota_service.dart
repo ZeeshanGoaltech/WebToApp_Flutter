@@ -21,6 +21,9 @@ import 'package:web_to_app/core/services/session_service.dart';
 /// APK + AAB downloads for that project only** (not `threescan_inapp` credits).
 /// Remaining `threescan_inapp` paid credits also allow downloads (1 credit each).
 ///
+/// Weekly / monthly / yearly / lifetime subscriptions do **not** unlock
+/// downloads — only credits, project unlock, or free RC quota.
+///
 /// Download free quota values: `off` = no free (paywall first), `1`/`2`/… = free
 /// then paywall, `unlimited` = unlimited free.
 class BuildQuotaService {
@@ -53,10 +56,9 @@ class BuildQuotaService {
     await prefs.setInt(key, next);
   }
 
-  /// Premium (weekly/monthly/yearly/lifetime) → unlimited.
-  /// Remaining paid `threescan_inapp` credits → can download.
-  Future<bool> _hasSubscriptionOrThreescanCredits() async {
-    if (_isPremium) return true;
+  /// Paid `threescan_inapp` credits → can download (1 credit each).
+  /// Subscriptions are intentionally ignored here.
+  Future<bool> _hasThreescanCredits() async {
     await CreditService.instance.initialize();
     return CreditService.instance.paidCredits.value > 0;
   }
@@ -100,13 +102,14 @@ class BuildQuotaService {
         ),
       );
 
-  /// Allow download when premium, threescan credits, this [appId] is unlocked,
-  /// or free RC quota remains. Else open download paywall.
+  /// Allow download when threescan credits, this [appId] is unlocked,
+  /// or free RC quota remains. Else open download / credits paywall.
+  /// Subscriptions (weekly/monthly/yearly/lifetime) do not grant downloads.
   Future<bool> ensureCanDownloadBundleApkOrOpenIap({
     required bool isAab,
     String? appId,
   }) async {
-    if (await _hasSubscriptionOrThreescanCredits()) return true;
+    if (await _hasThreescanCredits()) return true;
 
     if (await DownloadTokenService.instance.isProjectUnlocked(appId)) {
       return true;
@@ -117,13 +120,14 @@ class BuildQuotaService {
         ? RemoteConfigKeys.bundleDownloadInapp
         : RemoteConfigKeys.apkDownloadInapp;
 
-    if (await _canUsePersisted(
-      countKey: countKey,
-      limitReader: () =>
-          AdRemoteConfigService.instance.getDownloadFreeQuotaLimit(rcKey),
-    )) {
+    // Free download quota must not treat subscription as unlimited.
+    final limit = AdRemoteConfigService.instance.getDownloadFreeQuotaLimit(rcKey);
+    if (limit == null) {
+      // `unlimited` free downloads from RC.
       return true;
     }
+    final count = await _getPersistedCount(countKey);
+    if (count < limit) return true;
 
     final bought = await Get.toNamed(
       AppRoutes.downloadInApp,
@@ -137,7 +141,7 @@ class BuildQuotaService {
     if (await DownloadTokenService.instance.isProjectUnlocked(appId)) {
       return true;
     }
-    return _hasSubscriptionOrThreescanCredits();
+    return _hasThreescanCredits();
   }
 
   /// RC `buildagain_sub` — Build Again button (persists; default 3).
@@ -159,14 +163,13 @@ class BuildQuotaService {
     await _incrementPersisted(_buildAgainCountKey);
   }
 
-  /// Consume order: premium / project unlock → no count;
+  /// Consume order: project unlock → no count;
   /// threescan credit → free RC counter.
+  /// Subscriptions do not skip consumption.
   Future<void> recordSuccessfulDownload({
     required bool isAab,
     String? appId,
   }) async {
-    if (_isPremium) return;
-
     if (await DownloadTokenService.instance.isProjectUnlocked(appId)) {
       return;
     }

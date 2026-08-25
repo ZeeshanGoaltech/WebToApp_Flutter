@@ -129,12 +129,6 @@ class LifetimePremiumView extends GetView<LifetimePremiumController> {
                             ),
                             const SizedBox(height: 12),
                             _FeatureRow(
-                              iconAsset: AppAssets.lifetimeIconDownload,
-                              text: 'lifetime_feat_scan'.tr,
-                              fallbackIcon: Icons.apps_rounded,
-                            ),
-                            const SizedBox(height: 12),
-                            _FeatureRow(
                               iconAsset: AppAssets.lifetimeIconAds,
                               text: 'lifetime_feat_ads'.tr,
                               fallbackIcon: Icons.block_rounded,

@@ -12,7 +12,6 @@ import 'package:web_to_app/core/services/credit_service.dart';
 import 'package:web_to_app/core/services/download_token_service.dart';
 import 'package:web_to_app/core/services/iap_product_id_resolver.dart';
 import 'package:web_to_app/core/services/premium_service.dart';
-import 'package:web_to_app/core/services/session_service.dart';
 import 'package:web_to_app/core/utils/app_toast.dart';
 
 const String kDownloadInappMissingPrice = '--';
@@ -76,14 +75,12 @@ class DownloadInappController extends GetxController {
 
   Future<void> _initAndMaybeSkip() async {
     await CreditService.instance.initialize();
-    final premium = PremiumService.isPremiumCached ||
-        (Get.isRegistered<SessionService>() &&
-            Get.find<SessionService>().hasPremiumAccess);
+    // Subscriptions do not unlock downloads — only credits / project unlock.
     final hasThreescanCredits = CreditService.instance.paidCredits.value > 0;
     _wasUnlockedWhenOpened =
         await DownloadTokenService.instance.isProjectUnlocked(appId.value);
 
-    if (premium || hasThreescanCredits || _wasUnlockedWhenOpened) {
+    if (hasThreescanCredits || _wasUnlockedWhenOpened) {
       finish(purchased: true);
       return;
     }

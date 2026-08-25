@@ -5,7 +5,6 @@ class IapData {
 
   static List<String> get features => [
         'iap_convert_website'.tr,
-        'iap_download_apk'.tr,
         'iap_fast_conversion'.tr,
         'iap_ads_free'.tr,
       ];
