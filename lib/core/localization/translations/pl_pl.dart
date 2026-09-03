@@ -386,6 +386,7 @@ const Map<String, String> PlPlTranslations = {
   'skip': 'Pomiń',
   'slide_desc_placeholder': 'Opis slajdu',
   'slide_of': 'Slajd @current z @total',
+  'remove_slide': 'Usuń slajd',
   'slide_title': 'Tytuł slajdu',
   'slide_title_hint': 'Witamy w Twojej aplikacji',
   'slide_title_placeholder': 'Tytuł slajdu',

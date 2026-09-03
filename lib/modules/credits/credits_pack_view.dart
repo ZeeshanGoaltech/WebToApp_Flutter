@@ -74,6 +74,7 @@ class _CreditsPackViewState extends State<CreditsPackView> {
     CreditService.instance.paidCredits.removeListener(_onCreditsChanged);
     AdPresentationGate.markIapClosed();
     AdPresentationGate.reconcileIapVisibility();
+    AppOpenAdManager.instance.blockNextResume();
     AppOpenAdManager.instance.blockAppOpenAds =
         AdPresentationGate.isOnIapRoute;
     super.dispose();
@@ -253,7 +254,9 @@ class _CreditsPackViewState extends State<CreditsPackView> {
   Future<void> _openUrl(String url) async {
     final uri = Uri.tryParse(url);
     if (uri == null) return;
+    AppOpenAdManager.instance.blockNextResume();
     final ok = await launchUrl(uri, mode: LaunchMode.externalApplication);
+    AppOpenAdManager.instance.blockNextResume();
     if (!ok && mounted) {
       AppToast.info('request_failed'.tr, description: url);
     }

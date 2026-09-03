@@ -386,6 +386,7 @@ const Map<String, String> SvSeTranslations = {
   'skip': 'Hoppa över',
   'slide_desc_placeholder': 'Bildbeskrivning',
   'slide_of': 'Bild @current av @total',
+  'remove_slide': 'Ta bort bild',
   'slide_title': 'Bildtitel',
   'slide_title_hint': 'Välkommen till din app',
   'slide_title_placeholder': 'Bildtitel',

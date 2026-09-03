@@ -386,6 +386,7 @@ const Map<String, String> EsCoTranslations = {
   'skip': 'Omitir',
   'slide_desc_placeholder': 'Descripción de la diapositiva',
   'slide_of': 'Diapositiva @current de @total',
+  'remove_slide': 'Eliminar diapositiva',
   'slide_title': 'Título de la diapositiva',
   'slide_title_hint': 'Bienvenido a tu app',
   'slide_title_placeholder': 'Título de la diapositiva',

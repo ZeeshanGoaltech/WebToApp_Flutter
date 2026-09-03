@@ -386,6 +386,7 @@ const Map<String, String> ViVnTranslations = {
   'skip': 'Bỏ qua',
   'slide_desc_placeholder': 'Mô tả slide',
   'slide_of': 'Slide @current / @total',
+  'remove_slide': 'Xóa slide',
   'slide_title': 'Tiêu đề slide',
   'slide_title_hint': 'Chào mừng đến ứng dụng của bạn',
   'slide_title_placeholder': 'Tiêu đề slide',

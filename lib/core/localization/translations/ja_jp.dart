@@ -386,6 +386,7 @@ const Map<String, String> JaJpTranslations = {
   'skip': 'スキップ',
   'slide_desc_placeholder': 'スライドの説明',
   'slide_of': 'スライド @current / @total',
+  'remove_slide': 'スライドを削除',
   'slide_title': 'スライドタイトル',
   'slide_title_hint': 'アプリへようこそ',
   'slide_title_placeholder': 'スライドタイトル',

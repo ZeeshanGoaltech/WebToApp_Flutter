@@ -386,6 +386,7 @@ const Map<String, String> MsMyTranslations = {
   'skip': 'Langkau',
   'slide_desc_placeholder': 'Penerangan slaid',
   'slide_of': 'Slaid @current daripada @total',
+  'remove_slide': 'Buang slaid',
   'slide_title': 'Tajuk Slaid',
   'slide_title_hint': 'Selamat datang ke aplikasi anda',
   'slide_title_placeholder': 'Tajuk Slaid',

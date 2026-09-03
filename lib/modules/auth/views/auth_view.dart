@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:web_to_app/core/constants/app_assets.dart';
 import 'package:web_to_app/core/services/language_service.dart';
@@ -17,30 +18,44 @@ class AuthView extends GetView<AuthController> {
   Widget build(BuildContext context) {
     final hPad = Responsive.w(context, 24);
 
-    return Scaffold(
-      backgroundColor: AppColors.authBackground,
-      body: SafeArea(
-        child: SingleChildScrollView(
-          padding: EdgeInsets.only(bottom: Responsive.w(context, 32)),
-          child: Obx(() {
-            // Rebuild translated strings when app language changes.
-            final _ = Get.find<LanguageService>().selectedLanguageId.value;
-            final isSignIn = controller.isSignIn;
-            return Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                SizedBox(height: Responsive.h(context, isSignIn ? 39 : 46)),
-                _AuthHeader(isSignIn: isSignIn),
-                SizedBox(height: Responsive.h(context, isSignIn ? 40 : 39)),
-                Padding(
-                  padding: EdgeInsets.symmetric(horizontal: hPad),
-                  child: _AuthCard(isSignIn: isSignIn),
-                ),
-                SizedBox(height: Responsive.w(context, 27)),
-                _AuthFooter(isSignIn: isSignIn),
-              ],
-            );
-          }),
+    return PopScope(
+      canPop: false,
+      onPopInvokedWithResult: (didPop, _) async {
+        if (didPop) return;
+        final shouldClose = await controller.handleSystemBack();
+        if (!shouldClose || !context.mounted) return;
+
+        if (Get.key.currentState?.canPop() ?? false) {
+          Get.back();
+        } else {
+          await SystemNavigator.pop();
+        }
+      },
+      child: Scaffold(
+        backgroundColor: AppColors.authBackground,
+        body: SafeArea(
+          child: SingleChildScrollView(
+            padding: EdgeInsets.only(bottom: Responsive.w(context, 32)),
+            child: Obx(() {
+              // Rebuild translated strings when app language changes.
+              final _ = Get.find<LanguageService>().selectedLanguageId.value;
+              final isSignIn = controller.isSignIn;
+              return Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  SizedBox(height: Responsive.h(context, isSignIn ? 39 : 46)),
+                  _AuthHeader(isSignIn: isSignIn),
+                  SizedBox(height: Responsive.h(context, isSignIn ? 40 : 39)),
+                  Padding(
+                    padding: EdgeInsets.symmetric(horizontal: hPad),
+                    child: _AuthCard(isSignIn: isSignIn),
+                  ),
+                  SizedBox(height: Responsive.w(context, 27)),
+                  _AuthFooter(isSignIn: isSignIn),
+                ],
+              );
+            }),
+          ),
         ),
       ),
     );

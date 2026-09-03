@@ -386,6 +386,7 @@ const Map<String, String> UzUzTranslations = {
   'skip': 'Oʻtkazib yuborish',
   'slide_desc_placeholder': 'Slayd tavsifi',
   'slide_of': '@total ning @current slaydni',
+  'remove_slide': 'Slaydni olib tashlash',
   'slide_title': 'Slayd sarlavhasi',
   'slide_title_hint': 'Ilovangizga xush kelibsiz',
   'slide_title_placeholder': 'Slayd sarlavhasi',

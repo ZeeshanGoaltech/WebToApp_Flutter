@@ -386,6 +386,7 @@ const Map<String, String> DeDeTranslations = {
   'skip': 'Überspringen',
   'slide_desc_placeholder': 'Folienbeschreibung',
   'slide_of': 'Folie @current von @total',
+  'remove_slide': 'Folie entfernen',
   'slide_title': 'Folientitel',
   'slide_title_hint': 'Willkommen in Ihrer App',
   'slide_title_placeholder': 'Folientitel',

@@ -386,6 +386,7 @@ const Map<String, String> KoKrTranslations = {
   'skip': '건너뛰기',
   'slide_desc_placeholder': '슬라이드 설명',
   'slide_of': '슬라이드 @current / @total',
+  'remove_slide': '슬라이드 삭제',
   'slide_title': '슬라이드 제목',
   'slide_title_hint': '앱에 오신 것을 환영합니다',
   'slide_title_placeholder': '슬라이드 제목',

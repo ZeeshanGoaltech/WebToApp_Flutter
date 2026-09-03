@@ -146,6 +146,30 @@ class _SlideEditor extends GetView<CreateAppController> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            if (controller.canRemoveSlide) ...[
+              Align(
+                alignment: AlignmentDirectional.centerEnd,
+                child: GestureDetector(
+                  onTap: () => controller.removeSlide(index),
+                  behavior: HitTestBehavior.opaque,
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      FigmaSvgIcon(
+                        asset: CreateAppAssets.delete,
+                        size: Responsive.w(context, 19.995),
+                      ),
+                      SizedBox(width: Responsive.w(context, 6)),
+                      Text(
+                        'remove_slide'.tr,
+                        style: AppTextStyles.createLink(context),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+              SizedBox(height: Responsive.w(context, 12)),
+            ],
             if (slide.imagePath != null)
               CreateImagePreview(
                 imagePath: slide.imagePath!,
@@ -163,7 +187,7 @@ class _SlideEditor extends GetView<CreateAppController> {
             _SlideTitleField(slide: slide, index: index),
             SizedBox(height: Responsive.w(context, 16)),
             _DescriptionField(
-              key: ValueKey('desc_$index'),
+              key: ValueKey('desc_${slide.id}'),
               slide: slide,
               onChanged: controller.notifySlideChanged,
             ),
@@ -251,7 +275,7 @@ class _SlideTitleField extends GetView<CreateAppController> {
   @override
   Widget build(BuildContext context) {
     return _SlideBoundField(
-      key: ValueKey('title_$index'),
+      key: ValueKey('title_${slide.id}'),
       initialValue: slide.title,
       onChanged: (v) {
         slide.title = v;
@@ -276,7 +300,7 @@ class _CtaLabelField extends GetView<CreateAppController> {
   @override
   Widget build(BuildContext context) {
     return _SlideBoundField(
-      key: ValueKey('cta_$index'),
+      key: ValueKey('cta_${slide.id}'),
       initialValue: slide.ctaLabel,
       onChanged: (v) {
         slide.ctaLabel = v;

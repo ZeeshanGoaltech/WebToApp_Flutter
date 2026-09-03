@@ -386,6 +386,7 @@ const Map<String, String> AfZaTranslations = {
   'skip': 'Slaan oor',
   'slide_desc_placeholder': 'Skyfie beskrywing',
   'slide_of': 'Skyfie @current van @total',
+  'remove_slide': 'Verwyder skyfie',
   'slide_title': 'Skyfie titel',
   'slide_title_hint': 'Welkom by jou toepassing',
   'slide_title_placeholder': 'Skyfie titel',

@@ -386,6 +386,7 @@ const Map<String, String> EnGbTranslations = {
   'skip': 'Skip',
   'slide_desc_placeholder': 'Slide description',
   'slide_of': 'Slide @current of @total',
+  'remove_slide': 'Remove Slide',
   'slide_title': 'Slide Title',
   'slide_title_hint': 'Welcome to your app',
   'slide_title_placeholder': 'Slide Title',

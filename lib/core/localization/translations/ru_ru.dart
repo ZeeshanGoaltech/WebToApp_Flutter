@@ -386,6 +386,7 @@ const Map<String, String> RuRuTranslations = {
   'skip': 'Пропустить',
   'slide_desc_placeholder': 'Описание слайда',
   'slide_of': 'Слайд @current из @total',
+  'remove_slide': 'Удалить слайд',
   'slide_title': 'Заголовок слайда',
   'slide_title_hint': 'Добро пожаловать в приложение',
   'slide_title_placeholder': 'Заголовок слайда',

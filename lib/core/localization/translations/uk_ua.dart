@@ -386,6 +386,7 @@ const Map<String, String> UkUaTranslations = {
   'skip': 'Пропустити',
   'slide_desc_placeholder': 'Опис слайда',
   'slide_of': 'Слайд @current з @total',
+  'remove_slide': 'Видалити слайд',
   'slide_title': 'Заголовок слайда',
   'slide_title_hint': 'Ласкаво просимо до застосунку',
   'slide_title_placeholder': 'Заголовок слайда',

@@ -33,36 +33,47 @@ class SettingsController extends GetxController {
     final context = Get.context;
     if (context == null) return;
 
-    AppOpenAdManager.instance.blockNextResume();
-    final rating = await showRateUsDialog(
-      context,
-      initial: appRating.value > 0 ? appRating.value : 5,
-    );
-    AppOpenAdManager.instance.blockNextResume();
-    if (rating == null) return;
-
-    appRating.value = rating;
-    AppToast.success('rate_dialog_thanks'.tr);
-
-    if (rating >= 4) {
-      final opened = await launchUrl(
-        Uri.parse(AppInfo.playStoreUrl),
-        mode: LaunchMode.externalApplication,
+    final openAds = AppOpenAdManager.instance;
+    openAds.blockNextResume();
+    openAds.suppressWhileOverlay = true;
+    try {
+      final rating = await showRateUsDialog(
+        context,
+        initial: appRating.value > 0 ? appRating.value : 5,
       );
-      if (!opened) {
-        AppToast.info(
-          'rate_app'.tr,
-          description: 'rate_dialog_store_unavailable'.tr,
-        );
-      }
-      return;
-    }
+      openAds.blockNextResume();
+      if (rating == null) return;
 
-    final subject = Uri.encodeComponent('rate_dialog_feedback_subject'.tr);
-    final uri = Uri.parse('mailto:${AppInfo.feedbackEmail}?subject=$subject');
-    final opened = await launchUrl(uri, mode: LaunchMode.externalApplication);
-    if (!opened) {
-      AppToast.info(AppInfo.feedbackEmail);
+      appRating.value = rating;
+      AppToast.success('rate_dialog_thanks'.tr);
+
+      if (rating >= 4) {
+        openAds.blockNextResume();
+        final opened = await launchUrl(
+          Uri.parse(AppInfo.playStoreUrl),
+          mode: LaunchMode.externalApplication,
+        );
+        openAds.blockNextResume();
+        if (!opened) {
+          AppToast.info(
+            'rate_app'.tr,
+            description: 'rate_dialog_store_unavailable'.tr,
+          );
+        }
+        return;
+      }
+
+      openAds.blockNextResume();
+      final subject = Uri.encodeComponent('rate_dialog_feedback_subject'.tr);
+      final uri = Uri.parse('mailto:${AppInfo.feedbackEmail}?subject=$subject');
+      final opened = await launchUrl(uri, mode: LaunchMode.externalApplication);
+      openAds.blockNextResume();
+      if (!opened) {
+        AppToast.info(AppInfo.feedbackEmail);
+      }
+    } finally {
+      openAds.suppressWhileOverlay = false;
+      openAds.blockNextResume();
     }
   }
 

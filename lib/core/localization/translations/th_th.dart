@@ -386,6 +386,7 @@ const Map<String, String> ThThTranslations = {
   'skip': 'ข้าม',
   'slide_desc_placeholder': 'คำอธิบายสไลด์',
   'slide_of': 'สไลด์ @current จาก @total',
+  'remove_slide': 'ลบสไลด์',
   'slide_title': 'ชื่อสไลด์',
   'slide_title_hint': 'ยินดีต้อนรับสู่แอปของคุณ',
   'slide_title_placeholder': 'ชื่อสไลด์',

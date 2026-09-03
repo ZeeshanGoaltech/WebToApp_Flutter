@@ -30,6 +30,7 @@ class LaunchFlow {
   static void _leaveIap() {
     AdPresentationGate.markIapClosed();
     AdPresentationGate.reconcileIapVisibility();
+    AppOpenAdManager.instance.blockNextResume();
     AppOpenAdManager.instance.blockAppOpenAds = false;
   }
 

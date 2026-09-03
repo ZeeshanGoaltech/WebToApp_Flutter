@@ -386,6 +386,7 @@ const Map<String, String> PtPtTranslations = {
   'skip': 'Ignorar',
   'slide_desc_placeholder': 'Descrição do diapositivo',
   'slide_of': 'Diapositivo @current de @total',
+  'remove_slide': 'Remover diapositivo',
   'slide_title': 'Título do diapositivo',
   'slide_title_hint': 'Bem-vindo à sua app',
   'slide_title_placeholder': 'Título do diapositivo',

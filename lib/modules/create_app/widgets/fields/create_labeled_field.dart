@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:web_to_app/core/theme/app_colors.dart';
 import 'package:web_to_app/core/theme/app_text_styles.dart';
 import 'package:web_to_app/core/utils/responsive.dart';
@@ -16,6 +17,7 @@ class CreateLabeledField extends StatefulWidget {
     this.monospace = false,
     this.errorText,
     this.keyboardType,
+    this.inputFormatters,
   });
 
   final String label;
@@ -26,6 +28,7 @@ class CreateLabeledField extends StatefulWidget {
   final bool monospace;
   final String? errorText;
   final TextInputType? keyboardType;
+  final List<TextInputFormatter>? inputFormatters;
 
   @override
   State<CreateLabeledField> createState() => _CreateLabeledFieldState();
@@ -62,6 +65,10 @@ class _CreateLabeledFieldState extends State<CreateLabeledField> {
   bool get _focused => _focusNode.hasFocus;
   bool get _hasError =>
       widget.errorText != null && widget.errorText!.isNotEmpty;
+  bool get _isNumericKeyboard =>
+      widget.keyboardType == TextInputType.number ||
+      widget.keyboardType ==
+          const TextInputType.numberWithOptions(decimal: true);
 
   TextStyle _inputStyle(BuildContext context) {
     final base = widget.monospace
@@ -121,6 +128,12 @@ class _CreateLabeledFieldState extends State<CreateLabeledField> {
                       controller: widget.controller,
                       focusNode: _focusNode,
                       keyboardType: widget.keyboardType,
+                      inputFormatters: widget.inputFormatters,
+                      autocorrect: !_isNumericKeyboard,
+                      enableSuggestions: !_isNumericKeyboard,
+                      spellCheckConfiguration: _isNumericKeyboard
+                          ? const SpellCheckConfiguration.disabled()
+                          : null,
                       maxLines: 1,
                       textAlignVertical: TextAlignVertical.center,
                       style: _inputStyle(context),

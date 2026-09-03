@@ -49,7 +49,8 @@ class AuthTextField extends StatelessWidget {
           child: ValueListenableBuilder<TextEditingValue>(
             valueListenable: controller,
             builder: (context, value, _) {
-              final showVisibilityToggle = onToggleVisibility != null;
+              final showVisibilityToggle =
+                  onToggleVisibility != null && value.text.isNotEmpty;
 
               return TextField(
                 controller: controller,

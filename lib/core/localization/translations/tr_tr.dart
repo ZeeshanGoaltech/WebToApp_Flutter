@@ -386,6 +386,7 @@ const Map<String, String> TrTrTranslations = {
   'skip': 'Atlamak',
   'slide_desc_placeholder': 'Slayt açıklaması',
   'slide_of': '@total\'nin @current\'sini kaydırın',
+  'remove_slide': 'Slaytı kaldır',
   'slide_title': 'Slayt Başlığı',
   'slide_title_hint': 'Uygulamanıza hoş geldiniz',
   'slide_title_placeholder': 'Slayt Başlığı',

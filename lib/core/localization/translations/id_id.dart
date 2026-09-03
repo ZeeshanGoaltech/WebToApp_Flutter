@@ -386,6 +386,7 @@ const Map<String, String> IdIdTranslations = {
   'skip': 'Lewati',
   'slide_desc_placeholder': 'Deskripsi slide',
   'slide_of': 'Slide @current dari @total',
+  'remove_slide': 'Hapus slide',
   'slide_title': 'Judul Slide',
   'slide_title_hint': 'Selamat datang di aplikasi Anda',
   'slide_title_placeholder': 'Judul Slide',

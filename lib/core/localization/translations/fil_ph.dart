@@ -386,6 +386,7 @@ const Map<String, String> FilPhTranslations = {
   'skip': 'Laktawan',
   'slide_desc_placeholder': 'Deskripsyon ng slide',
   'slide_of': 'Slide @current ng @total',
+  'remove_slide': 'Alisin ang slide',
   'slide_title': 'Pamagat ng Slide',
   'slide_title_hint': 'Welcome sa app mo',
   'slide_title_placeholder': 'Pamagat ng Slide',

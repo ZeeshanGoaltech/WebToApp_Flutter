@@ -72,6 +72,8 @@ class CreateAppController extends GetxController {
     return CreateAppValidator.isSlideComplete(slides.last);
   }
 
+  bool get canRemoveSlide => slides.length > 1;
+
   void notifySlideChanged() => slides.refresh();
 
   String? errorFor(String key) => fieldErrors[key];
@@ -306,6 +308,21 @@ class CreateAppController extends GetxController {
       id: DateTime.now().millisecondsSinceEpoch.toString(),
     ));
     currentSlideIndex.value = slides.length - 1;
+  }
+
+  void removeSlide(int index) {
+    if (!canRemoveSlide) return;
+    if (index < 0 || index >= slides.length) return;
+
+    slides.removeAt(index);
+    fieldErrors.removeWhere((key, _) => key.startsWith('slide'));
+
+    if (currentSlideIndex.value >= slides.length) {
+      currentSlideIndex.value = slides.length - 1;
+    } else if (currentSlideIndex.value > index) {
+      currentSlideIndex.value--;
+    }
+    slides.refresh();
   }
 
   void removeSlideImage(int index) {

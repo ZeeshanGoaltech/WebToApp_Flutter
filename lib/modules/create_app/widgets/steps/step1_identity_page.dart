@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:web_to_app/core/ads/ad_placements.dart';
 import 'package:web_to_app/core/ads/widgets/small_native_ad_widget.dart';
@@ -126,6 +127,9 @@ class Step1IdentityPage extends GetView<CreateAppController> {
                             hint: '1',
                             errorText: controller.errorFor('versionCode'),
                             keyboardType: TextInputType.number,
+                            inputFormatters: [
+                              FilteringTextInputFormatter.digitsOnly,
+                            ],
                           )),
                     ),
                     SizedBox(width: Responsive.w(context, 8)),
@@ -135,6 +139,14 @@ class Step1IdentityPage extends GetView<CreateAppController> {
                             controller: controller.versionNameController,
                             hint: '1.0.0',
                             errorText: controller.errorFor('versionName'),
+                            keyboardType: const TextInputType.numberWithOptions(
+                              decimal: true,
+                            ),
+                            inputFormatters: [
+                              FilteringTextInputFormatter.allow(
+                                RegExp(r'[0-9.]'),
+                              ),
+                            ],
                           )),
                     ),
                   ],

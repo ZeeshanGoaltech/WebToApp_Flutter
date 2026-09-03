@@ -386,6 +386,7 @@ const Map<String, String> HiInTranslations = {
   'skip': 'छोडना',
   'slide_desc_placeholder': 'स्लाइड विवरण',
   'slide_of': '@total की स्लाइड @current',
+  'remove_slide': 'स्लाइड हटाएं',
   'slide_title': 'स्लाइड शीर्षक',
   'slide_title_hint': 'आपके ऐप में आपका स्वागत है',
   'slide_title_placeholder': 'स्लाइड शीर्षक',

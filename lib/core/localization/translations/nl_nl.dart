@@ -386,6 +386,7 @@ const Map<String, String> NlNlTranslations = {
   'skip': 'Overslaan',
   'slide_desc_placeholder': 'Slidebeschrijving',
   'slide_of': 'Slide @current van @total',
+  'remove_slide': 'Slide verwijderen',
   'slide_title': 'Slidetitel',
   'slide_title_hint': 'Welkom bij je app',
   'slide_title_placeholder': 'Slidetitel',

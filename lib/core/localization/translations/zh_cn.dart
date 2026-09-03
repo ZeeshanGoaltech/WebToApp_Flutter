@@ -386,6 +386,7 @@ const Map<String, String> ZhCnTranslations = {
   'skip': '跳过',
   'slide_desc_placeholder': '幻灯片描述',
   'slide_of': '第 @current 张，共 @total 张',
+  'remove_slide': '删除幻灯片',
   'slide_title': '幻灯片标题',
   'slide_title_hint': '欢迎使用您的应用',
   'slide_title_placeholder': '幻灯片标题',

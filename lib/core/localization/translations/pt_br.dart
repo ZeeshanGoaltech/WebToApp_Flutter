@@ -386,6 +386,7 @@ const Map<String, String> PtBrTranslations = {
   'skip': 'Pular',
   'slide_desc_placeholder': 'Descrição do slide',
   'slide_of': 'Slide @current de @total',
+  'remove_slide': 'Remover slide',
   'slide_title': 'Título do slide',
   'slide_title_hint': 'Bem-vindo ao seu app',
   'slide_title_placeholder': 'Título do slide',

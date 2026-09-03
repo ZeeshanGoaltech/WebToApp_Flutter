@@ -386,6 +386,7 @@ const Map<String, String> BnBdTranslations = {
   'skip': 'এড়িয়ে যান',
   'slide_desc_placeholder': 'স্লাইড বিবরণ',
   'slide_of': '@total এর @current স্লাইড করুন',
+  'remove_slide': 'স্লাইড সরান',
   'slide_title': 'স্লাইড শিরোনাম',
   'slide_title_hint': 'আপনার অ্যাপে স্বাগতম',
   'slide_title_placeholder': 'স্লাইড শিরোনাম',

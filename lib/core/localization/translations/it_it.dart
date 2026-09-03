@@ -386,6 +386,7 @@ const Map<String, String> ItItTranslations = {
   'skip': 'Salta',
   'slide_desc_placeholder': 'Descrizione slide',
   'slide_of': 'Slide @current di @total',
+  'remove_slide': 'Rimuovi slide',
   'slide_title': 'Titolo slide',
   'slide_title_hint': 'Benvenuto nella tua app',
   'slide_title_placeholder': 'Titolo slide',

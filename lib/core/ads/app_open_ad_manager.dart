@@ -33,9 +33,18 @@ class AppOpenAdManager {
   bool _isResuming = false;
   bool blockAppOpenAds = false;
 
-  /// Block app open ad on next resume after specific user actions:
-  /// rate us dialog, privacy policy, terms, share app, generate APK screen.
+  /// One-shot: skip the next real background→resume open-ad attempt.
+  /// Used for rate-us, terms, privacy, share, store / external links.
+  bool _skipNextResume = false;
+
+  /// While true (e.g. rate-us dialog), never show an app-open ad.
+  bool suppressWhileOverlay = false;
+
+  /// Block app open ad on the next resume after external actions
+  /// (rate us → store, privacy, terms, share app, leave IAP, etc.).
+  /// One-shot + cooldown so a long Play Store / browser visit still skips.
   void blockNextResume() {
+    _skipNextResume = true;
     _lastExternalActionTime = DateTime.now();
   }
 
@@ -64,7 +73,7 @@ class AppOpenAdManager {
       return;
     }
     // Only skip while the paywall is actually on screen (not a stale flag).
-    if (AdPresentationGate.isOnIapRoute) {
+    if (_isBlockedSubscriptionRoute) {
       developer.log('[AppOpen] pause ignored — on IAP route');
       return;
     }
@@ -77,10 +86,16 @@ class AppOpenAdManager {
     _wasBackgrounded = false;
   }
 
-  /// Clear sticky IAP blocks when no longer on `/iap`.
+  /// Clear sticky IAP blocks when no longer on a paywall.
+  /// Keeps a pre-navigation lock ([AdPresentationGate.iapVisible]) so open ads
+  /// cannot fire during Get.toNamed → /iap.
   void _reconcileIapBlock() {
-    AdPresentationGate.reconcileIapVisibility();
     if (AdPresentationGate.isOnIapRoute) {
+      AdPresentationGate.iapVisible = true;
+      blockAppOpenAds = true;
+      return;
+    }
+    if (AdPresentationGate.iapVisible) {
       blockAppOpenAds = true;
       return;
     }
@@ -90,6 +105,26 @@ class AppOpenAdManager {
       );
     }
     blockAppOpenAds = false;
+  }
+
+  bool get _hasBlockingOverlay {
+    if (suppressWhileOverlay) return true;
+    if (Get.isDialogOpen == true) return true;
+    if (Get.isBottomSheetOpen == true) return true;
+    return false;
+  }
+
+  bool get _isBlockedSubscriptionRoute {
+    final route = Get.currentRoute;
+    return route == AppRoutes.iap ||
+        route.startsWith('${AppRoutes.iap}?') ||
+        route == AppRoutes.lifetimePremium ||
+        route.startsWith('${AppRoutes.lifetimePremium}?') ||
+        route == AppRoutes.downloadInApp ||
+        route.startsWith('${AppRoutes.downloadInApp}?') ||
+        route == AppRoutes.creditsPack ||
+        route.startsWith('${AppRoutes.creditsPack}?') ||
+        AdPresentationGate.isIapActive;
   }
 
   /// Call from app lifecycle `resumed` (skip cold start / splash).
@@ -102,6 +137,13 @@ class AppOpenAdManager {
     }
     _wasBackgrounded = false;
 
+    // Consume one-shot skip from rate-us / terms / privacy / share / store.
+    if (_skipNextResume) {
+      _skipNextResume = false;
+      developer.log('[AppOpen] resume skip — external action (one-shot)');
+      return;
+    }
+
     if (_isResuming || _isShowing || blockAppOpenAds) {
       developer.log(
         '[AppOpen] resume skip — busy '
@@ -109,11 +151,15 @@ class AppOpenAdManager {
       );
       return;
     }
+    if (_hasBlockingOverlay) {
+      developer.log('[AppOpen] resume skip — dialog/overlay open');
+      return;
+    }
     if (_isPremium) {
       developer.log('[AppOpen] resume skip — premium');
       return;
     }
-    if (!AdPresentationGate.canShowAppOpen) {
+    if (!AdPresentationGate.canShowAppOpen || _isBlockedSubscriptionRoute) {
       developer.log('[AppOpen] skip — IAP or interstitial active');
       return;
     }
@@ -165,9 +211,10 @@ class AppOpenAdManager {
       return;
     }
 
+    // Long visits to Play Store / browser (rate, terms, privacy, share).
     if (_lastExternalActionTime != null &&
         now.difference(_lastExternalActionTime!) <
-            const Duration(seconds: 30)) {
+            const Duration(minutes: 5)) {
       developer.log('[AppOpen] skip — post-external-action cooldown');
       return;
     }
@@ -189,9 +236,11 @@ class AppOpenAdManager {
       );
 
       if (blockAppOpenAds ||
+          _skipNextResume ||
+          _hasBlockingOverlay ||
           !AdPresentationGate.canShowAppOpen ||
-          AdPresentationGate.isOnIapRoute) {
-        developer.log('[AppOpen] abort after delay — IAP/interstitial');
+          _isBlockedSubscriptionRoute) {
+        developer.log('[AppOpen] abort after delay — IAP/overlay/interstitial');
         return;
       }
 
@@ -207,7 +256,10 @@ class AppOpenAdManager {
       developer.log('[AppOpen] load skip — premium');
       return;
     }
-    if (!AdPresentationGate.canShowAppOpen || AdPresentationGate.isOnIapRoute) {
+    if (!AdPresentationGate.canShowAppOpen ||
+        _isBlockedSubscriptionRoute ||
+        _hasBlockingOverlay ||
+        _skipNextResume) {
       return;
     }
 
@@ -294,9 +346,11 @@ class AppOpenAdManager {
       }
 
       if (!AdPresentationGate.canShowAppOpen ||
-          AdPresentationGate.isOnIapRoute ||
-          blockAppOpenAds) {
-        developer.log('[AppOpen] discard loaded ad — IAP active');
+          _isBlockedSubscriptionRoute ||
+          blockAppOpenAds ||
+          _hasBlockingOverlay ||
+          _skipNextResume) {
+        developer.log('[AppOpen] discard loaded ad — IAP/overlay active');
         try {
           ad.dispose();
         } catch (_) {}
@@ -351,6 +405,8 @@ class AppOpenAdManager {
     _isShowing = false;
     _isResuming = false;
     _wasBackgrounded = false;
+    _skipNextResume = false;
+    suppressWhileOverlay = false;
     AdPresentationGate.appOpenBusy = false;
   }
 }

@@ -190,10 +190,12 @@ class DownloadInappController extends GetxController {
   }
 
   Future<void> _openExternalUrl(String url) async {
+    AppOpenAdManager.instance.blockNextResume();
     final opened = await launchUrl(
       Uri.parse(url),
       mode: LaunchMode.externalApplication,
     );
+    AppOpenAdManager.instance.blockNextResume();
     if (!opened) {
       AppToast.info('request_failed'.tr, description: url);
     }
@@ -208,6 +210,7 @@ class DownloadInappController extends GetxController {
     }
     AdPresentationGate.markIapClosed();
     AdPresentationGate.reconcileIapVisibility();
+    AppOpenAdManager.instance.blockNextResume();
     AppOpenAdManager.instance.blockAppOpenAds =
         AdPresentationGate.isOnIapRoute;
     super.onClose();

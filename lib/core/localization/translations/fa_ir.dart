@@ -386,6 +386,7 @@ const Map<String, String> FaIrTranslations = {
   'skip': 'پرش کنید',
   'slide_desc_placeholder': 'توضیحات اسلاید',
   'slide_of': 'اسلاید @current از @total',
+  'remove_slide': 'حذف اسلاید',
   'slide_title': 'عنوان اسلاید',
   'slide_title_hint': 'به برنامه خود خوش آمدید',
   'slide_title_placeholder': 'عنوان اسلاید',

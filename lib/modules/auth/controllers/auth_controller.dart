@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:web_to_app/core/ads/ad_presentation_gate.dart';
 import 'package:web_to_app/core/api/api_exception.dart';
 import 'package:web_to_app/core/navigation/auth_redirect.dart';
 import 'package:web_to_app/core/navigation/launch_flow.dart';
@@ -21,6 +22,7 @@ class AuthController extends GetxController {
   final RxBool isGuestLoading = false.obs;
   final RxBool isResettingPassword = false.obs;
   final fieldErrors = <String, String>{}.obs;
+  DateTime? _lastBackPressAt;
 
   final fullNameController = TextEditingController();
   final emailController = TextEditingController();
@@ -43,7 +45,12 @@ class AuthController extends GetxController {
     void updateFormFilled() => formFilled.value = _isFormFilled();
     fullNameController.addListener(updateFormFilled);
     emailController.addListener(updateFormFilled);
-    passwordController.addListener(updateFormFilled);
+    passwordController.addListener(() {
+      updateFormFilled();
+      if (passwordController.text.isEmpty) {
+        obscurePassword.value = true;
+      }
+    });
     ever(activeTab, (_) => formFilled.value = _isFormFilled());
   }
 
@@ -315,6 +322,23 @@ class AuthController extends GetxController {
     } finally {
       isGuestLoading.value = false;
     }
+  }
+
+  /// Root auth (splash / first-install): first back shows toast, second exits.
+  /// Pushed auth (e.g. build login gate): allow normal pop.
+  Future<bool> handleSystemBack() async {
+    if (AdPresentationGate.shouldBlockBack) return false;
+
+    if (Get.key.currentState?.canPop() ?? false) return true;
+
+    final now = DateTime.now();
+    if (_lastBackPressAt == null ||
+        now.difference(_lastBackPressAt!) > const Duration(seconds: 2)) {
+      _lastBackPressAt = now;
+      await AppToast.info('press_back_again_to_close'.tr);
+      return false;
+    }
+    return true;
   }
 
   @override

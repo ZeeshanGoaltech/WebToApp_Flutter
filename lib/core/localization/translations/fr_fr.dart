@@ -386,6 +386,7 @@ const Map<String, String> FrFrTranslations = {
   'skip': 'Passer',
   'slide_desc_placeholder': 'Description de la diapositive',
   'slide_of': 'Diapositive @current sur @total',
+  'remove_slide': 'Supprimer la diapositive',
   'slide_title': 'Titre de la diapositive',
   'slide_title_hint': 'Bienvenue dans votre app',
   'slide_title_placeholder': 'Titre de la diapositive',

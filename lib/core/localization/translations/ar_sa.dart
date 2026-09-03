@@ -386,6 +386,7 @@ const Map<String, String> ArSaTranslations = {
   'skip': 'يتخطى',
   'slide_desc_placeholder': 'وصف الشريحة',
   'slide_of': 'قم بإزاحة @current من @total',
+  'remove_slide': 'إزالة الشريحة',
   'slide_title': 'عنوان الشريحة',
   'slide_title_hint': 'مرحبا بكم في التطبيق الخاص بك',
   'slide_title_placeholder': 'عنوان الشريحة',
