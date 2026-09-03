@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:web_to_app/app/routes/app_routes.dart';
+import 'package:web_to_app/core/ads/interstitial_ad_trigger.dart';
 import 'package:web_to_app/core/localization/l10n.dart';
 import 'package:web_to_app/core/api/api_exception.dart';
 import 'package:web_to_app/core/services/build_login_gate.dart';
@@ -119,6 +120,9 @@ class CreateAppController extends GetxController {
         return;
       }
     }
+
+    // Session-wise interstitial on Build App → (not on Home).
+    await InterstitialAdTrigger.showBuildAppInterstitialIfNeeded();
 
     isSaving.value = true;
     try {

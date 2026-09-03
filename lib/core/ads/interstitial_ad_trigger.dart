@@ -1,5 +1,4 @@
-﻿import 'dart:async';
-import 'dart:developer' as developer;
+﻿import 'dart:developer' as developer;
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -18,9 +17,8 @@ class InterstitialAdTrigger {
   static final Set<String> _currentlyShowing = {};
 
   /// Session flag — resets when the process is killed.
-  static bool _firstClickShownThisSession = false;
-  static Future<void>? _firstClickFuture;
-  static DateTime? _homeProTapAt;
+  static bool _buildAppShownThisSession = false;
+  static Future<void>? _buildAppFuture;
 
   static bool get _isPremium {
     if (Get.isRegistered<SessionService>() &&
@@ -30,64 +28,45 @@ class InterstitialAdTrigger {
     return PremiumService.isPremiumCached;
   }
 
-  /// True while the once-per-session first-click interstitial is loading/showing.
-  static bool get isFirstClickInFlight => _firstClickFuture != null;
+  /// True while the once-per-session Build App interstitial is loading/showing.
+  static bool get isBuildAppInterInFlight => _buildAppFuture != null;
 
-  /// Call from the Home Pro button so that tap does not trigger 1st-click inter.
-  static void markHomeProTap() {
-    _homeProTapAt = DateTime.now();
-  }
-
-  /// Run [action] only after the first-click interstitial is done (or skipped).
-  /// Use for any Home navigation so the next screen opens after ad dismiss.
-  static Future<T> afterFirstClick<T>(FutureOr<T> Function() action) async {
-    await showFirstClickInterstitialIfNeeded();
-    return await action();
-  }
-
-  /// Home-screen first click interstitial — once per app session.
-  /// Skips when the Pro button was just tapped.
+  /// Live Preview "Build App" interstitial — once per app session.
   /// Concurrent callers share the same in-flight Future (so navigation can wait).
-  static Future<void> showFirstClickInterstitialIfNeeded() async {
+  static Future<void> showBuildAppInterstitialIfNeeded() async {
     if (_isPremium) return;
-    if (_firstClickShownThisSession) return;
+    if (_buildAppShownThisSession) return;
 
-    final inFlight = _firstClickFuture;
+    final inFlight = _buildAppFuture;
     if (inFlight != null) {
       await inFlight;
       return;
     }
 
-    final proTapAt = _homeProTapAt;
-    if (proTapAt != null &&
-        DateTime.now().difference(proTapAt) < const Duration(milliseconds: 800)) {
-      return;
-    }
-
     if (!AdPresentationGate.canShowInterstitial) {
       developer.log(
-        '[InterstitialAdTrigger] skip first_click — IAP/app-open active',
+        '[InterstitialAdTrigger] skip build_app_inter — IAP/app-open active',
       );
       return;
     }
 
-    final future = _runFirstClickInterstitial();
-    _firstClickFuture = future;
+    final future = _runBuildAppInterstitial();
+    _buildAppFuture = future;
     try {
       await future;
     } finally {
-      if (identical(_firstClickFuture, future)) {
-        _firstClickFuture = null;
+      if (identical(_buildAppFuture, future)) {
+        _buildAppFuture = null;
       }
     }
   }
 
-  static Future<void> _runFirstClickInterstitial() async {
+  static Future<void> _runBuildAppInterstitial() async {
     final shown = await showPlacement(
       placementId: AdPlacements.firstClickInter,
     );
     if (shown) {
-      _firstClickShownThisSession = true;
+      _buildAppShownThisSession = true;
     }
   }
 

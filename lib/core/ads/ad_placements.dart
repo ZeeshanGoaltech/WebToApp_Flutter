@@ -10,7 +10,7 @@ abstract final class AdPlacements {
   static const languageNative = 'language_native';
   static const onboardingNative = 'onboarding_native';
 
-  /// Home-screen first click interstitial (once per app session).
+  /// Live Preview "Build App" interstitial (once per app session).
   static const firstClickInter = 'first_click_inter';
 
   /// App Open ad.

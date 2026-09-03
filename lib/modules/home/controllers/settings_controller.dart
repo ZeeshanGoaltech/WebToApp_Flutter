@@ -3,7 +3,6 @@ import 'package:share_plus/share_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:web_to_app/app/routes/app_routes.dart';
 import 'package:web_to_app/core/ads/app_open_ad_manager.dart';
-import 'package:web_to_app/core/ads/interstitial_ad_trigger.dart';
 import 'package:web_to_app/core/constants/app_info.dart';
 import 'package:web_to_app/core/navigation/launch_flow.dart';
 import 'package:web_to_app/core/services/session_service.dart';
@@ -20,19 +19,17 @@ class SettingsController extends GetxController {
     if (isLoggingOut.value) return;
     isLoggingOut.value = true;
     try {
-      await InterstitialAdTrigger.afterFirstClick(() async {
-        await Get.find<SessionService>().clearSession();
-        Get.find<HomeController>().apps.clear();
-        Get.offAllNamed(AppRoutes.auth);
-      });
+      await Get.find<SessionService>().clearSession();
+      Get.find<HomeController>().apps.clear();
+      Get.offAllNamed(AppRoutes.auth);
     } finally {
       isLoggingOut.value = false;
     }
   }
 
-  Future<void> openAuth() => InterstitialAdTrigger.afterFirstClick(
-        () => Get.offAllNamed(AppRoutes.auth),
-      );
+  Future<void> openAuth() async {
+    await Get.offAllNamed(AppRoutes.auth);
+  }
 
   Future<void> showRateDialog() async {
     final context = Get.context;
@@ -108,15 +105,13 @@ class SettingsController extends GetxController {
   }
 
   Future<void> upgradeToPremium() async {
-    await InterstitialAdTrigger.afterFirstClick(() {
-      LaunchFlow.openIapFromSettings();
-    });
+    LaunchFlow.openIapFromSettings();
   }
 
-  Future<void> openLanguage() => InterstitialAdTrigger.afterFirstClick(() {
-        if (Get.isRegistered<LanguageController>()) {
-          Get.delete<LanguageController>(force: true);
-        }
-        Get.toNamed(AppRoutes.language, arguments: 'settings');
-      });
+  Future<void> openLanguage() async {
+    if (Get.isRegistered<LanguageController>()) {
+      Get.delete<LanguageController>(force: true);
+    }
+    await Get.toNamed(AppRoutes.language, arguments: 'settings');
+  }
 }
