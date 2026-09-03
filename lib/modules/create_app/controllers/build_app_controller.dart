@@ -50,7 +50,7 @@ class BuildAppController extends GetxController {
   final isSharingApp = false.obs;
   final downloadingFormat = Rxn<BuildFormat>();
   final sharingFormat = Rxn<BuildFormat>();
-  /// Share APK / AAB visible only after that format is unlocked (free or IAP).
+  /// Share APK / AAB visible only after that format is unlocked via IAP.
   final apkShareUnlocked = false.obs;
   final aabShareUnlocked = false.obs;
 
@@ -107,12 +107,13 @@ class BuildAppController extends GetxController {
       : apkShareUnlocked.value;
 
   Future<void> refreshShareUnlocks() async {
-    final appId = _createAppOrNull?.appId.value;
+    final packageName =
+        _createAppOrNull?.packageNameController.text.trim();
     final tokens = DownloadTokenService.instance;
     apkShareUnlocked.value =
-        await tokens.isFormatUnlocked(appId, isAab: false);
+        await tokens.isFormatUnlocked(packageName, isAab: false);
     aabShareUnlocked.value =
-        await tokens.isFormatUnlocked(appId, isAab: true);
+        await tokens.isFormatUnlocked(packageName, isAab: true);
   }
 
   void _onDownloadUnlockChanged() {
@@ -621,11 +622,12 @@ class BuildAppController extends GetxController {
     if (id == null || buildState.value == BuildState.downloading) return;
 
     final isAab = format == BuildFormat.aab;
-    final appId = _createAppOrNull?.appId.value;
+    final packageName =
+        _createAppOrNull?.packageNameController.text.trim();
     // Paywall only on Download tap when free quota is over — nothing after download.
     if (!await BuildQuotaService.instance.ensureCanDownloadBundleApkOrOpenIap(
       isAab: isAab,
-      appId: appId,
+      packageName: packageName,
     )) {
       return;
     }
@@ -652,7 +654,7 @@ class BuildAppController extends GetxController {
       if (launched) {
         await BuildQuotaService.instance.recordSuccessfulDownload(
           isAab: isAab,
-          appId: appId,
+          packageName: packageName,
         );
       } else {
         AppToast.info('download'.tr, description: 'could_not_open_download'.tr);

@@ -14,10 +14,8 @@ import 'package:web_to_app/core/services/session_service.dart';
 /// - `generateBundleApkSubLimit` — Generate Bundle & APK
 /// - `buildAgainSubLimit` — Build Again button (default 3)
 ///
-/// Downloads:
-/// - **One free project** on first install (unlimited APK + AAB).
-/// - Later projects: `apkdownload_inapp` unlocks APK only;
-///   `bundledownload_inapp` unlocks AAB only (same project, separate buys).
+/// Downloads: no free quota. `apkdownload_inapp` unlocks APK only and
+/// `bundledownload_inapp` unlocks AAB only (scoped by package name).
 ///
 /// Weekly / monthly / yearly / lifetime subscriptions do **not** unlock
 /// downloads.
@@ -84,19 +82,20 @@ class BuildQuotaService {
         limitReader: () => AppFeatureConfig.generateBundleApkSubLimit,
       );
 
-  /// Allow download when this format is unlocked for [appId], or when the
-  /// one free project can still be claimed. Else open the matching paywall.
+  /// Allow download when this format is already unlocked for [packageName].
+  /// Else open the matching paywall (no free downloads).
   Future<bool> ensureCanDownloadBundleApkOrOpenIap({
     required bool isAab,
-    String? appId,
+    String? packageName,
   }) async {
     final tokens = DownloadTokenService.instance;
-
-    if (await tokens.isFormatUnlocked(appId, isAab: isAab)) {
-      return true;
+    final pkg = DownloadTokenService.normalizePackage(packageName);
+    if (pkg == null) {
+      // Package is required to scope unlocks — never grant without it.
+      return false;
     }
 
-    if (await tokens.tryClaimFreeProject(appId, isAab: isAab)) {
+    if (await tokens.isFormatUnlocked(pkg, isAab: isAab)) {
       return true;
     }
 
@@ -104,12 +103,12 @@ class BuildQuotaService {
       AppRoutes.downloadInApp,
       arguments: <String, dynamic>{
         'isAab': isAab,
-        'appId': appId,
+        'packageName': pkg,
       },
     );
     if (bought == true) return true;
 
-    return tokens.isFormatUnlocked(appId, isAab: isAab);
+    return tokens.isFormatUnlocked(pkg, isAab: isAab);
   }
 
   /// Build Again button (persists; default 3).
@@ -129,13 +128,12 @@ class BuildQuotaService {
     await _incrementPersisted(_buildAgainCountKey);
   }
 
-  /// Format unlock already covers unlimited downloads — nothing to consume.
+  /// Paid format unlock covers unlimited downloads — nothing to consume.
   Future<void> recordSuccessfulDownload({
     required bool isAab,
-    String? appId,
+    String? packageName,
   }) async {
-    // Free claim / paid unlock happen in [ensureCanDownloadBundleApkOrOpenIap]
-    // and purchase handlers. No per-download counters.
+    // Paid unlock happens in purchase handlers. No per-download counters.
   }
 
   @Deprecated('Use ensureCanOpenBuildFlowOrOpenIap')

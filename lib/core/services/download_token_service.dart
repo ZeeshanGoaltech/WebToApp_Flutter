@@ -1,41 +1,53 @@
 import 'package:flutter/foundation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-/// Per-project **per-format** unlock for APK / AAB downloads.
+/// Per-**package** (unique) per-format unlock for APK / AAB downloads.
 ///
-/// - First install: **one free project** (unlimited APK + AAB for that project).
-/// - Later projects: buy separately —
-///   - `apkdownload_inapp` → APK only for that project
-///   - `bundledownload_inapp` → AAB only for that project
+/// Keys use Android package name (not app display name / backend appId), so
+/// two projects with the same name but different packages stay separate.
+///
+/// No free downloads — every package/format needs a purchase:
+/// - `apkdownload_inapp` → APK only for that package
+/// - `bundledownload_inapp` → AAB only for that package
 class DownloadTokenService {
   DownloadTokenService._();
   static final DownloadTokenService instance = DownloadTokenService._();
 
-  /// Tokens like `appId:apk` / `appId:aab`.
-  static const _unlockedFormatsKey = 'download_inapp_unlocked_formats';
+  /// Tokens like `pkg:com.example.app:apk` / `pkg:com.example.app:aab`.
+  static const _unlockedFormatsKey = 'download_inapp_unlocked_formats_v2';
 
-  /// Legacy: project IDs unlocked for both formats (old combined unlock).
+  /// Legacy unlock stores (cleared on migrate).
+  static const _legacyFormatsKey = 'download_inapp_unlocked_formats';
   static const _legacyUnlockedProjectsKey = 'download_inapp_unlocked_projects';
 
-  static const _processedKey = 'download_inapp_unlock_processed';
-  static const _freeClaimedKey = 'download_inapp_free_project_claimed';
-  static const _freeProjectIdKey = 'download_inapp_free_project_id';
+  static const _processedKey = 'download_inapp_unlock_processed_v2';
 
-  /// Legacy global free-download counters (migrated once).
+  /// Legacy free-download flags (cleared; free path removed).
+  static const _freeClaimedKey = 'download_inapp_free_package_claimed';
+  static const _freePackageKey = 'download_inapp_free_package_name';
+  static const _legacyFreeClaimedKey = 'download_inapp_free_project_claimed';
+  static const _legacyFreeProjectIdKey = 'download_inapp_free_project_id';
   static const _legacyApkCountKey = 'apkdownload_inapp_count';
   static const _legacyAabCountKey = 'bundledownload_inapp_count';
 
-  /// Set before launching the download IAP so purchase success can unlock
-  /// the correct project + format.
-  String? pendingPurchaseAppId;
+  /// Set before launching the download IAP so purchase success unlocks
+  /// the correct package + format.
+  String? pendingPurchasePackageName;
   bool? pendingPurchaseIsAab;
 
   final ValueNotifier<int> version = ValueNotifier<int>(0);
+  bool _didMigrate = false;
 
   Future<SharedPreferences> get _prefs => SharedPreferences.getInstance();
 
-  String _token(String appId, {required bool isAab}) =>
-      '${appId.trim()}:${isAab ? 'aab' : 'apk'}';
+  /// Normalize package for stable unlock keys.
+  static String? normalizePackage(String? packageName) {
+    final pkg = packageName?.trim().toLowerCase() ?? '';
+    return pkg.isEmpty ? null : pkg;
+  }
+
+  String _token(String packageName, {required bool isAab}) =>
+      'pkg:${normalizePackage(packageName)}:${isAab ? 'aab' : 'apk'}';
 
   Future<Set<String>> _loadUnlocked() async {
     await _migrateIfNeeded();
@@ -52,65 +64,59 @@ class DownloadTokenService {
   }
 
   Future<void> _migrateIfNeeded() async {
+    if (_didMigrate) return;
+    _didMigrate = true;
     final prefs = await _prefs;
 
-    // Old combined project unlocks → both formats.
-    final legacyProjects =
-        prefs.getStringList(_legacyUnlockedProjectsKey) ?? const <String>[];
-    if (legacyProjects.isNotEmpty) {
+    // Drop legacy appId unlock lists.
+    await prefs.remove(_legacyFormatsKey);
+    await prefs.remove(_legacyUnlockedProjectsKey);
+
+    // Revoke any package that was unlocked only via the old free grant.
+    final freePkg = normalizePackage(prefs.getString(_freePackageKey));
+    if (freePkg != null) {
       final current =
           (prefs.getStringList(_unlockedFormatsKey) ?? const <String>[])
               .toSet();
-      var changed = false;
-      for (final raw in legacyProjects) {
-        final id = raw.trim();
-        if (id.isEmpty) continue;
-        if (current.add(_token(id, isAab: false))) changed = true;
-        if (current.add(_token(id, isAab: true))) changed = true;
-      }
-      if (changed) {
+      final before = current.length;
+      current.remove(_token(freePkg, isAab: false));
+      current.remove(_token(freePkg, isAab: true));
+      if (current.length != before) {
         await prefs.setStringList(_unlockedFormatsKey, current.toList());
+        version.value++;
+        debugPrint('[DownloadUnlock] revoked free unlock for $freePkg');
       }
-      await prefs.remove(_legacyUnlockedProjectsKey);
-      debugPrint('[DownloadUnlock] migrated legacy project unlocks → formats');
     }
 
-    if (prefs.containsKey(_freeClaimedKey)) return;
-
-    final legacyApk = prefs.getInt(_legacyApkCountKey) ?? 0;
-    final legacyAab = prefs.getInt(_legacyAabCountKey) ?? 0;
-    if (legacyApk > 0 || legacyAab > 0) {
-      await prefs.setBool(_freeClaimedKey, true);
-      debugPrint(
-        '[DownloadUnlock] migrated legacy free quota → free project claimed',
-      );
-    }
+    await prefs.remove(_freeClaimedKey);
+    await prefs.remove(_freePackageKey);
+    await prefs.remove(_legacyFreeClaimedKey);
+    await prefs.remove(_legacyFreeProjectIdKey);
+    await prefs.remove(_legacyApkCountKey);
+    await prefs.remove(_legacyAabCountKey);
   }
 
-  Future<bool> hasClaimedFreeProject() async {
-    await _migrateIfNeeded();
-    final prefs = await _prefs;
-    return prefs.getBool(_freeClaimedKey) ?? false;
-  }
-
-  Future<bool> isFormatUnlocked(String? appId, {required bool isAab}) async {
-    final id = appId?.trim() ?? '';
-    if (id.isEmpty) return false;
+  Future<bool> isFormatUnlocked(
+    String? packageName, {
+    required bool isAab,
+  }) async {
+    final pkg = normalizePackage(packageName);
+    if (pkg == null) return false;
     final unlocked = await _loadUnlocked();
-    return unlocked.contains(_token(id, isAab: isAab));
+    return unlocked.contains(_token(pkg, isAab: isAab));
   }
 
   Future<void> _unlockFormats(
-    String appId, {
+    String packageName, {
     required bool apk,
     required bool aab,
   }) async {
-    final id = appId.trim();
-    if (id.isEmpty) return;
+    final pkg = normalizePackage(packageName);
+    if (pkg == null) return;
     final unlocked = await _loadUnlocked();
     var changed = false;
-    if (apk && unlocked.add(_token(id, isAab: false))) changed = true;
-    if (aab && unlocked.add(_token(id, isAab: true))) changed = true;
+    if (apk && unlocked.add(_token(pkg, isAab: false))) changed = true;
+    if (aab && unlocked.add(_token(pkg, isAab: true))) changed = true;
     if (changed) {
       await _saveUnlocked(unlocked);
     } else {
@@ -118,61 +124,33 @@ class DownloadTokenService {
     }
   }
 
-  /// Claims the one free project for [appId] (unlocks APK + AAB forever).
-  /// Returns `true` if [isAab] format is now available on this free project.
-  Future<bool> tryClaimFreeProject(
-    String? appId, {
-    required bool isAab,
-  }) async {
-    final id = appId?.trim() ?? '';
-    if (id.isEmpty) return false;
-
-    if (await isFormatUnlocked(id, isAab: isAab)) return true;
-
-    await _migrateIfNeeded();
-    final prefs = await _prefs;
-    final claimed = prefs.getBool(_freeClaimedKey) ?? false;
-    if (claimed) {
-      final freeId = prefs.getString(_freeProjectIdKey)?.trim();
-      if (freeId == null || freeId != id) return false;
-      // Free project already claimed for this id — ensure both formats.
-      await _unlockFormats(id, apk: true, aab: true);
-      return true;
-    }
-
-    await prefs.setBool(_freeClaimedKey, true);
-    await prefs.setString(_freeProjectIdKey, id);
-    await _unlockFormats(id, apk: true, aab: true);
-    debugPrint('[DownloadUnlock] free project claimed: $id (apk+aab)');
-    return true;
-  }
-
-  /// Unlocks only the purchased format for [appId].
+  /// Unlocks only the purchased format for [packageName].
   Future<void> unlockFormatFromPurchase({
-    required String appId,
+    required String packageName,
     required bool isAab,
     required String purchaseKey,
   }) async {
-    final id = appId.trim();
-    if (id.isEmpty) return;
+    final pkg = normalizePackage(packageName);
+    if (pkg == null) return;
 
     final prefs = await _prefs;
+    await _migrateIfNeeded();
     final processed = prefs.getStringList(_processedKey) ?? <String>[];
     final dedupeKey = purchaseKey.isNotEmpty
         ? purchaseKey
-        : '$id:${isAab ? 'aab' : 'apk'}';
+        : '$pkg:${isAab ? 'aab' : 'apk'}';
 
     if (processed.contains(dedupeKey)) {
       debugPrint('[DownloadUnlock] already processed: $dedupeKey');
-      await _unlockFormats(id, apk: !isAab, aab: isAab);
+      await _unlockFormats(pkg, apk: !isAab, aab: isAab);
       return;
     }
     processed.add(dedupeKey);
     await prefs.setStringList(_processedKey, processed);
 
-    await _unlockFormats(id, apk: !isAab, aab: isAab);
+    await _unlockFormats(pkg, apk: !isAab, aab: isAab);
     debugPrint(
-      '[DownloadUnlock] ${isAab ? 'aab' : 'apk'} unlocked for project: $id',
+      '[DownloadUnlock] ${isAab ? 'aab' : 'apk'} unlocked for package: $pkg',
     );
   }
 }

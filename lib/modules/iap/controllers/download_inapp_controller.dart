@@ -18,7 +18,8 @@ const Duration kDownloadInappCloseRevealDelay = Duration(seconds: 2);
 
 /// Lifetime-style paywall for Download APK / AAB.
 ///
-/// Each product unlocks **only that format** for this project:
+/// Unlock is scoped by **package name** (unique). Each product unlocks only
+/// that format for this package:
 /// - APK button → `apkdownload_inapp` (APK only)
 /// - AAB button → `bundledownload_inapp` (AAB only)
 class DownloadInappController extends GetxController {
@@ -26,7 +27,7 @@ class DownloadInappController extends GetxController {
   final showCloseButton = false.obs;
   final packPrice = kDownloadInappMissingPrice.obs;
   final isAab = false.obs;
-  final appId = ''.obs;
+  final packageName = ''.obs;
 
   PremiumService? _premiumService;
   Timer? _closeRevealTimer;
@@ -49,13 +50,16 @@ class DownloadInappController extends GetxController {
     final args = Get.arguments;
     if (args is Map) {
       isAab.value = args['isAab'] == true;
-      appId.value = (args['appId'] as String?)?.trim() ?? '';
+      packageName.value = DownloadTokenService.normalizePackage(
+            args['packageName'] as String?,
+          ) ??
+          '';
     } else {
       isAab.value = args == true;
     }
 
-    DownloadTokenService.instance.pendingPurchaseAppId =
-        appId.value.isEmpty ? null : appId.value;
+    DownloadTokenService.instance.pendingPurchasePackageName =
+        packageName.value.isEmpty ? null : packageName.value;
     DownloadTokenService.instance.pendingPurchaseIsAab = isAab.value;
 
     AdPresentationGate.markIapOpened();
@@ -73,9 +77,8 @@ class DownloadInappController extends GetxController {
   }
 
   Future<void> _initAndMaybeSkip() async {
-    // Subscriptions do not unlock downloads — only per-format unlock.
     _wasUnlockedWhenOpened = await DownloadTokenService.instance
-        .isFormatUnlocked(appId.value, isAab: isAab.value);
+        .isFormatUnlocked(packageName.value, isAab: isAab.value);
 
     if (_wasUnlockedWhenOpened) {
       finish(purchased: true);
@@ -91,7 +94,7 @@ class DownloadInappController extends GetxController {
   Future<void> _checkFormatUnlocked() async {
     if (_wasUnlockedWhenOpened) return;
     final unlocked = await DownloadTokenService.instance
-        .isFormatUnlocked(appId.value, isAab: isAab.value);
+        .isFormatUnlocked(packageName.value, isAab: isAab.value);
     if (!unlocked) return;
     unawaited(showSuccessAndFinish());
   }
@@ -113,13 +116,14 @@ class DownloadInappController extends GetxController {
 
   Future<void> buyDownloadPack() async {
     if (isPurchasing.value || _finishing) return;
-    if (appId.value.isEmpty) {
+    if (packageName.value.isEmpty) {
       AppToast.error('credits_pack_purchase_failed'.tr);
       return;
     }
 
     isPurchasing.value = true;
-    DownloadTokenService.instance.pendingPurchaseAppId = appId.value;
+    DownloadTokenService.instance.pendingPurchasePackageName =
+        packageName.value;
     DownloadTokenService.instance.pendingPurchaseIsAab = isAab.value;
 
     try {
@@ -203,8 +207,9 @@ class DownloadInappController extends GetxController {
   void onClose() {
     _closeRevealTimer?.cancel();
     DownloadTokenService.instance.version.removeListener(_onUnlockChanged);
-    if (DownloadTokenService.instance.pendingPurchaseAppId == appId.value) {
-      DownloadTokenService.instance.pendingPurchaseAppId = null;
+    if (DownloadTokenService.instance.pendingPurchasePackageName ==
+        packageName.value) {
+      DownloadTokenService.instance.pendingPurchasePackageName = null;
       DownloadTokenService.instance.pendingPurchaseIsAab = null;
     }
     AdPresentationGate.markIapClosed();

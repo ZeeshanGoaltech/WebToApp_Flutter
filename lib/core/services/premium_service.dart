@@ -283,19 +283,20 @@ class PremiumService {
       final key = purchase.purchaseID?.trim().isNotEmpty == true
           ? purchase.purchaseID!.trim()
           : purchase.verificationData.serverVerificationData;
-      final appId = DownloadTokenService.instance.pendingPurchaseAppId?.trim();
+      final packageName =
+          DownloadTokenService.instance.pendingPurchasePackageName?.trim();
       final isAab = DownloadTokenService.instance.pendingPurchaseIsAab ??
           _productIdResolver.getDownloadInappProductId(isAab: true) ==
               purchase.productID;
-      if (appId != null && appId.isNotEmpty) {
+      if (packageName != null && packageName.isNotEmpty) {
         await DownloadTokenService.instance.unlockFormatFromPurchase(
-          appId: appId,
+          packageName: packageName,
           isAab: isAab,
           purchaseKey: key,
         );
       } else {
         developer.log(
-          'Download in-app purchase without pending appId '
+          'Download in-app purchase without pending packageName '
           '(product=${purchase.productID})',
           name: 'PremiumService',
         );
