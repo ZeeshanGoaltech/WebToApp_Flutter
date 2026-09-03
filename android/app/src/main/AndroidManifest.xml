@@ -44,8 +44,9 @@
         <meta-data
             android:name="com.google.android.gms.ads.APPLICATION_ID"
             android:value="ca-app-pub-5471933816484694~2858628432"/>
-        <!-- Offload heavy GMA init / ad-load work off the UI thread to reduce
-             WebView-related "Input dispatching timed out" ANRs. -->
+        <!-- Offload heavy GMA init / ad-load work off the UI thread.
+             Pair with WebView warmup before MobileAds.initialize to avoid
+             nativeLoadWithRelroFile ANRs ("Input dispatching timed out"). -->
         <meta-data
             android:name="com.google.android.gms.ads.flag.OPTIMIZE_INITIALIZATION"
             android:value="true"/>

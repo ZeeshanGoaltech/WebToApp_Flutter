@@ -6,6 +6,7 @@ import 'package:flutter/foundation.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:web_to_app/core/ads/ads_debug_config.dart';
 import 'package:web_to_app/core/ads/gdpr_consent_service.dart';
+import 'package:web_to_app/core/ads/webview_warmup.dart';
 
 /// Splash gate matching Ummah_Pro_Exis [AdsConsentGate]:
 /// 1) configure test devices + [MobileAds.initialize]
@@ -101,6 +102,11 @@ abstract final class AdsConsentGate {
         developer.log('[AdsConsentGate] test device config failed: $e');
       }
     }
+
+    // Android: load System WebView before GMA so AdMob's ads.internal.js
+    // WebView does not hit nativeLoadWithRelroFile on first ad init (ANR).
+    // Timeout / failure inside ensureReady — never blocks GDPR or ads forever.
+    await WebViewWarmup.ensureReady();
 
     await MobileAds.instance.initialize();
     _mobileAdsInitialized = true;
