@@ -120,8 +120,6 @@ class AppOpenAdManager {
         route.startsWith('${AppRoutes.lifetimePremium}?') ||
         route == AppRoutes.downloadInApp ||
         route.startsWith('${AppRoutes.downloadInApp}?') ||
-        route == AppRoutes.creditsPack ||
-        route.startsWith('${AppRoutes.creditsPack}?') ||
         AdPresentationGate.isIapActive;
   }
 
@@ -167,7 +165,6 @@ class AppOpenAdManager {
         route == AppRoutes.iap ||
         route == AppRoutes.lifetimePremium ||
         route == AppRoutes.downloadInApp ||
-        route == AppRoutes.creditsPack ||
         route == AppRoutes.intro ||
         route == AppRoutes.language ||
         route == AppRoutes.auth ||

@@ -11,7 +11,6 @@ import 'package:web_to_app/core/navigation/auth_redirect.dart';
 import 'package:web_to_app/core/ads/app_open_ad_manager.dart';
 import 'package:web_to_app/core/services/build_login_gate.dart';
 import 'package:web_to_app/core/services/build_quota_service.dart';
-import 'package:web_to_app/core/services/credit_gate.dart';
 import 'package:web_to_app/core/services/session_service.dart';
 import 'package:web_to_app/core/services/token_storage.dart';
 import 'package:web_to_app/core/utils/app_error_handler.dart';
@@ -63,7 +62,6 @@ class BuildAppController extends GetxController {
   String? _preparedAppId;
   String? _preparedAppVersionId;
   bool _hydratingExistingBuild = false;
-  String? _creditChargedBuildId;
   DateTime? _queueEstimateEndsAt;
   int _queueEstimateTotalSeconds = 0;
 
@@ -301,10 +299,6 @@ class BuildAppController extends GetxController {
       return;
     }
 
-    if (!await CreditGate.ensureOrOpenPaywall()) {
-      return;
-    }
-
     final create = _createAppOrNull;
     if (create == null) return;
 
@@ -439,7 +433,6 @@ class BuildAppController extends GetxController {
         buildState.value = BuildState.success;
         if (statusChanged) {
           buildLogs.add(r'✓ Build successful!');
-          unawaited(_consumeCreditOnBuildSuccess(build.id));
           unawaited(_markFirstBuildComplete());
         }
       case 'failed':
@@ -542,14 +535,6 @@ class BuildAppController extends GetxController {
     await Get.find<TokenStorage>().markFirstBuildComplete();
     if (Get.isRegistered<HomeController>()) {
       unawaited(Get.find<HomeController>().loadApps());
-    }
-  }
-
-  Future<void> _consumeCreditOnBuildSuccess(String id) async {
-    if (_creditChargedBuildId == id) return;
-    final consumed = await CreditGate.consumeAfterSuccess();
-    if (consumed) {
-      _creditChargedBuildId = id;
     }
   }
 
@@ -697,13 +682,9 @@ class BuildAppController extends GetxController {
     _resetBuildResult();
   }
 
-  /// Build Again button — need credits available, then interstitial, then reset.
+  /// Build Again button — interstitial gate (if any), then reset.
   Future<void> onBuildAgainTapped() async {
     if (!await BuildLoginGate.ensureForBuild(retry: onBuildAgainTapped)) {
-      return;
-    }
-
-    if (!await CreditGate.ensureOrOpenPaywall()) {
       return;
     }
 

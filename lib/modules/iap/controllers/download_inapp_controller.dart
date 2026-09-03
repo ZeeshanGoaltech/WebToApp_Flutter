@@ -8,7 +8,6 @@ import 'package:web_to_app/core/ads/ad_presentation_gate.dart';
 import 'package:web_to_app/core/ads/app_open_ad_manager.dart';
 import 'package:web_to_app/core/constants/app_info.dart';
 import 'package:web_to_app/core/services/analytics_service.dart';
-import 'package:web_to_app/core/services/credit_service.dart';
 import 'package:web_to_app/core/services/download_token_service.dart';
 import 'package:web_to_app/core/services/iap_product_id_resolver.dart';
 import 'package:web_to_app/core/services/premium_service.dart';
@@ -19,10 +18,9 @@ const Duration kDownloadInappCloseRevealDelay = Duration(seconds: 2);
 
 /// Lifetime-style paywall for Download APK / AAB.
 ///
-/// Buying either product unlocks **unlimited APK + AAB downloads for this
-/// project only** (not `threescan_inapp` credits):
-/// - APK button → product `apkdownload_inapp`
-/// - AAB button → product `bundledownload_inapp`
+/// Each product unlocks **only that format** for this project:
+/// - APK button → `apkdownload_inapp` (APK only)
+/// - AAB button → `bundledownload_inapp` (AAB only)
 class DownloadInappController extends GetxController {
   final isPurchasing = false.obs;
   final showCloseButton = false.obs;
@@ -58,6 +56,7 @@ class DownloadInappController extends GetxController {
 
     DownloadTokenService.instance.pendingPurchaseAppId =
         appId.value.isEmpty ? null : appId.value;
+    DownloadTokenService.instance.pendingPurchaseIsAab = isAab.value;
 
     AdPresentationGate.markIapOpened();
     AppOpenAdManager.instance.blockAppOpenAds = true;
@@ -74,13 +73,11 @@ class DownloadInappController extends GetxController {
   }
 
   Future<void> _initAndMaybeSkip() async {
-    await CreditService.instance.initialize();
-    // Subscriptions do not unlock downloads — only credits / project unlock.
-    final hasThreescanCredits = CreditService.instance.paidCredits.value > 0;
-    _wasUnlockedWhenOpened =
-        await DownloadTokenService.instance.isProjectUnlocked(appId.value);
+    // Subscriptions do not unlock downloads — only per-format unlock.
+    _wasUnlockedWhenOpened = await DownloadTokenService.instance
+        .isFormatUnlocked(appId.value, isAab: isAab.value);
 
-    if (hasThreescanCredits || _wasUnlockedWhenOpened) {
+    if (_wasUnlockedWhenOpened) {
       finish(purchased: true);
       return;
     }
@@ -88,13 +85,13 @@ class DownloadInappController extends GetxController {
   }
 
   void _onUnlockChanged() {
-    unawaited(_checkProjectUnlocked());
+    unawaited(_checkFormatUnlocked());
   }
 
-  Future<void> _checkProjectUnlocked() async {
+  Future<void> _checkFormatUnlocked() async {
     if (_wasUnlockedWhenOpened) return;
-    final unlocked =
-        await DownloadTokenService.instance.isProjectUnlocked(appId.value);
+    final unlocked = await DownloadTokenService.instance
+        .isFormatUnlocked(appId.value, isAab: isAab.value);
     if (!unlocked) return;
     unawaited(showSuccessAndFinish());
   }
@@ -123,6 +120,7 @@ class DownloadInappController extends GetxController {
 
     isPurchasing.value = true;
     DownloadTokenService.instance.pendingPurchaseAppId = appId.value;
+    DownloadTokenService.instance.pendingPurchaseIsAab = isAab.value;
 
     try {
       final service = await _service;
@@ -207,6 +205,7 @@ class DownloadInappController extends GetxController {
     DownloadTokenService.instance.version.removeListener(_onUnlockChanged);
     if (DownloadTokenService.instance.pendingPurchaseAppId == appId.value) {
       DownloadTokenService.instance.pendingPurchaseAppId = null;
+      DownloadTokenService.instance.pendingPurchaseIsAab = null;
     }
     AdPresentationGate.markIapClosed();
     AdPresentationGate.reconcileIapVisibility();

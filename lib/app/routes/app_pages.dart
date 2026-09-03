@@ -17,7 +17,6 @@ import 'package:web_to_app/modules/iap/bindings/download_inapp_binding.dart';
 import 'package:web_to_app/modules/iap/views/iap_view.dart';
 import 'package:web_to_app/modules/iap/views/lifetime_premium_view.dart';
 import 'package:web_to_app/modules/iap/views/download_inapp_view.dart';
-import 'package:web_to_app/modules/credits/credits_pack_view.dart';
 import 'package:web_to_app/modules/splash/bindings/splash_binding.dart';
 import 'package:web_to_app/modules/splash/views/splash_view.dart';
 
@@ -78,12 +77,6 @@ class AppPages {
       name: AppRoutes.downloadInApp,
       page: () => const DownloadInappView(),
       binding: DownloadInappBinding(),
-      popGesture: false,
-    ),
-    GetPage(
-      name: AppRoutes.creditsPack,
-      page: () => const CreditsPackView(),
-      binding: CreditsPackBinding(),
       popGesture: false,
     ),
   ];

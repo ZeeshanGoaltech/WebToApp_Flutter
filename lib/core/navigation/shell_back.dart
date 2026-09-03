@@ -36,8 +36,7 @@ abstract final class ShellBack {
     final route = Get.currentRoute;
     if (route == AppRoutes.lifetimePremium ||
         route == AppRoutes.downloadInApp ||
-        route == AppRoutes.iap ||
-        route == AppRoutes.creditsPack) {
+        route == AppRoutes.iap) {
       return true;
     }
 

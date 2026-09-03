@@ -138,11 +138,6 @@ class AnalyticsService {
     await logScreenView('lifetime_premium');
   }
 
-  Future<void> logCreditsPackOpen() async {
-    await logEvent('credits_pack_open');
-    await logScreenView('credits_pack');
-  }
-
   Future<void> logDownloadInappOpen({required bool isAab}) async {
     await logEvent(
       'download_inapp_open',
@@ -178,7 +173,6 @@ class AnalyticsService {
     if (path == AppRoutes.iap) return 'iap_premium';
     if (path == AppRoutes.lifetimePremium) return 'lifetime_premium';
     if (path == AppRoutes.downloadInApp) return 'download_inapp';
-    if (path == AppRoutes.creditsPack) return 'credits_pack';
     return path.replaceAll('/', '_').replaceFirst(RegExp(r'^_'), '');
   }
 

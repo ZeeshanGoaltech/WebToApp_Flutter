@@ -29,12 +29,9 @@ class AppAssets {
 
   static const String iapHero = 'assets/images/iap/iap_hero.png';
   static const String iapLifetimeHero = 'assets/images/iap/iap_life_time.png';
-  static const String iapThreePacks = 'assets/images/iap/iap_three_packs.png';
   static const String iapCheck = 'assets/images/iap/iap_check.svg';
   static const String iapCloseIcon = 'assets/images/iap/iap_close_icon.svg';
   static const String exitCrown = 'assets/images/iap/exit_crown.svg';
-  static const String creditsPackCrown =
-      'assets/images/iap/credits_pack_crown.svg';
   static const String lifetimeIconBuild =
       'assets/images/iap/lifetime_icon_globe.svg';
   static const String lifetimeIconDownload =

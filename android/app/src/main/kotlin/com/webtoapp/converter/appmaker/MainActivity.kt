@@ -102,7 +102,6 @@ class MainActivity : FlutterActivity() {
             )
         }
 
-        PackIapDebug.register(flutterEngine.dartExecutor.binaryMessenger, this)
     }
 
     /**

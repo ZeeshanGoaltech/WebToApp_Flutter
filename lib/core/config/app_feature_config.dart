@@ -9,18 +9,6 @@ abstract final class AppFeatureConfig {
   /// Generate Bundle & APK quota: `null` = unlimited.
   static const int? generateBundleApkSubLimit = null;
 
-  /// Free APK downloads before paywall (`0` = paywall first).
-  static const int apkDownloadFreeQuota = 1;
-
-  /// Free AAB downloads before paywall (`0` = paywall first).
-  static const int bundleDownloadFreeQuota = 1;
-
   /// Build Again free quota (`null` = unlimited).
   static const int? buildAgainSubLimit = 3;
-
-  /// Free AI credits before pack paywall.
-  static const int aiModuleFreeCredits = 3;
-
-  /// Credits granted per credit-pack purchase.
-  static const int aiModulePackCredits = 3;
 }

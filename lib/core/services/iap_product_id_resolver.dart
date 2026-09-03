@@ -11,13 +11,10 @@ class IapProductIdResolver {
   static const String yearlyPremium = 'yearly_sub';
   static const String lifetimePremium = 'lifetime';
 
-  /// Consumable credit pack (+N builds). Separate from subscription SKUs.
-  static const String creditsPack = 'threescan_inapp';
-
-  /// Consumable — Download APK paywall (same id as RC free-quota key).
+  /// Consumable — Download APK paywall (unlocks that project).
   static const String apkDownloadInapp = 'apkdownload_inapp';
 
-  /// Consumable — Download AAB paywall (same id as RC free-quota key).
+  /// Consumable — Download AAB paywall (unlocks that project).
   static const String bundleDownloadInapp = 'bundledownload_inapp';
 
   String getWeeklySubscriptionId() => weeklyPremium;
@@ -27,8 +24,6 @@ class IapProductIdResolver {
   String getYearlySubscriptionId() => yearlyPremium;
 
   String getLifetimeProductId() => lifetimePremium;
-
-  String getCreditsPackProductId() => creditsPack;
 
   String getApkDownloadInappProductId() => apkDownloadInapp;
 
@@ -40,24 +35,15 @@ class IapProductIdResolver {
   bool isLifetimeProductId(String productId) =>
       productId == getLifetimeProductId();
 
-  bool isCreditsPackProductId(String productId) =>
-      productId == getCreditsPackProductId();
-
   bool isDownloadInappProductId(String productId) =>
       productId == getApkDownloadInappProductId() ||
       productId == getBundleDownloadInappProductId();
-
-  /// Only `threescan_inapp` grants [CreditService] pack credits.
-  /// Download products grant one-shot download tokens instead.
-  bool isCreditsGrantingProductId(String productId) =>
-      isCreditsPackProductId(productId);
 
   Set<String> getAllProductIds() => {
         getWeeklySubscriptionId(),
         if (AppFeatureFlags.monthlyPlanEnabled) getMonthlySubscriptionId(),
         getYearlySubscriptionId(),
         getLifetimeProductId(),
-        getCreditsPackProductId(),
         getApkDownloadInappProductId(),
         getBundleDownloadInappProductId(),
       };
