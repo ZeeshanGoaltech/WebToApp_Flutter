@@ -1,8 +1,10 @@
 import 'dart:async';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:web_to_app/app/routes/app_pages.dart';
 import 'package:web_to_app/core/ads/app_open_ad_manager.dart';
 import 'package:web_to_app/core/bindings/initial_binding.dart';
@@ -17,6 +19,15 @@ import 'package:web_to_app/modules/language/data/language_data.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  // Bundle fonts under assets/google_fonts/ and never fetch at runtime.
+  // Prevents Crashlytics fatals when fonts.gstatic.com DNS/network fails.
+  GoogleFonts.config.allowRuntimeFetching = false;
+
+  LicenseRegistry.addLicense(() async* {
+    final license = await rootBundle.loadString('assets/google_fonts/OFL.txt');
+    yield LicenseEntryWithLineBreaks(['google_fonts'], license);
+  });
 
   await FirebaseService.init();
   await InitialBinding.init();
