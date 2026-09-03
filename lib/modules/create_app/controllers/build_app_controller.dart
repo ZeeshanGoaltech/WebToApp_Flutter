@@ -93,8 +93,13 @@ class BuildAppController extends GetxController {
       isBuildInProgress && !isLeavingBuildScreen.value;
 
   bool get shouldNavigateHomeOnBack {
-    final appId = Get.find<CreateAppController>().appId.value;
+    final appId = _createAppOrNull?.appId.value;
     return appId != null && !shouldConfirmBuildExit;
+  }
+
+  CreateAppController? get _createAppOrNull {
+    if (!Get.isRegistered<CreateAppController>()) return null;
+    return Get.find<CreateAppController>();
   }
 
   String get buildStatusMessage {
@@ -111,7 +116,9 @@ class BuildAppController extends GetxController {
   }
 
   void prepareForCurrentApp() {
-    final create = Get.find<CreateAppController>();
+    final create = _createAppOrNull;
+    if (create == null) return;
+
     final appId = create.appId.value;
     final appVersionId = create.appVersionId.value;
     if (appId == null || appVersionId == null) return;
@@ -123,6 +130,7 @@ class BuildAppController extends GetxController {
     _preparedAppId = appId;
     _preparedAppVersionId = appVersionId;
     _resetBuildResult(resetFormats: true);
+    unawaited(_loadSigningState());
     _hydrateExistingBuild(appId);
   }
 
@@ -208,14 +216,8 @@ class BuildAppController extends GetxController {
     }
   }
 
-  @override
-  void onInit() {
-    super.onInit();
-    _loadSigningState();
-  }
-
   Future<void> _loadSigningState() async {
-    final appId = Get.find<CreateAppController>().appId.value;
+    final appId = _createAppOrNull?.appId.value;
     if (appId == null) return;
 
     try {
@@ -308,7 +310,8 @@ class BuildAppController extends GetxController {
     // Generate Bundle & APK interstitial (RC: generatebundleapk_inter)
     await InterstitialAdTrigger.showGenerateBundleApkInterstitial();
 
-    final create = Get.find<CreateAppController>();
+    final create = _createAppOrNull;
+    if (create == null) return;
 
     isEnqueueing.value = true;
     isLeavingBuildScreen.value = false;
@@ -609,7 +612,7 @@ class BuildAppController extends GetxController {
     if (id == null || buildState.value == BuildState.downloading) return;
 
     final isAab = format == BuildFormat.aab;
-    final appId = Get.find<CreateAppController>().appId.value;
+    final appId = _createAppOrNull?.appId.value;
     // Paywall only on Download tap when free quota is over — nothing after download.
     if (!await BuildQuotaService.instance.ensureCanDownloadBundleApkOrOpenIap(
       isAab: isAab,
@@ -667,8 +670,8 @@ class BuildAppController extends GetxController {
         buildId: id,
         type: artifactType(format),
       );
-      final appName = Get.find<CreateAppController>().appNameController.text
-          .trim();
+      final appName =
+          (_createAppOrNull?.appNameController.text ?? '').trim();
       final title = appName.isEmpty ? 'your_app'.tr : appName;
       final label = artifactLabel(format);
 

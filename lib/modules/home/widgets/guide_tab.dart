@@ -12,8 +12,7 @@ import 'package:web_to_app/core/theme/app_text_styles.dart';
 import 'package:web_to_app/core/utils/responsive.dart';
 import 'package:web_to_app/core/widgets/figma_svg_icon.dart';
 import 'package:web_to_app/core/widgets/rtl_flip.dart';
-import 'package:web_to_app/modules/create_app/controllers/build_app_controller.dart';
-import 'package:web_to_app/modules/create_app/controllers/create_app_controller.dart';
+import 'package:web_to_app/modules/create_app/bindings/create_app_binding.dart';
 import 'package:web_to_app/modules/home/controllers/home_controller.dart';
 import 'package:web_to_app/modules/home/data/help_guide_steps.dart';
 
@@ -28,12 +27,7 @@ Future<void> _openFreshCreateApp() async {
 }
 
 Future<void> _openFreshCreateAppInternal() async {
-  if (Get.isRegistered<CreateAppController>()) {
-    Get.find<CreateAppController>().resetForNewApp();
-  }
-  if (Get.isRegistered<BuildAppController>()) {
-    Get.find<BuildAppController>().resetForNewApp();
-  }
+  CreateAppBinding.resetForNewAppIfPresent();
   Get.toNamed(AppRoutes.createApp);
 }
 
