@@ -1,7 +1,6 @@
 import 'dart:async';
 
 import 'package:get/get.dart';
-import 'package:web_to_app/core/ads/interstitial_ad_trigger.dart';
 import 'package:web_to_app/core/services/analytics_service.dart';
 import 'package:web_to_app/core/services/push_notification_service.dart';
 import 'package:web_to_app/core/services/guest_auth_service.dart';
@@ -51,7 +50,6 @@ class HomeController extends GetxController {
           AnalyticsService.tabNameForIndex(index),
         ),
       );
-      unawaited(InterstitialAdTrigger.showBottomTabInterstitial());
     }
   }
 

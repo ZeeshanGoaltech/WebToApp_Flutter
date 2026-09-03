@@ -1,5 +1,4 @@
 import 'package:get/get.dart';
-import 'package:web_to_app/core/ads/ad_remote_config_service.dart';
 import 'package:web_to_app/core/api/api_client.dart';
 import 'package:web_to_app/core/services/language_service.dart';
 import 'package:web_to_app/core/services/push_notification_service.dart';
@@ -98,8 +97,7 @@ class InitialBinding extends Bindings {
     await PremiumService.beginRestoreEarly();
     await CreditService.instance.initialize();
 
-    // Remote Config early; Mobile Ads + GDPR consent wait until UI exists
+    // Mobile Ads + GDPR consent wait until UI exists
     // (see SplashController / AdService.initialize).
-    await AdRemoteConfigService.instance.initialize();
   }
 }

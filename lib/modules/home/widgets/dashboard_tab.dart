@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:web_to_app/core/ads/ad_placements.dart';
-import 'package:web_to_app/core/ads/widgets/medium_native_ad_widget.dart';
+import 'package:web_to_app/core/ads/interstitial_ad_trigger.dart';
 import 'package:web_to_app/core/constants/settings_assets.dart';
 import 'package:web_to_app/core/navigation/launch_flow.dart';
 import 'package:web_to_app/core/services/session_service.dart';
@@ -53,10 +52,6 @@ class DashboardTab extends StatelessWidget {
               ),
               child: const CreateAppCard(),
             ),
-            // Medium native after first card (RC: home_native)
-            const MediumNativeAdWidget(
-              placementId: AdPlacements.homeNative,
-            ),
             SizedBox(height: Responsive.h(context, 24)),
             Padding(
               padding: EdgeInsets.symmetric(
@@ -85,44 +80,49 @@ class _HomeProIcon extends StatelessWidget {
 
       return Padding(
         padding: EdgeInsets.only(left: Responsive.w(context, 8)),
-        child: Material(
-          color: Colors.transparent,
-          elevation: 4,
-          shadowColor: const Color(0xFFFF9500).withValues(alpha: 0.45),
-          borderRadius: BorderRadius.circular(Responsive.w(context, 999)),
-          child: InkWell(
-            onTap: LaunchFlow.openIapFromSettings,
+        child: Listener(
+          behavior: HitTestBehavior.opaque,
+          onPointerDown: (_) => InterstitialAdTrigger.markHomeProTap(),
+          child: Material(
+            color: Colors.transparent,
+            elevation: 4,
+            shadowColor: const Color(0xFFFF9500).withValues(alpha: 0.45),
             borderRadius: BorderRadius.circular(Responsive.w(context, 999)),
-            child: Ink(
-              padding: EdgeInsets.symmetric(
-                horizontal: Responsive.w(context, 14),
-                vertical: Responsive.w(context, 9),
-              ),
-              decoration: BoxDecoration(
-                gradient: const LinearGradient(
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                  colors: [Color(0xFFFF9500), Color(0xFFFF7A00)],
+            child: InkWell(
+              onTap: LaunchFlow.openIapFromSettings,
+              borderRadius: BorderRadius.circular(Responsive.w(context, 999)),
+              child: Ink(
+                padding: EdgeInsets.symmetric(
+                  horizontal: Responsive.w(context, 14),
+                  vertical: Responsive.w(context, 9),
                 ),
-                borderRadius: BorderRadius.circular(Responsive.w(context, 999)),
-              ),
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  FigmaSvgIcon(
-                    asset: SettingsAssets.crown,
-                    size: Responsive.w(context, 18),
+                decoration: BoxDecoration(
+                  gradient: const LinearGradient(
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                    colors: [Color(0xFFFF9500), Color(0xFFFF7A00)],
                   ),
-                  SizedBox(width: Responsive.w(context, 6)),
-                  Text(
-                    'pro'.tr,
-                    style: AppTextStyles.settingsPremiumBadge(context).copyWith(
-                      fontSize: Responsive.sp(context, 14),
-                      fontWeight: FontWeight.w800,
-                      letterSpacing: 0.6,
+                  borderRadius: BorderRadius.circular(Responsive.w(context, 999)),
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    FigmaSvgIcon(
+                      asset: SettingsAssets.crown,
+                      size: Responsive.w(context, 18),
                     ),
-                  ),
-                ],
+                    SizedBox(width: Responsive.w(context, 6)),
+                    Text(
+                      'pro'.tr,
+                      style:
+                          AppTextStyles.settingsPremiumBadge(context).copyWith(
+                        fontSize: Responsive.sp(context, 14),
+                        fontWeight: FontWeight.w800,
+                        letterSpacing: 0.6,
+                      ),
+                    ),
+                  ],
+                ),
               ),
             ),
           ),

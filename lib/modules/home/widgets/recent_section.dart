@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:web_to_app/core/ads/ad_placements.dart';
-import 'package:web_to_app/core/ads/widgets/medium_native_ad_widget.dart';
 import 'package:web_to_app/core/constants/app_assets.dart';
 import 'package:web_to_app/core/services/session_service.dart';
 import 'package:web_to_app/core/theme/app_colors.dart';
@@ -113,12 +111,6 @@ class MyAppsTab extends GetView<HomeController> {
                       _showAppActions(context, controller, app),
                   emptyMessage: 'no_apps_yet_myapps'.tr,
                   showHeader: true,
-                  // Medium native: after 1st if only 1 app, else after 2nd (RC: myproj_native)
-                  listAd: const MediumNativeAdWidget(
-                    placementId: AdPlacements.myProjNative,
-                    includeOuterPadding: false,
-                  ),
-                  listAdAfterCount: 2,
                 ),
               );
             }),
@@ -145,8 +137,6 @@ class _AppsListSection extends StatelessWidget {
     this.showHeader = true,
     this.actionLabel,
     this.onAction,
-    this.listAd,
-    this.listAdAfterCount = 2,
   });
 
   final String title;
@@ -163,12 +153,6 @@ class _AppsListSection extends StatelessWidget {
   final bool showHeader;
   final String? actionLabel;
   final VoidCallback? onAction;
-
-  /// Optional native ad inserted in the list.
-  /// When there is only 1 app, inserts after that card; otherwise after
-  /// [listAdAfterCount] cards (default 2).
-  final Widget? listAd;
-  final int listAdAfterCount;
 
   @override
   Widget build(BuildContext context) {
@@ -292,45 +276,8 @@ class _AppsListSection extends StatelessWidget {
             ),
           )
         else
-          _buildAppsWithOptionalAd(context, borderWidth: borderWidth, radius: radius),
-      ],
-    );
-  }
-
-  Widget _buildAppsWithOptionalAd(
-    BuildContext context, {
-    required double borderWidth,
-    required double radius,
-  }) {
-    // 1 app → after 1st; 2+ apps → after [listAdAfterCount] (usually 2).
-    final insertAfter = apps.length == 1
-        ? 1
-        : listAdAfterCount;
-    final showAd = listAd != null && apps.isNotEmpty && apps.length >= insertAfter;
-    final firstBatch = showAd ? apps.take(insertAfter).toList() : apps;
-    final rest =
-        showAd ? apps.skip(insertAfter).toList() : const <AppSummary>[];
-
-    return Column(
-      children: [
-        _AppsCard(
-          apps: firstBatch,
-          borderWidth: borderWidth,
-          radius: radius,
-          openingAppId: openingAppId,
-          actionAppId: actionAppId,
-          onAppTap: onAppTap,
-          onAppMoreTap: onAppMoreTap,
-          snapshotFor: snapshotFor,
-        ),
-        if (showAd) ...[
-          SizedBox(height: Responsive.w(context, 12)),
-          listAd!,
-          if (rest.isNotEmpty) SizedBox(height: Responsive.w(context, 12)),
-        ],
-        if (rest.isNotEmpty)
           _AppsCard(
-            apps: rest,
+            apps: apps,
             borderWidth: borderWidth,
             radius: radius,
             openingAppId: openingAppId,

@@ -8,7 +8,6 @@ class AppDebugFlags {
   // Enable this for QA/testing to force language + onboarding on every launch.
   static const bool forceLanguageAndOnboardingOnLaunch = false;
 
-  /// Deprecated for launch gating — use Firebase RC `splash_sub` instead.
-  /// Kept for reference; LaunchFlow reads Remote Config.
+  /// Local IAP splash gate mirror — see [AppFeatureConfig.splashSub].
   static const bool iapEnabled = true;
 }

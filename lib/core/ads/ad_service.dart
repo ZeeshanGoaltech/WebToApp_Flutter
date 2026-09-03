@@ -6,7 +6,6 @@ import 'package:flutter/services.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:web_to_app/core/ads/ad_placements.dart';
 import 'package:web_to_app/core/ads/ad_presentation_gate.dart';
-import 'package:web_to_app/core/ads/ad_remote_config_service.dart';
 import 'package:web_to_app/core/ads/ads_consent_gate.dart';
 import 'package:web_to_app/core/ads/app_open_ad_manager.dart';
 import 'package:web_to_app/core/services/premium_service.dart';
@@ -54,7 +53,6 @@ class AdService {
   Future<bool> showInterstitial(
     String placementId, {
     VoidCallback? onAdShown,
-    bool forceFetchRc = false,
   }) async {
     if (_showing.contains(placementId)) {
       developer.log('[AdService] already showing $placementId');
@@ -72,15 +70,6 @@ class AdService {
 
     if (!AdsConsentGate.mayRequestAds) {
       developer.log('[AdService] UMP blocked — skip $placementId');
-      return false;
-    }
-
-    if (forceFetchRc) {
-      await AdRemoteConfigService.instance.fetchNow();
-    }
-
-    if (!AdRemoteConfigService.instance.isPlacementEnabled(placementId)) {
-      developer.log('[AdService] RC disabled: $placementId');
       return false;
     }
 

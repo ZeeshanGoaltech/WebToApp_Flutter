@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
-import 'package:web_to_app/core/ads/ad_placements.dart';
-import 'package:web_to_app/core/ads/widgets/small_native_ad_widget.dart';
 import 'package:web_to_app/core/theme/app_text_styles.dart';
 import 'package:web_to_app/core/utils/responsive.dart';
 import 'package:web_to_app/modules/create_app/controllers/create_app_controller.dart';
@@ -51,11 +49,6 @@ class Step1IdentityPage extends GetView<CreateAppController> {
                     )),
               ],
             ),
-          ),
-          SizedBox(height: Responsive.w(context, 24)),
-          const SmallNativeAdWidget(
-            placementId: AdPlacements.creationScreenNative,
-            includeOuterPadding: false,
           ),
           SizedBox(height: Responsive.w(context, 24)),
           CreateAppCard(

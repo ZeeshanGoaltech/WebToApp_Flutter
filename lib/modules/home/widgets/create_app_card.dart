@@ -3,8 +3,6 @@ import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:web_to_app/app/routes/app_routes.dart';
-import 'package:web_to_app/core/ads/ad_placements.dart';
-import 'package:web_to_app/core/ads/interstitial_ad_trigger.dart';
 import 'package:web_to_app/core/services/build_login_gate.dart';
 import 'package:web_to_app/core/constants/app_assets.dart';
 import 'package:web_to_app/core/theme/app_colors.dart';
@@ -28,10 +26,6 @@ class CreateAppCard extends StatelessWidget {
   }
 
   Future<void> _openFreshCreateAppInternal() async {
-    await InterstitialAdTrigger.showPlacement(
-      placementId: AdPlacements.createAppInter,
-    );
-
     CreateAppBinding.resetForNewAppIfPresent();
     Get.toNamed(AppRoutes.createApp);
   }

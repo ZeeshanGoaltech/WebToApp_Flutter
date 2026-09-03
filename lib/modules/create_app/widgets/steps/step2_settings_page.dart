@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:web_to_app/core/ads/ad_placements.dart';
-import 'package:web_to_app/core/ads/widgets/small_native_ad_widget.dart';
 import 'package:web_to_app/core/constants/create_app_assets.dart';
 import 'package:web_to_app/core/theme/app_colors.dart';
 import 'package:web_to_app/core/theme/app_text_styles.dart';
@@ -55,12 +53,6 @@ class Step2SettingsPage extends GetView<CreateAppController> {
                     )),
               ],
             ),
-          ),
-          SizedBox(height: Responsive.w(context, 16)),
-          // Monetization: Creation Screen Native — after the Add tab button.
-          const SmallNativeAdWidget(
-            placementId: AdPlacements.creationScreenNative,
-            includeOuterPadding: false,
           ),
           SizedBox(height: Responsive.w(context, 16)),
           CreateAppCard(

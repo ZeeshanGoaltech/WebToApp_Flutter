@@ -1,0 +1,26 @@
+/// Local feature / quota flags (formerly Remote Config defaults).
+abstract final class AppFeatureConfig {
+  /// Show IAP paywall before auth (new users) or before home (logged-in).
+  static const bool splashSub = true;
+
+  /// Free build quota: `null` = unlimited.
+  static const int? buildAppSubLimit = null;
+
+  /// Generate Bundle & APK quota: `null` = unlimited.
+  static const int? generateBundleApkSubLimit = null;
+
+  /// Free APK downloads before paywall (`0` = paywall first).
+  static const int apkDownloadFreeQuota = 1;
+
+  /// Free AAB downloads before paywall (`0` = paywall first).
+  static const int bundleDownloadFreeQuota = 1;
+
+  /// Build Again free quota (`null` = unlimited).
+  static const int? buildAgainSubLimit = 3;
+
+  /// Free AI credits before pack paywall.
+  static const int aiModuleFreeCredits = 3;
+
+  /// Credits granted per credit-pack purchase.
+  static const int aiModulePackCredits = 3;
+}

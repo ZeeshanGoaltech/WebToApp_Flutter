@@ -1,7 +1,7 @@
 import 'package:get/get.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:web_to_app/app/routes/app_routes.dart';
-import 'package:web_to_app/core/ads/ad_remote_config_service.dart';
+import 'package:web_to_app/core/config/app_feature_config.dart';
 import 'package:web_to_app/core/navigation/launch_flow.dart';
 import 'package:web_to_app/core/services/credit_service.dart';
 import 'package:web_to_app/core/services/download_token_service.dart';
@@ -11,21 +11,18 @@ import 'package:web_to_app/core/services/session_service.dart';
 /// Free-use quotas for build / generate / download.
 ///
 /// Persistent (survives restart):
-/// - RC `buildapp_sub` — opening Build App flow
-/// - RC `generatebundleapk_sub` — Generate Bundle & APK
-/// - RC `buildagain_sub` — Build Again button (default 3)
-/// - RC `apkdownload_inapp` — free APK downloads (`off` = none, default `1`)
-/// - RC `bundledownload_inapp` — free AAB downloads (`off` = none, default `1`)
+/// - `buildAppSubLimit` — opening Build App flow
+/// - `generateBundleApkSubLimit` — Generate Bundle & APK
+/// - `buildAgainSubLimit` — Build Again button (default 3)
+/// - `apkDownloadFreeQuota` — free APK downloads (`0` = none, default `1`)
+/// - `bundleDownloadFreeQuota` — free AAB downloads (`0` = none, default `1`)
 ///
 /// Buying `apkdownload_inapp` or `bundledownload_inapp` unlocks **unlimited
 /// APK + AAB downloads for that project only** (not `threescan_inapp` credits).
 /// Remaining `threescan_inapp` paid credits also allow downloads (1 credit each).
 ///
 /// Weekly / monthly / yearly / lifetime subscriptions do **not** unlock
-/// downloads — only credits, project unlock, or free RC quota.
-///
-/// Download free quota values: `off` = no free (paywall first), `1`/`2`/… = free
-/// then paywall, `unlimited` = unlimited free.
+/// downloads — only credits, project unlock, or free local quota.
 class BuildQuotaService {
   BuildQuotaService._();
 
@@ -85,25 +82,21 @@ class BuildQuotaService {
     return false;
   }
 
-  /// RC `buildapp_sub` — opening Build App / build screen.
+  /// Opening Build App / build screen.
   Future<bool> ensureCanOpenBuildFlowOrOpenIap() => _ensurePersistedOrOpenIap(
         countKey: _buildAppCountKey,
-        limitReader: () => AdRemoteConfigService.instance.getQuotaLimit(
-          RemoteConfigKeys.buildAppSub,
-        ),
+        limitReader: () => AppFeatureConfig.buildAppSubLimit,
       );
 
-  /// RC `generatebundleapk_sub` — Generate Bundle & APK button.
+  /// Generate Bundle & APK button.
   Future<bool> ensureCanGenerateBundleApkOrOpenIap() =>
       _ensurePersistedOrOpenIap(
         countKey: _generateBundleApkCountKey,
-        limitReader: () => AdRemoteConfigService.instance.getQuotaLimit(
-          RemoteConfigKeys.generateBundleApkSub,
-        ),
+        limitReader: () => AppFeatureConfig.generateBundleApkSubLimit,
       );
 
   /// Allow download when threescan credits, this [appId] is unlocked,
-  /// or free RC quota remains. Else open download / credits paywall.
+  /// or free local quota remains. Else open download / credits paywall.
   /// Subscriptions (weekly/monthly/yearly/lifetime) do not grant downloads.
   Future<bool> ensureCanDownloadBundleApkOrOpenIap({
     required bool isAab,
@@ -116,16 +109,10 @@ class BuildQuotaService {
     }
 
     final countKey = isAab ? _downloadAabCountKey : _downloadApkCountKey;
-    final rcKey = isAab
-        ? RemoteConfigKeys.bundleDownloadInapp
-        : RemoteConfigKeys.apkDownloadInapp;
+    final limit = isAab
+        ? AppFeatureConfig.bundleDownloadFreeQuota
+        : AppFeatureConfig.apkDownloadFreeQuota;
 
-    // Free download quota must not treat subscription as unlimited.
-    final limit = AdRemoteConfigService.instance.getDownloadFreeQuotaLimit(rcKey);
-    if (limit == null) {
-      // `unlimited` free downloads from RC.
-      return true;
-    }
     final count = await _getPersistedCount(countKey);
     if (count < limit) return true;
 
@@ -144,12 +131,10 @@ class BuildQuotaService {
     return _hasThreescanCredits();
   }
 
-  /// RC `buildagain_sub` — Build Again button (persists; default 3).
+  /// Build Again button (persists; default 3).
   Future<bool> ensureCanBuildAgainOrOpenIap() => _ensurePersistedOrOpenIap(
         countKey: _buildAgainCountKey,
-        limitReader: () => AdRemoteConfigService.instance.getQuotaLimit(
-          RemoteConfigKeys.buildAgainSub,
-        ),
+        limitReader: () => AppFeatureConfig.buildAgainSubLimit,
       );
 
   /// Record a successful generate (persists; never reset on restart).
@@ -164,7 +149,7 @@ class BuildQuotaService {
   }
 
   /// Consume order: project unlock → no count;
-  /// threescan credit → free RC counter.
+  /// threescan credit → free local counter.
   /// Subscriptions do not skip consumption.
   Future<void> recordSuccessfulDownload({
     required bool isAab,

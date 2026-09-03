@@ -3,8 +3,6 @@ import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:web_to_app/app/routes/app_routes.dart';
-import 'package:web_to_app/core/ads/ad_placements.dart';
-import 'package:web_to_app/core/ads/widgets/medium_native_ad_widget.dart';
 import 'package:web_to_app/core/services/build_login_gate.dart';
 import 'package:web_to_app/core/constants/help_guide_assets.dart';
 import 'package:web_to_app/core/theme/app_colors.dart';
@@ -74,14 +72,6 @@ class GuideTab extends GetView<HomeController> {
                               index < HelpGuideSteps.steps.length - 1,
                         ),
                       ),
-                      // Medium native after first step card (RC: helpscreen_native)
-                      if (index == 0) ...[
-                        SizedBox(height: Responsive.w(context, 12)),
-                        const MediumNativeAdWidget(
-                          placementId: AdPlacements.helpScreenNative,
-                          includeOuterPadding: false,
-                        ),
-                      ],
                     ];
                   }),
                 ],

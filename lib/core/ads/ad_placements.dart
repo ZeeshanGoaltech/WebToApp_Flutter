@@ -3,39 +3,17 @@ import 'package:web_to_app/core/ads/ads_debug_config.dart';
 /// Ad formats supported by the app.
 enum AdFormat { interstitial, appOpen, banner, mediumNative, smallNative }
 
-/// Placement IDs — keep in sync with Firebase Remote Config keys.
+/// Placement IDs for the ads enabled in this build.
 abstract final class AdPlacements {
   static const splashInter1st = 'splash_inter_1st';
   static const splashInter2nd = 'splash_inter_2nd';
   static const languageNative = 'language_native';
   static const onboardingNative = 'onboarding_native';
-  static const homeNative = 'home_native';
 
-  /// Bottom-tab interstitial (frequency RC: default `3` = every 3rd tab click).
-  static const projectNative = 'project_native';
+  /// Home-screen first click interstitial (once per app session).
+  static const firstClickInter = 'first_click_inter';
 
-  /// Create App card "Get Started" interstitial.
-  static const createAppInter = 'createapp_inter';
-
-  /// Create-app wizard / build screen small native (after first 2 cards).
-  static const creationScreenNative = 'creationscreen_native';
-
-  /// Generate Bundle & APK button interstitial (frequency RC).
-  static const generateBundleApkInter = 'generatebundleapk_inter';
-
-  /// Build Again button interstitial (frequency RC).
-  static const buildAgainInter = 'buildagain_inter';
-
-  /// Go to Home button after generate (boolean RC).
-  static const goToHomeInter = 'gotohome_inter';
-
-  /// My Projects / My Apps tab medium native.
-  static const myProjNative = 'myproj_native';
-
-  /// Help & Guide screen medium native.
-  static const helpScreenNative = 'helpscreen_native';
-
-  /// App Open ad (RC: appopen).
+  /// App Open ad.
   static const appOpen = 'appopen';
 }
 
@@ -74,7 +52,7 @@ class AdPlacement {
   }
 }
 
-/// Central registry of ad placements and production unit IDs.
+/// Central registry of ad placements and production unit IDs (local only).
 abstract final class AdConfig {
   static const Map<String, AdPlacement> placements = {
     AdPlacements.splashInter1st: AdPlacement(
@@ -97,50 +75,10 @@ abstract final class AdConfig {
       androidUnitId: 'ca-app-pub-5471933816484694/6355588539',
       format: AdFormat.mediumNative,
     ),
-    AdPlacements.homeNative: AdPlacement(
-      id: AdPlacements.homeNative,
-      androidUnitId: 'ca-app-pub-5471933816484694/2212449530',
-      format: AdFormat.mediumNative,
-    ),
-    AdPlacements.projectNative: AdPlacement(
-      id: AdPlacements.projectNative,
+    AdPlacements.firstClickInter: AdPlacement(
+      id: AdPlacements.firstClickInter,
       androidUnitId: 'ca-app-pub-5471933816484694/9340844521',
       format: AdFormat.interstitial,
-    ),
-    AdPlacements.createAppInter: AdPlacement(
-      id: AdPlacements.createAppInter,
-      androidUnitId: 'ca-app-pub-5471933816484694/5042506867',
-      format: AdFormat.interstitial,
-    ),
-    AdPlacements.creationScreenNative: AdPlacement(
-      id: AdPlacements.creationScreenNative,
-      androidUnitId: 'ca-app-pub-5471933816484694/2416343522',
-      format: AdFormat.smallNative,
-    ),
-    AdPlacements.generateBundleApkInter: AdPlacement(
-      id: AdPlacements.generateBundleApkInter,
-      androidUnitId: 'ca-app-pub-5471933816484694/1163091748',
-      format: AdFormat.interstitial,
-    ),
-    AdPlacements.buildAgainInter: AdPlacement(
-      id: AdPlacements.buildAgainInter,
-      androidUnitId: 'ca-app-pub-5471933816484694/9911690161',
-      format: AdFormat.interstitial,
-    ),
-    AdPlacements.goToHomeInter: AdPlacement(
-      id: AdPlacements.goToHomeInter,
-      androidUnitId: 'ca-app-pub-5471933816484694/8394714503',
-      format: AdFormat.interstitial,
-    ),
-    AdPlacements.myProjNative: AdPlacement(
-      id: AdPlacements.myProjNative,
-      androidUnitId: 'ca-app-pub-5471933816484694/6794004019',
-      format: AdFormat.mediumNative,
-    ),
-    AdPlacements.helpScreenNative: AdPlacement(
-      id: AdPlacements.helpScreenNative,
-      androidUnitId: 'ca-app-pub-5471933816484694/7919383426',
-      format: AdFormat.mediumNative,
     ),
     AdPlacements.appOpen: AdPlacement(
       id: AdPlacements.appOpen,

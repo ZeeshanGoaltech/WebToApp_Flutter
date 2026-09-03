@@ -5,18 +5,21 @@ import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:web_to_app/core/ads/ad_placements.dart';
 import 'package:web_to_app/core/ads/ad_presentation_gate.dart';
-import 'package:web_to_app/core/ads/ad_remote_config_service.dart';
 import 'package:web_to_app/core/ads/ad_service.dart';
-import 'package:web_to_app/core/ads/interstitial_counter_service.dart';
 import 'package:web_to_app/core/ads/widgets/ad_loading_dialog.dart';
 import 'package:web_to_app/core/services/premium_service.dart';
 import 'package:web_to_app/core/services/session_service.dart';
 
-/// Shows interstitial ads with the same loading overlay UX as Ummah_Pro_Exis.
+/// Shows interstitial ads with a loading overlay UX.
 class InterstitialAdTrigger {
   InterstitialAdTrigger._();
 
   static final Set<String> _currentlyShowing = {};
+
+  /// Session flag — resets when the process is killed.
+  static bool _firstClickShownThisSession = false;
+  static bool _firstClickInFlight = false;
+  static DateTime? _homeProTapAt;
 
   static bool get _isPremium {
     if (Get.isRegistered<SessionService>() &&
@@ -26,58 +29,40 @@ class InterstitialAdTrigger {
     return PremiumService.isPremiumCached;
   }
 
-  /// Bottom-tab interstitial with RC frequency (`project_native`: `off, 1, 2, 3…`).
-  static Future<void> showBottomTabInterstitial() =>
-      showFrequencyInterstitial(AdPlacements.projectNative);
+  /// Call from the Home Pro button so that tap does not trigger 1st-click inter.
+  static void markHomeProTap() {
+    _homeProTapAt = DateTime.now();
+  }
 
-  /// Generate Bundle & APK interstitial (`generatebundleapk_inter`).
-  static Future<void> showGenerateBundleApkInterstitial() =>
-      showFrequencyInterstitial(AdPlacements.generateBundleApkInter);
-
-  /// Build Again interstitial (`buildagain_inter`).
-  static Future<void> showBuildAgainInterstitial() =>
-      showFrequencyInterstitial(AdPlacements.buildAgainInter);
-
-  /// Frequency-gated interstitial: `off` / `1` / `2` / `off, 1, 2, 3, 4`.
-  static Future<void> showFrequencyInterstitial(String placementId) async {
+  /// Home-screen first click interstitial — once per app session.
+  /// Skips when the Pro button was just tapped.
+  static Future<void> showFirstClickInterstitialIfNeeded() async {
     if (_isPremium) return;
+    if (_firstClickShownThisSession || _firstClickInFlight) return;
+
+    final proTapAt = _homeProTapAt;
+    if (proTapAt != null &&
+        DateTime.now().difference(proTapAt) < const Duration(milliseconds: 800)) {
+      return;
+    }
+
     if (!AdPresentationGate.canShowInterstitial) {
       developer.log(
-        '[InterstitialAdTrigger] skip $placementId — IAP/app-open active',
+        '[InterstitialAdTrigger] skip first_click — IAP/app-open active',
       );
       return;
     }
-    if (_currentlyShowing.contains(placementId)) return;
 
-    final thresholds =
-        AdRemoteConfigService.instance.getFrequencyThresholds(placementId);
-    if (thresholds.isEmpty) {
-      developer.log('[InterstitialAdTrigger] $placementId frequency off');
-      return;
-    }
-
-    final countAfter =
-        await InterstitialCounterService.instance.increment(placementId);
-    final maxFrequency = thresholds.reduce((a, b) => a > b ? a : b);
-
-    developer.log(
-      '[InterstitialAdTrigger] $placementId count=$countAfter '
-      'thresholds=$thresholds',
-    );
-
-    if (countAfter > maxFrequency) {
-      await InterstitialCounterService.instance.reset(placementId);
-      return;
-    }
-
-    if (!thresholds.contains(countAfter)) return;
-
-    // Re-check after async counter work — IAP may have opened.
-    if (!AdPresentationGate.canShowInterstitial) return;
-
-    final shown = await showPlacement(placementId: placementId);
-    if (shown) {
-      await InterstitialCounterService.instance.reset(placementId);
+    _firstClickInFlight = true;
+    try {
+      final shown = await showPlacement(
+        placementId: AdPlacements.firstClickInter,
+      );
+      if (shown) {
+        _firstClickShownThisSession = true;
+      }
+    } finally {
+      _firstClickInFlight = false;
     }
   }
 
@@ -89,7 +74,6 @@ class InterstitialAdTrigger {
   static Future<bool> showPlacement({
     required String placementId,
     Future<void> Function()? onAdClosed,
-    bool forceFetchRc = false,
     bool? showLoader,
   }) async {
     if (_isPremium) {
@@ -159,7 +143,6 @@ class InterstitialAdTrigger {
 
       success = await AdService.instance.showInterstitial(
         placementId,
-        forceFetchRc: forceFetchRc,
         onAdShown: dismissLoader,
       );
 

@@ -5,7 +5,6 @@ import 'package:flutter/foundation.dart';
 import 'package:get/get.dart';
 import 'package:web_to_app/app/routes/app_routes.dart';
 import 'package:web_to_app/core/ads/ad_placements.dart';
-import 'package:web_to_app/core/ads/ad_remote_config_service.dart';
 import 'package:web_to_app/core/ads/ad_service.dart';
 import 'package:web_to_app/core/ads/ads_consent_gate.dart';
 import 'package:web_to_app/core/ads/interstitial_ad_trigger.dart';
@@ -143,7 +142,7 @@ class SplashController extends GetxController {
     final isFirstTimeUser = !storage.hasCompletedOnboarding;
     final isPremium = session.hasPremiumAccess;
 
-    // Splash Interstitial — 1st time only (RC: splash_inter_1st)
+    // Splash Interstitial — 1st time only
     final shouldShowSplashInter1st = isFirstTimeUser &&
         !storage.hasShownSplashInter1st &&
         !isPremium;
@@ -152,7 +151,6 @@ class SplashController extends GetxController {
       developer.log('[Splash] showing splash_inter_1st after GDPR');
       await InterstitialAdTrigger.showPlacement(
         placementId: AdPlacements.splashInter1st,
-        forceFetchRc: true,
         showLoader: false,
         onAdClosed: () async {
           await storage.markSplashInter1stShown();
@@ -162,18 +160,15 @@ class SplashController extends GetxController {
       await storage.markSplashInter1stShown();
     }
 
-    // Splash Interstitial — 2nd & onwards (RC: splash_inter_2nd)
+    // Splash Interstitial — 2nd & onwards
     final shouldShowSplashInter2nd = !isFirstTimeUser && !isPremium;
 
     if (shouldShowSplashInter2nd) {
       developer.log('[Splash] showing splash_inter_2nd after GDPR');
       await InterstitialAdTrigger.showPlacement(
         placementId: AdPlacements.splashInter2nd,
-        forceFetchRc: true,
         showLoader: false,
       );
-    } else if (!isFirstTimeUser) {
-      await AdRemoteConfigService.instance.fetchNow();
     }
 
     _routeAfterSplash(storage, session);

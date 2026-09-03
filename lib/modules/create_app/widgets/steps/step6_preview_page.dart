@@ -2,8 +2,6 @@ import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:web_to_app/core/ads/ad_placements.dart';
-import 'package:web_to_app/core/ads/widgets/small_native_ad_widget.dart';
 import 'package:web_to_app/core/localization/l10n.dart';
 import 'package:web_to_app/core/constants/create_app_assets.dart';
 import 'package:web_to_app/core/theme/app_colors.dart';
@@ -59,15 +57,6 @@ class Step6PreviewPage extends GetView<CreateAppController> {
                 },
               );
             }),
-          ),
-        ),
-        SizedBox(height: Responsive.h(context, 12)),
-        // Monetization: Creation Screen Native near top of preview
-        Padding(
-          padding: EdgeInsets.symmetric(horizontal: Responsive.w(context, 24)),
-          child: const SmallNativeAdWidget(
-            placementId: AdPlacements.creationScreenNative,
-            includeOuterPadding: false,
           ),
         ),
         SizedBox(height: Responsive.h(context, 12)),

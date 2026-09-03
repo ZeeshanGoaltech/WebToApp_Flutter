@@ -1,8 +1,8 @@
 import 'package:get/get.dart';
 import 'package:web_to_app/app/routes/app_routes.dart';
 import 'package:web_to_app/core/ads/ad_presentation_gate.dart';
-import 'package:web_to_app/core/ads/ad_remote_config_service.dart';
 import 'package:web_to_app/core/ads/app_open_ad_manager.dart';
+import 'package:web_to_app/core/config/app_feature_config.dart';
 import 'package:web_to_app/core/services/session_service.dart';
 
 /// Centralizes cold-start and post-auth navigation into the paywall/home.
@@ -14,12 +14,10 @@ class LaunchFlow {
   /// True while the subscription screen was opened from cold-start / splash.
   static bool get iapOpenedFromLaunch => _iapFromLaunch;
 
-  /// IAP when RC `splash_sub` is true and user is not premium.
+  /// IAP when local `splashSub` is true and user is not premium.
   static bool shouldShowIap() {
     if (Get.find<SessionService>().hasPremiumAccess) return false;
-    return AdRemoteConfigService.instance.isPlacementEnabled(
-      RemoteConfigKeys.splashSub,
-    );
+    return AppFeatureConfig.splashSub;
   }
 
   static void _enterIap() {

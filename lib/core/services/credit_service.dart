@@ -1,6 +1,6 @@
 import 'package:flutter/foundation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:web_to_app/core/ads/ad_remote_config_service.dart';
+import 'package:web_to_app/core/config/app_feature_config.dart';
 import 'package:web_to_app/core/services/iap_product_id_resolver.dart';
 
 /// Diginotes-style local credits for API actions (build / download).
@@ -29,15 +29,13 @@ class CreditService {
   final Set<String> _processedKeys = <String>{};
   bool _initialized = false;
 
-  /// Free uses before paywall — Firebase RC `ai_module_free_credits`.
-  int get freeLimit => AdRemoteConfigService.instance
-      .getInt(RemoteConfigKeys.aiModuleFreeCredits, defaultFreeLimit)
-      .clamp(1, 99);
+  /// Free uses before paywall.
+  int get freeLimit =>
+      AppFeatureConfig.aiModuleFreeCredits.clamp(1, 99);
 
-  /// Credits per pack purchase — Firebase RC `ai_module_pack_credits`.
-  int get packCredits => AdRemoteConfigService.instance
-      .getInt(RemoteConfigKeys.aiModulePackCredits, defaultPackCredits)
-      .clamp(1, 99);
+  /// Credits per pack purchase.
+  int get packCredits =>
+      AppFeatureConfig.aiModulePackCredits.clamp(1, 99);
 
   bool get hasPurchasedPackBefore =>
       _hasPurchased || paidCredits.value > 0;

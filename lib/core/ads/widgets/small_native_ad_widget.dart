@@ -7,7 +7,6 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:web_to_app/core/ads/ad_placements.dart';
-import 'package:web_to_app/core/ads/ad_remote_config_service.dart';
 import 'package:web_to_app/core/ads/ad_service.dart';
 import 'package:web_to_app/core/ads/ads_consent_gate.dart';
 import 'package:web_to_app/core/ads/native_ad_load_gate.dart';
@@ -123,16 +122,6 @@ class _SmallNativeAdWidgetState extends State<SmallNativeAdWidget> {
 
     if (!AdsConsentGate.mayRequestAds) {
       developer.log('[SmallNative] UMP blocked ads');
-      if (mounted) {
-        setState(() {
-          _shouldShow = false;
-          _isLoading = false;
-        });
-      }
-      return;
-    }
-
-    if (!AdRemoteConfigService.instance.isPlacementEnabled(widget.placementId)) {
       if (mounted) {
         setState(() {
           _shouldShow = false;

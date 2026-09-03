@@ -8,7 +8,6 @@ import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:web_to_app/app/routes/app_routes.dart';
 import 'package:web_to_app/core/ads/ad_placements.dart';
 import 'package:web_to_app/core/ads/ad_presentation_gate.dart';
-import 'package:web_to_app/core/ads/ad_remote_config_service.dart';
 import 'package:web_to_app/core/ads/ad_service.dart';
 import 'package:web_to_app/core/ads/ads_consent_gate.dart';
 import 'package:web_to_app/core/ads/widgets/ad_loading_dialog.dart';
@@ -16,7 +15,6 @@ import 'package:web_to_app/core/services/premium_service.dart';
 import 'package:web_to_app/core/services/session_service.dart';
 
 /// App Open ads on resume (same pattern as Ummah_Pro_Exis, GetX-friendly).
-/// RC key: [AdPlacements.appOpen] (`appopen`).
 class AppOpenAdManager {
   AppOpenAdManager._();
 
@@ -181,11 +179,7 @@ class AppOpenAdManager {
 
     if (AdService.instance.isShowing(AdPlacements.splashInter1st) ||
         AdService.instance.isShowing(AdPlacements.splashInter2nd) ||
-        AdService.instance.isShowing(AdPlacements.createAppInter) ||
-        AdService.instance.isShowing(AdPlacements.generateBundleApkInter) ||
-        AdService.instance.isShowing(AdPlacements.buildAgainInter) ||
-        AdService.instance.isShowing(AdPlacements.goToHomeInter) ||
-        AdService.instance.isShowing(AdPlacements.projectNative)) {
+        AdService.instance.isShowing(AdPlacements.firstClickInter)) {
       developer.log('[AppOpen] skip — interstitial showing');
       return;
     }
@@ -216,11 +210,6 @@ class AppOpenAdManager {
         now.difference(_lastExternalActionTime!) <
             const Duration(minutes: 5)) {
       developer.log('[AppOpen] skip — post-external-action cooldown');
-      return;
-    }
-
-    if (!AdRemoteConfigService.instance.isPlacementEnabled(_placementId)) {
-      developer.log('[AppOpen] RC disabled: $_placementId');
       return;
     }
 

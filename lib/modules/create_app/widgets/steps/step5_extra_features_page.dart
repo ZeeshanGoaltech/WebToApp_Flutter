@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:web_to_app/core/ads/ad_placements.dart';
-import 'package:web_to_app/core/ads/widgets/small_native_ad_widget.dart';
 import 'package:web_to_app/core/constants/create_app_assets.dart';
 import 'package:web_to_app/core/theme/app_colors.dart';
 import 'package:web_to_app/core/theme/app_text_styles.dart';
@@ -121,20 +119,6 @@ class Step5ExtraFeaturesPage extends GetView<CreateAppController> {
                     ],
                   ),
                 ),
-                // Monetization: after first 2 feature rows
-                if (i == 1)
-                  Padding(
-                    padding: EdgeInsets.fromLTRB(
-                      Responsive.w(context, 16),
-                      Responsive.w(context, 8),
-                      Responsive.w(context, 16),
-                      Responsive.w(context, 8),
-                    ),
-                    child: const SmallNativeAdWidget(
-                      placementId: AdPlacements.creationScreenNative,
-                      includeOuterPadding: false,
-                    ),
-                  ),
               ],
             ],
           ),

@@ -2,9 +2,7 @@ import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:web_to_app/core/ads/ad_placements.dart';
 import 'package:web_to_app/core/ads/ad_presentation_gate.dart';
-import 'package:web_to_app/core/ads/widgets/small_native_ad_widget.dart';
 import 'package:web_to_app/core/constants/create_app_assets.dart';
 import 'package:web_to_app/core/theme/app_colors.dart';
 import 'package:web_to_app/core/theme/app_text_styles.dart';
@@ -276,11 +274,6 @@ class _BuildAppBody extends GetView<BuildAppController> {
                     ],
                   ),
                   SizedBox(height: Responsive.h(context, 16)),
-                  const SmallNativeAdWidget(
-                    placementId: AdPlacements.creationScreenNative,
-                    includeOuterPadding: false,
-                  ),
-                  SizedBox(height: Responsive.h(context, 20)),
                   _KeystoreSection(),
                   if (state == BuildState.building ||
                       state == BuildState.failed) ...[

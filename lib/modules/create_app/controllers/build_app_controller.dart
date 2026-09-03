@@ -8,9 +8,7 @@ import 'package:url_launcher/url_launcher.dart';
 import 'package:web_to_app/app/routes/app_routes.dart';
 import 'package:web_to_app/core/api/api_exception.dart';
 import 'package:web_to_app/core/navigation/auth_redirect.dart';
-import 'package:web_to_app/core/ads/ad_placements.dart';
 import 'package:web_to_app/core/ads/app_open_ad_manager.dart';
-import 'package:web_to_app/core/ads/interstitial_ad_trigger.dart';
 import 'package:web_to_app/core/services/build_login_gate.dart';
 import 'package:web_to_app/core/services/build_quota_service.dart';
 import 'package:web_to_app/core/services/credit_gate.dart';
@@ -306,9 +304,6 @@ class BuildAppController extends GetxController {
     if (!await CreditGate.ensureOrOpenPaywall()) {
       return;
     }
-
-    // Generate Bundle & APK interstitial (RC: generatebundleapk_inter)
-    await InterstitialAdTrigger.showGenerateBundleApkInterstitial();
 
     final create = _createAppOrNull;
     if (create == null) return;
@@ -712,7 +707,6 @@ class BuildAppController extends GetxController {
       return;
     }
 
-    await InterstitialAdTrigger.showBuildAgainInterstitial();
     buildAgain();
   }
 
@@ -762,11 +756,8 @@ class BuildAppController extends GetxController {
     }
   }
 
-  /// Go to Home after generate — interstitial then home (RC: gotohome_inter).
+  /// Go to Home after generate.
   Future<void> onGoToHomeTapped() async {
-    await InterstitialAdTrigger.showPlacement(
-      placementId: AdPlacements.goToHomeInter,
-    );
     backToHome();
   }
 

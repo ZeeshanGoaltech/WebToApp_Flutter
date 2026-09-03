@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:web_to_app/core/ads/ad_placements.dart';
-import 'package:web_to_app/core/ads/widgets/small_native_ad_widget.dart';
 import 'package:web_to_app/core/localization/l10n.dart';
 import 'package:web_to_app/core/constants/create_app_assets.dart';
 import 'package:web_to_app/core/theme/app_colors.dart';
@@ -193,11 +191,6 @@ class _SlideEditor extends GetView<CreateAppController> {
             ),
             SizedBox(height: Responsive.w(context, 16)),
             // Monetization: immediately above the Add CTA button setting.
-            const SmallNativeAdWidget(
-              placementId: AdPlacements.creationScreenNative,
-              includeOuterPadding: false,
-            ),
-            SizedBox(height: Responsive.w(context, 16)),
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
