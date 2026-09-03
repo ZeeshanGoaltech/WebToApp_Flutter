@@ -3,6 +3,7 @@ import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:web_to_app/core/ads/ad_placements.dart';
+import 'package:web_to_app/core/ads/ad_presentation_gate.dart';
 import 'package:web_to_app/core/ads/widgets/small_native_ad_widget.dart';
 import 'package:web_to_app/core/constants/create_app_assets.dart';
 import 'package:web_to_app/core/theme/app_colors.dart';
@@ -50,6 +51,8 @@ class BuildAppView extends GetView<BuildAppController> {
   }
 
   Future<void> _handleBack(BuildContext context) async {
+    if (AdPresentationGate.shouldBlockBack) return;
+
     if (!controller.shouldConfirmBuildExit) {
       if (controller.shouldNavigateHomeOnBack) {
         controller.backToHome();

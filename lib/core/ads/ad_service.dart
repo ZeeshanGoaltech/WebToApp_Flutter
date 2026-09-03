@@ -5,6 +5,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:web_to_app/core/ads/ad_placements.dart';
+import 'package:web_to_app/core/ads/ad_presentation_gate.dart';
 import 'package:web_to_app/core/ads/ad_remote_config_service.dart';
 import 'package:web_to_app/core/ads/ads_consent_gate.dart';
 import 'package:web_to_app/core/ads/app_open_ad_manager.dart';
@@ -113,6 +114,7 @@ class AdService {
       onAdDismissedFullScreenContent: (InterstitialAd dismissed) {
         developer.log('[AdService] dismissed $placementId');
         _showing.remove(placementId);
+        AdPresentationGate.markFullscreenAdClosed();
         AppOpenAdManager.instance.onInterstitialDismissed();
         Future.microtask(() async {
           try {
@@ -135,6 +137,7 @@ class AdService {
           '[AdService] failed to show $placementId: ${error.message}',
         );
         _showing.remove(placementId);
+        AdPresentationGate.markFullscreenAdClosed();
         try {
           failed.dispose();
         } catch (_) {}
@@ -143,17 +146,23 @@ class AdService {
     );
 
     try {
+      // Android only; never block show if the channel call fails.
+      try {
+        await ad.setImmersiveMode(true);
+      } catch (_) {}
       await ad.show();
       return await completer.future.timeout(
         const Duration(seconds: 60),
         onTimeout: () {
           _showing.remove(placementId);
+          AdPresentationGate.markFullscreenAdClosed();
           return false;
         },
       );
     } catch (e) {
       developer.log('[AdService] show() error $placementId: $e');
       _showing.remove(placementId);
+      AdPresentationGate.markFullscreenAdClosed();
       try {
         ad.dispose();
       } catch (_) {}

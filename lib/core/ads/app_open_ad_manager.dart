@@ -314,6 +314,7 @@ class AppOpenAdManager {
           developer.log('[AppOpen] dismissed');
           _lastDismissTime = DateTime.now();
           releaseBusy();
+          AdPresentationGate.markFullscreenAdClosed();
           try {
             dismissed.dispose();
           } catch (_) {}
@@ -322,6 +323,7 @@ class AppOpenAdManager {
         onAdFailedToShowFullScreenContent: (failed, error) {
           developer.log('[AppOpen] failed to show: ${error.message}');
           releaseBusy();
+          AdPresentationGate.markFullscreenAdClosed();
           try {
             failed.dispose();
           } catch (_) {}
@@ -329,6 +331,10 @@ class AppOpenAdManager {
         },
       );
 
+      // Android only; never block show if the channel call fails.
+      try {
+        await ad.setImmersiveMode(true);
+      } catch (_) {}
       await ad.show();
       await shown.future.timeout(
         const Duration(seconds: 60),

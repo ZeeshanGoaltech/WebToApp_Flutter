@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:web_to_app/core/ads/ad_presentation_gate.dart';
 import 'package:web_to_app/core/navigation/shell_back.dart';
 import 'package:web_to_app/core/theme/app_colors.dart';
 import 'package:web_to_app/modules/home/controllers/home_controller.dart';
@@ -53,6 +54,8 @@ class HomeView extends GetView<HomeController> {
   }
 
   Future<void> _handleBack(BuildContext context) async {
+    if (AdPresentationGate.shouldBlockBack) return;
+
     if (controller.selectedTab.value != 0) {
       controller.selectTab(0);
       return;

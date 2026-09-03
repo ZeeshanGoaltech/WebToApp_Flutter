@@ -1,5 +1,6 @@
 import 'package:get/get.dart';
 import 'package:web_to_app/app/routes/app_routes.dart';
+import 'package:web_to_app/core/ads/ad_presentation_gate.dart';
 import 'package:web_to_app/core/utils/app_toast.dart';
 import 'package:web_to_app/core/services/language_service.dart';
 import 'package:web_to_app/modules/language/data/language_data.dart';
@@ -43,6 +44,9 @@ class LanguageController extends GetxController {
   void onBack() => Get.back();
 
   Future<bool> handleSystemBack() async {
+    // Swallow while inter/app-open is up; do not permanently disable after X dismiss.
+    if (AdPresentationGate.shouldBlockBack) return false;
+
     if (fromSettings) return true;
 
     final now = DateTime.now();

@@ -5,6 +5,7 @@ import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:web_to_app/app/routes/app_routes.dart';
+import 'package:web_to_app/core/ads/ad_presentation_gate.dart';
 import 'package:web_to_app/core/constants/app_feature_flags.dart';
 import 'package:web_to_app/core/services/premium_service.dart';
 import 'package:web_to_app/core/services/session_service.dart';
@@ -27,6 +28,11 @@ abstract final class ShellBack {
 
   /// Returns true when the back press was handled.
   static Future<bool> handle(BuildContext context) async {
+    // Inter / app-open load+show, plus brief post-dismiss grace for trailing back.
+    if (AdPresentationGate.shouldBlockBack) {
+      return true;
+    }
+
     final route = Get.currentRoute;
     if (route == AppRoutes.lifetimePremium ||
         route == AppRoutes.downloadInApp ||

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:web_to_app/core/ads/ad_presentation_gate.dart';
 import 'package:web_to_app/core/navigation/launch_flow.dart';
 import 'package:web_to_app/core/services/token_storage.dart';
 import 'package:web_to_app/core/utils/app_toast.dart';
@@ -42,6 +43,9 @@ class IntroController extends GetxController {
   }
 
   Future<bool> handleSystemBack() async {
+    // Swallow while inter/app-open is up; do not permanently disable after X dismiss.
+    if (AdPresentationGate.shouldBlockBack) return false;
+
     final now = DateTime.now();
     if (_lastBackPressAt == null ||
         now.difference(_lastBackPressAt!) > const Duration(seconds: 2)) {

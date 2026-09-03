@@ -15,6 +15,25 @@ class AdPresentationGate {
   /// True while an app-open ad is loading/showing.
   static bool appOpenBusy = false;
 
+  /// Brief window after AdActivity closes — swallows a trailing system back
+  /// that Android sometimes delivers into Flutter. Short on purpose so back
+  /// works again once the user dismisses via the ad's own close control.
+  static DateTime? _blockBackUntil;
+
+  /// Block Flutter/system-back navigation while inter/app-open load or show,
+  /// plus a short post-dismiss grace (not permanent).
+  static bool get shouldBlockBack {
+    if (interstitialBusy || appOpenBusy) return true;
+    final until = _blockBackUntil;
+    if (until != null && DateTime.now().isBefore(until)) return true;
+    return false;
+  }
+
+  /// Call when a fullscreen interstitial / app-open finishes (dismiss or fail).
+  static void markFullscreenAdClosed() {
+    _blockBackUntil = DateTime.now().add(const Duration(milliseconds: 800));
+  }
+
   static bool get isOnIapRoute {
     final route = Get.currentRoute;
     return route == AppRoutes.iap ||
