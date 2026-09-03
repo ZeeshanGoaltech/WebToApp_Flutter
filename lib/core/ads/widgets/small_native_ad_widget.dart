@@ -10,6 +10,7 @@ import 'package:web_to_app/core/ads/ad_placements.dart';
 import 'package:web_to_app/core/ads/ad_remote_config_service.dart';
 import 'package:web_to_app/core/ads/ad_service.dart';
 import 'package:web_to_app/core/ads/ads_consent_gate.dart';
+import 'package:web_to_app/core/ads/native_ad_load_gate.dart';
 import 'package:web_to_app/core/services/premium_service.dart';
 import 'package:web_to_app/core/services/session_service.dart';
 import 'package:web_to_app/core/theme/app_colors.dart';
@@ -70,7 +71,12 @@ class _SmallNativeAdWidgetState extends State<SmallNativeAdWidget> {
       return;
     }
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (mounted) unawaited(_loadAd());
+      if (!mounted) return;
+      unawaited(
+        Future<void>.delayed(const Duration(milliseconds: 350), () {
+          if (mounted) unawaited(_loadAd());
+        }),
+      );
     });
   }
 
@@ -93,9 +99,27 @@ class _SmallNativeAdWidgetState extends State<SmallNativeAdWidget> {
       return;
     }
 
+    await NativeAdLoadGate.run(_loadAdBody);
+  }
+
+  Future<void> _loadAdBody() async {
+    if (!mounted || _nativeAd != null) return;
+
+    if (_isPremium) {
+      if (mounted) {
+        setState(() {
+          _shouldShow = false;
+          _isLoading = false;
+        });
+      }
+      return;
+    }
+
     if (!AdService.instance.isInitialized) {
       await AdService.instance.initialize();
     }
+
+    if (!mounted) return;
 
     if (!AdsConsentGate.mayRequestAds) {
       developer.log('[SmallNative] UMP blocked ads');

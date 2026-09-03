@@ -10,6 +10,7 @@ import 'package:web_to_app/core/ads/ad_placements.dart';
 import 'package:web_to_app/core/ads/ad_remote_config_service.dart';
 import 'package:web_to_app/core/ads/ad_service.dart';
 import 'package:web_to_app/core/ads/ads_consent_gate.dart';
+import 'package:web_to_app/core/ads/native_ad_load_gate.dart';
 import 'package:web_to_app/core/services/premium_service.dart';
 import 'package:web_to_app/core/services/session_service.dart';
 import 'package:web_to_app/core/theme/app_colors.dart';
@@ -82,7 +83,14 @@ class _MediumNativeAdWidgetState extends State<MediumNativeAdWidget> {
       return;
     }
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (mounted) unawaited(_loadAd());
+      if (!mounted) return;
+      // Brief idle so first taps after navigation are not competing with
+      // AdMob WebView loadUrl on the main thread (Input dispatching ANR).
+      unawaited(
+        Future<void>.delayed(const Duration(milliseconds: 350), () {
+          if (mounted) unawaited(_loadAd());
+        }),
+      );
     });
   }
 
@@ -106,9 +114,28 @@ class _MediumNativeAdWidgetState extends State<MediumNativeAdWidget> {
       return;
     }
 
+    await NativeAdLoadGate.run(_loadAdBody);
+  }
+
+  Future<void> _loadAdBody() async {
+    if (!mounted || _nativeAd != null) return;
+
+    if (_isPremium) {
+      if (mounted) {
+        setState(() {
+          _shouldShow = false;
+          _isLoading = false;
+        });
+        widget.onVisibilityChanged?.call(false);
+      }
+      return;
+    }
+
     if (!AdService.instance.isInitialized) {
       await AdService.instance.initialize();
     }
+
+    if (!mounted) return;
 
     if (!AdsConsentGate.mayRequestAds) {
       developer.log('[MediumNative] UMP blocked ads');
