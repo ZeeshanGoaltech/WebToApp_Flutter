@@ -11,6 +11,7 @@ import 'package:web_to_app/core/navigation/auth_redirect.dart';
 import 'package:web_to_app/core/ads/app_open_ad_manager.dart';
 import 'package:web_to_app/core/services/build_login_gate.dart';
 import 'package:web_to_app/core/services/build_quota_service.dart';
+import 'package:web_to_app/core/services/download_token_service.dart';
 import 'package:web_to_app/core/services/session_service.dart';
 import 'package:web_to_app/core/services/token_storage.dart';
 import 'package:web_to_app/core/utils/app_error_handler.dart';
@@ -49,6 +50,9 @@ class BuildAppController extends GetxController {
   final isSharingApp = false.obs;
   final downloadingFormat = Rxn<BuildFormat>();
   final sharingFormat = Rxn<BuildFormat>();
+  /// Share APK / AAB visible only after that format is unlocked (free or IAP).
+  final apkShareUnlocked = false.obs;
+  final aabShareUnlocked = false.obs;
 
   final lastBuildError = RxnString();
   final buildLogs = <String>[r'$ Starting build process...'].obs;
@@ -98,6 +102,30 @@ class BuildAppController extends GetxController {
     return Get.find<CreateAppController>();
   }
 
+  bool canShareFormat(BuildFormat format) => format == BuildFormat.aab
+      ? aabShareUnlocked.value
+      : apkShareUnlocked.value;
+
+  Future<void> refreshShareUnlocks() async {
+    final appId = _createAppOrNull?.appId.value;
+    final tokens = DownloadTokenService.instance;
+    apkShareUnlocked.value =
+        await tokens.isFormatUnlocked(appId, isAab: false);
+    aabShareUnlocked.value =
+        await tokens.isFormatUnlocked(appId, isAab: true);
+  }
+
+  void _onDownloadUnlockChanged() {
+    unawaited(refreshShareUnlocks());
+  }
+
+  @override
+  void onInit() {
+    super.onInit();
+    DownloadTokenService.instance.version.addListener(_onDownloadUnlockChanged);
+    unawaited(refreshShareUnlocks());
+  }
+
   String get buildStatusMessage {
     if (buildState.value == BuildState.failed) {
       return lastBuildError.value ?? 'build_failed'.tr;
@@ -127,6 +155,7 @@ class BuildAppController extends GetxController {
     _preparedAppVersionId = appVersionId;
     _resetBuildResult(resetFormats: true);
     unawaited(_loadSigningState());
+    unawaited(refreshShareUnlocks());
     _hydrateExistingBuild(appId);
   }
 
@@ -600,6 +629,7 @@ class BuildAppController extends GetxController {
     )) {
       return;
     }
+    await refreshShareUnlocks();
 
     isFetchingDownload.value = true;
     downloadingFormat.value = format;
@@ -642,6 +672,7 @@ class BuildAppController extends GetxController {
   Future<void> shareArtifact(BuildFormat format) async {
     final id = buildId.value;
     if (id == null || isSharingApp.value) return;
+    if (!canShareFormat(format)) return;
 
     isSharingApp.value = true;
     sharingFormat.value = format;
@@ -824,6 +855,7 @@ class BuildAppController extends GetxController {
 
   @override
   void onClose() {
+    DownloadTokenService.instance.version.removeListener(_onDownloadUnlockChanged);
     _pollTimer?.cancel();
     _stopLogRetry();
     _queueEstimateTimer?.cancel();

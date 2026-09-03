@@ -1227,12 +1227,16 @@ class _ArtifactActionsPanel extends GetView<BuildAppController> {
   Widget build(BuildContext context) {
     return Obx(() {
       final formats = controller.selectedBuildFormats;
+      // Touch unlock flags so Obx rebuilds when IAP / free claim updates.
+      final apkShare = controller.apkShareUnlocked.value;
+      final aabShare = controller.aabShareUnlocked.value;
       return Column(
         children: List.generate(formats.length, (index) {
           final format = formats[index];
           final label = controller.artifactLabel(format);
           final downloading = controller.downloadingFormat.value == format;
           final sharing = controller.sharingFormat.value == format;
+          final canShare = format == BuildFormat.aab ? aabShare : apkShare;
           return Padding(
             padding: EdgeInsets.only(
               bottom: index == formats.length - 1
@@ -1253,19 +1257,21 @@ class _ArtifactActionsPanel extends GetView<BuildAppController> {
                         : () => controller.downloadArtifact(format),
                   ),
                 ),
-                SizedBox(width: Responsive.w(context, 12)),
-                Expanded(
-                  child: _OutlineActionButton(
-                    label: sharing
-                        ? 'preparing_download'.tr
-                        : '${'share_app_btn'.tr} $label',
-                    icon: CreateAppAssets.share,
-                    labelColor: AppColors.createAccent,
-                    onTap: controller.isSharingApp.value
-                        ? null
-                        : () => controller.shareArtifact(format),
+                if (canShare) ...[
+                  SizedBox(width: Responsive.w(context, 12)),
+                  Expanded(
+                    child: _OutlineActionButton(
+                      label: sharing
+                          ? 'preparing_download'.tr
+                          : '${'share_app_btn'.tr} $label',
+                      icon: CreateAppAssets.share,
+                      labelColor: AppColors.createAccent,
+                      onTap: controller.isSharingApp.value
+                          ? null
+                          : () => controller.shareArtifact(format),
+                    ),
                   ),
-                ),
+                ],
               ],
             ),
           );
