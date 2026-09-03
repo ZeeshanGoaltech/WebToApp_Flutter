@@ -10,7 +10,7 @@ import 'package:web_to_app/core/ads/ad_placements.dart';
 import 'package:web_to_app/core/ads/ad_presentation_gate.dart';
 import 'package:web_to_app/core/ads/ad_service.dart';
 import 'package:web_to_app/core/ads/ads_consent_gate.dart';
-import 'package:web_to_app/core/ads/widgets/ad_loading_dialog.dart';
+import 'package:web_to_app/core/ads/widgets/ad_loading_overlay.dart';
 import 'package:web_to_app/core/services/premium_service.dart';
 import 'package:web_to_app/core/services/session_service.dart';
 
@@ -255,18 +255,12 @@ class AppOpenAdManager {
     _isShowing = true;
     AdPresentationGate.appOpenBusy = true;
 
-    final context = Get.overlayContext ?? Get.context;
-    var loaderVisible = false;
+    var loaderShown = false;
 
     void dismissLoader() {
-      if (!loaderVisible) return;
-      final ctx = Get.overlayContext ?? Get.context;
-      if (ctx != null && ctx.mounted) {
-        try {
-          Navigator.of(ctx, rootNavigator: true).pop();
-        } catch (_) {}
-      }
-      loaderVisible = false;
+      if (!loaderShown) return;
+      loaderShown = false;
+      AdLoadingOverlay.hide();
     }
 
     void releaseBusy() {
@@ -275,16 +269,8 @@ class AppOpenAdManager {
     }
 
     try {
-      if (context != null && context.mounted) {
-        showDialog<void>(
-          context: context,
-          barrierDismissible: false,
-          barrierColor: Colors.black.withValues(alpha: 0.5),
-          useRootNavigator: true,
-          builder: (_) => const AdLoadingDialog(),
-        );
-        loaderVisible = true;
-      }
+      AdLoadingOverlay.show();
+      loaderShown = AdLoadingOverlay.isShowing;
 
       if (!AdService.instance.isInitialized) {
         await AdService.instance.initialize();
@@ -387,6 +373,8 @@ class AppOpenAdManager {
       developer.log('[AppOpen] error: $e');
       dismissLoader();
       releaseBusy();
+    } finally {
+      dismissLoader();
     }
   }
 

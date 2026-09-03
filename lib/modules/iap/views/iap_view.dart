@@ -5,10 +5,10 @@ import 'package:web_to_app/core/constants/app_assets.dart';
 import 'package:web_to_app/core/navigation/launch_flow.dart';
 import 'package:web_to_app/core/theme/app_colors.dart';
 import 'package:web_to_app/core/widgets/button_loading_indicator.dart';
-import 'package:web_to_app/core/widgets/figma_svg_icon.dart';
 import 'package:web_to_app/modules/iap/controllers/iap_controller.dart';
 import 'package:web_to_app/modules/iap/data/iap_data.dart';
 import 'package:web_to_app/modules/iap/widgets/iap_check_icon.dart';
+import 'package:web_to_app/modules/iap/widgets/iap_close_button.dart';
 
 /// Figma IAP paywall (node 127:101). Fixed canvas scaled to fit — never scrolls.
 class IapView extends GetView<IapController> {
@@ -107,27 +107,11 @@ class _CloseButton extends GetView<IapController> {
         return const SizedBox.shrink();
       }
       return Positioned(
-        top: 19,
-        left: 11,
-        child: Material(
-          color: Colors.transparent,
-          child: InkWell(
-            onTap: LaunchFlow.completeIap,
-            customBorder: const CircleBorder(),
-            child: Container(
-              width: 28,
-              height: 28,
-              decoration: const BoxDecoration(
-                color: AppColors.iapCloseBg,
-                shape: BoxShape.circle,
-              ),
-              alignment: Alignment.center,
-              child: const FigmaSvgIcon(
-                asset: AppAssets.iapCloseIcon,
-                size: 20,
-              ),
-            ),
-          ),
+        top: IapCloseButton.designTop,
+        left: IapCloseButton.designLeft,
+        child: IapCloseButton(
+          onTap: LaunchFlow.completeIap,
+          scale: 1,
         ),
       );
     });

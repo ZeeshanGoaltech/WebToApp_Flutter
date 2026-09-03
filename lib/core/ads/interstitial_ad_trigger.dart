@@ -1,4 +1,5 @@
-﻿import 'dart:developer' as developer;
+﻿import 'dart:async';
+import 'dart:developer' as developer;
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -6,7 +7,7 @@ import 'package:get/get.dart';
 import 'package:web_to_app/core/ads/ad_placements.dart';
 import 'package:web_to_app/core/ads/ad_presentation_gate.dart';
 import 'package:web_to_app/core/ads/ad_service.dart';
-import 'package:web_to_app/core/ads/widgets/ad_loading_dialog.dart';
+import 'package:web_to_app/core/ads/widgets/ad_loading_overlay.dart';
 import 'package:web_to_app/core/services/premium_service.dart';
 import 'package:web_to_app/core/services/session_service.dart';
 
@@ -18,7 +19,7 @@ class InterstitialAdTrigger {
 
   /// Session flag — resets when the process is killed.
   static bool _firstClickShownThisSession = false;
-  static bool _firstClickInFlight = false;
+  static Future<void>? _firstClickFuture;
   static DateTime? _homeProTapAt;
 
   static bool get _isPremium {
@@ -29,16 +30,33 @@ class InterstitialAdTrigger {
     return PremiumService.isPremiumCached;
   }
 
+  /// True while the once-per-session first-click interstitial is loading/showing.
+  static bool get isFirstClickInFlight => _firstClickFuture != null;
+
   /// Call from the Home Pro button so that tap does not trigger 1st-click inter.
   static void markHomeProTap() {
     _homeProTapAt = DateTime.now();
   }
 
+  /// Run [action] only after the first-click interstitial is done (or skipped).
+  /// Use for any Home navigation so the next screen opens after ad dismiss.
+  static Future<T> afterFirstClick<T>(FutureOr<T> Function() action) async {
+    await showFirstClickInterstitialIfNeeded();
+    return await action();
+  }
+
   /// Home-screen first click interstitial — once per app session.
   /// Skips when the Pro button was just tapped.
+  /// Concurrent callers share the same in-flight Future (so navigation can wait).
   static Future<void> showFirstClickInterstitialIfNeeded() async {
     if (_isPremium) return;
-    if (_firstClickShownThisSession || _firstClickInFlight) return;
+    if (_firstClickShownThisSession) return;
+
+    final inFlight = _firstClickFuture;
+    if (inFlight != null) {
+      await inFlight;
+      return;
+    }
 
     final proTapAt = _homeProTapAt;
     if (proTapAt != null &&
@@ -53,16 +71,23 @@ class InterstitialAdTrigger {
       return;
     }
 
-    _firstClickInFlight = true;
+    final future = _runFirstClickInterstitial();
+    _firstClickFuture = future;
     try {
-      final shown = await showPlacement(
-        placementId: AdPlacements.firstClickInter,
-      );
-      if (shown) {
-        _firstClickShownThisSession = true;
-      }
+      await future;
     } finally {
-      _firstClickInFlight = false;
+      if (identical(_firstClickFuture, future)) {
+        _firstClickFuture = null;
+      }
+    }
+  }
+
+  static Future<void> _runFirstClickInterstitial() async {
+    final shown = await showPlacement(
+      placementId: AdPlacements.firstClickInter,
+    );
+    if (shown) {
+      _firstClickShownThisSession = true;
     }
   }
 
@@ -103,6 +128,13 @@ class InterstitialAdTrigger {
     _currentlyShowing.add(placementId);
     AdPresentationGate.interstitialBusy = true;
     var success = false;
+    var loaderShown = false;
+
+    void dismissLoader() {
+      if (!loaderShown) return;
+      loaderShown = false;
+      AdLoadingOverlay.hide();
+    }
 
     try {
       await _enableFullScreenForAds();
@@ -115,30 +147,10 @@ class InterstitialAdTrigger {
         return false;
       }
 
-      final context = Get.overlayContext ?? Get.context;
-      var loaderVisible = false;
-
-      if (useLoader && context != null && context.mounted) {
-        showDialog<void>(
-          context: context,
-          barrierDismissible: false,
-          barrierColor: Colors.black.withValues(alpha: 0.5),
-          useRootNavigator: true,
-          builder: (_) => const AdLoadingDialog(),
-        );
-        loaderVisible = true;
-      }
-
-      var loaderDismissed = false;
-
-      void dismissLoader() {
-        if (!loaderVisible || loaderDismissed) return;
-        final ctx = Get.overlayContext ?? Get.context;
-        if (ctx != null && ctx.mounted) {
-          Navigator.of(ctx, rootNavigator: true).pop();
-        }
-        loaderDismissed = true;
-        loaderVisible = false;
+      if (useLoader) {
+        // OverlayEntry — not a route — so Create App / back never orphans it.
+        AdLoadingOverlay.show();
+        loaderShown = AdLoadingOverlay.isShowing;
       }
 
       success = await AdService.instance.showInterstitial(
@@ -160,6 +172,7 @@ class InterstitialAdTrigger {
       await _restoreSystemUI();
       success = false;
     } finally {
+      dismissLoader();
       _currentlyShowing.remove(placementId);
       AdPresentationGate.interstitialBusy = _currentlyShowing.isNotEmpty;
       await onAdClosed?.call();

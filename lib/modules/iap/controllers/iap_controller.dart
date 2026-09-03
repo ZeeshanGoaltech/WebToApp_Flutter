@@ -6,6 +6,7 @@ import 'package:in_app_purchase/in_app_purchase.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:web_to_app/core/ads/ad_presentation_gate.dart';
 import 'package:web_to_app/core/ads/app_open_ad_manager.dart';
+import 'package:web_to_app/core/constants/app_assets.dart';
 import 'package:web_to_app/core/constants/app_feature_flags.dart';
 import 'package:web_to_app/core/constants/app_info.dart';
 import 'package:web_to_app/core/navigation/launch_flow.dart';
@@ -13,6 +14,7 @@ import 'package:web_to_app/core/services/analytics_service.dart';
 import 'package:web_to_app/core/services/premium_service.dart';
 import 'package:web_to_app/core/services/session_service.dart';
 import 'package:web_to_app/core/utils/app_toast.dart';
+import 'package:web_to_app/core/widgets/figma_svg_icon.dart';
 
 /// Diginotes Android order: yearly (trial CTA) → monthly → weekly.
 /// iOS fallback (no monthly): weekly (trial CTA) → yearly → lifetime.
@@ -95,6 +97,8 @@ class IapController extends GetxController {
       fromLaunch: LaunchFlow.iapOpenedFromLaunch,
       fromSettings: !LaunchFlow.iapOpenedFromLaunch,
     );
+    // Warm close SVG during the delay so circle bg + X paint together.
+    unawaited(FigmaSvgIcon.preload(AppAssets.iapCloseIcon));
     if (LaunchFlow.iapOpenedFromLaunch) {
       _closeRevealTimer = Timer(kIapCloseRevealDelayFromLaunch, () {
         showCloseButton.value = true;

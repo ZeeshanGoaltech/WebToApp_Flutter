@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:get/get.dart';
+import 'package:web_to_app/core/ads/interstitial_ad_trigger.dart';
 import 'package:web_to_app/core/services/analytics_service.dart';
 import 'package:web_to_app/core/services/push_notification_service.dart';
 import 'package:web_to_app/core/services/guest_auth_service.dart';
@@ -38,22 +39,24 @@ class HomeController extends GetxController {
   AppBuildSnapshot snapshotFor(String appId) =>
       buildSnapshots[appId] ?? const AppBuildSnapshot();
 
-  void selectTab(int index) {
-    final isTabChange = selectedTab.value != index;
-    selectedTab.value = index;
-    if (index == 0 || index == 1) {
-      loadApps();
-    }
-    if (isTabChange) {
-      unawaited(
-        AnalyticsService.instance.logBottomNav(
-          AnalyticsService.tabNameForIndex(index),
-        ),
-      );
-    }
+  Future<void> selectTab(int index) async {
+    await InterstitialAdTrigger.afterFirstClick(() {
+      final isTabChange = selectedTab.value != index;
+      selectedTab.value = index;
+      if (index == 0 || index == 1) {
+        loadApps();
+      }
+      if (isTabChange) {
+        unawaited(
+          AnalyticsService.instance.logBottomNav(
+            AnalyticsService.tabNameForIndex(index),
+          ),
+        );
+      }
+    });
   }
 
-  void openMyAppsTab() => selectTab(1);
+  Future<void> openMyAppsTab() => selectTab(1);
 
   @override
   void onInit() {
@@ -204,53 +207,57 @@ class HomeController extends GetxController {
   }
 
   Future<void> openAppBuild(AppSummary app) async {
-    final session = Get.find<SessionService>();
-    if (session.isGuest.value) {
-      await Get.find<GuestAuthService>().ensureGuestApiSession();
-    }
-    if (!session.canAccessApps) {
-      AppToast.info(
-        'sign_in_required'.tr,
-        description: 'sign_in_to_open_apps'.tr,
-      );
-      return;
-    }
+    await InterstitialAdTrigger.afterFirstClick(() async {
+      final session = Get.find<SessionService>();
+      if (session.isGuest.value) {
+        await Get.find<GuestAuthService>().ensureGuestApiSession();
+      }
+      if (!session.canAccessApps) {
+        AppToast.info(
+          'sign_in_required'.tr,
+          description: 'sign_in_to_open_apps'.tr,
+        );
+        return;
+      }
 
-    if (openingAppId.value != null) return;
+      if (openingAppId.value != null) return;
 
-    openingAppId.value = app.id;
-    try {
-      await AppOpenService.openOrPrompt(app);
-    } finally {
-      openingAppId.value = null;
-      await loadApps();
-    }
+      openingAppId.value = app.id;
+      try {
+        await AppOpenService.openOrPrompt(app);
+      } finally {
+        openingAppId.value = null;
+        await loadApps();
+      }
+    });
   }
 
   Future<void> openAppBuildFlow(AppSummary app) async {
-    final session = Get.find<SessionService>();
-    if (session.isGuest.value) {
-      await Get.find<GuestAuthService>().ensureGuestApiSession();
-    }
-    if (!session.canAccessApps) {
-      AppToast.info(
-        'sign_in_required'.tr,
-        description: 'sign_in_to_open_apps'.tr,
-      );
-      return;
-    }
+    await InterstitialAdTrigger.afterFirstClick(() async {
+      final session = Get.find<SessionService>();
+      if (session.isGuest.value) {
+        await Get.find<GuestAuthService>().ensureGuestApiSession();
+      }
+      if (!session.canAccessApps) {
+        AppToast.info(
+          'sign_in_required'.tr,
+          description: 'sign_in_to_open_apps'.tr,
+        );
+        return;
+      }
 
-    if (openingAppId.value != null) return;
+      if (openingAppId.value != null) return;
 
-    openingAppId.value = app.id;
-    try {
-      await Get.find<AppOpenService>().openBuildScreen(app);
-    } catch (e) {
-      await AppErrorHandler.show(e, title: 'could_not_open_app'.tr);
-    } finally {
-      openingAppId.value = null;
-      await loadApps();
-    }
+      openingAppId.value = app.id;
+      try {
+        await Get.find<AppOpenService>().openBuildScreen(app);
+      } catch (e) {
+        await AppErrorHandler.show(e, title: 'could_not_open_app'.tr);
+      } finally {
+        openingAppId.value = null;
+        await loadApps();
+      }
+    });
   }
 
   Future<void> renameApp(AppSummary app, String name) async {

@@ -20,6 +20,16 @@ class FigmaSvgIcon extends StatelessWidget {
 
   static final Map<String, String> _svgCache = {};
 
+  /// Warm the SVG cache so first paint can show icon + chrome together.
+  static Future<void> preload(String asset, {bool tinted = false}) async {
+    if (_svgCache.containsKey(asset)) return;
+    final raw = await rootBundle.loadString(asset);
+    _svgCache[asset] = _sanitizeSvg(raw, tinted: tinted);
+  }
+
+  /// Returns cached SVG when available (after [preload] / prior paint).
+  static String? cached(String asset) => _svgCache[asset];
+
   static String _sanitizeSvg(String svg, {required bool tinted}) {
     var result = svg
         .replaceAllMapped(

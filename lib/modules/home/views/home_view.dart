@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:web_to_app/core/ads/ad_presentation_gate.dart';
 import 'package:web_to_app/core/ads/interstitial_ad_trigger.dart';
+import 'package:web_to_app/core/ads/widgets/ad_loading_overlay.dart';
 import 'package:web_to_app/core/navigation/shell_back.dart';
 import 'package:web_to_app/core/theme/app_colors.dart';
 import 'package:web_to_app/modules/home/controllers/home_controller.dart';
@@ -47,7 +48,9 @@ class HomeView extends GetView<HomeController> {
                 Obx(
                   () => HomeBottomNav(
                     selectedIndex: controller.selectedTab.value,
-                    onTabSelected: controller.selectTab,
+                    onTabSelected: (index) {
+                      unawaited(controller.selectTab(index));
+                    },
                   ),
                 ),
               ],
@@ -62,7 +65,7 @@ class HomeView extends GetView<HomeController> {
     if (AdPresentationGate.shouldBlockBack) return;
 
     if (controller.selectedTab.value != 0) {
-      controller.selectTab(0);
+      unawaited(controller.selectTab(0));
       return;
     }
 
@@ -85,10 +88,26 @@ class _HomeFirstClickListenerState extends State<_HomeFirstClickListener> {
   Offset? _downPosition;
 
   @override
+  void initState() {
+    super.initState();
+    // Clear orphaned "Loading ad" dialog if user returned mid-ad / old bug.
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      AdLoadingOverlay.hide();
+      AdLoadingOverlay.clearStaleNavigatorDialogs();
+    });
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Listener(
       behavior: HitTestBehavior.translucent,
       onPointerDown: (event) {
+        // Unstick orphaned "Loading ad" if no ad is actually running.
+        if (!AdPresentationGate.interstitialBusy &&
+            !AdPresentationGate.appOpenBusy) {
+          AdLoadingOverlay.hide();
+          AdLoadingOverlay.clearStaleNavigatorDialogs();
+        }
         _downPosition = event.position;
       },
       onPointerUp: (event) {

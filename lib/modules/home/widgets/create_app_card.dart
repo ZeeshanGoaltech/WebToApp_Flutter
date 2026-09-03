@@ -3,6 +3,7 @@ import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:web_to_app/app/routes/app_routes.dart';
+import 'package:web_to_app/core/ads/interstitial_ad_trigger.dart';
 import 'package:web_to_app/core/services/build_login_gate.dart';
 import 'package:web_to_app/core/constants/app_assets.dart';
 import 'package:web_to_app/core/theme/app_colors.dart';
@@ -17,12 +18,14 @@ class CreateAppCard extends StatelessWidget {
   const CreateAppCard({super.key});
 
   Future<void> _openFreshCreateApp() async {
-    if (!await BuildLoginGate.ensureForNewApp(
-      openCreateApp: _openFreshCreateAppInternal,
-    )) {
-      return;
-    }
-    await _openFreshCreateAppInternal();
+    await InterstitialAdTrigger.afterFirstClick(() async {
+      if (!await BuildLoginGate.ensureForNewApp(
+        openCreateApp: _openFreshCreateAppInternal,
+      )) {
+        return;
+      }
+      await _openFreshCreateAppInternal();
+    });
   }
 
   Future<void> _openFreshCreateAppInternal() async {

@@ -44,6 +44,7 @@ class LaunchFlow {
 
   static void openIapFromSettings() {
     // Prefer subscription over any interstitial / app-open.
+    _iapFromLaunch = false;
     _enterIap();
     Get.toNamed(AppRoutes.iap);
   }
