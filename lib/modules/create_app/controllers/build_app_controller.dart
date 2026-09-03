@@ -742,7 +742,26 @@ class BuildAppController extends GetxController {
     backToHome();
   }
 
-  void editApp() => Get.back();
+  /// Open the create/edit wizard for the current project.
+  ///
+  /// If the user reached build from the wizard, pop back to it. If build was
+  /// opened directly (e.g. from Home), replace this screen with the editor —
+  /// [CreateAppController] is already prepared with the project data.
+  void editApp() {
+    isLeavingBuildScreen.value = true;
+    final create = _createAppOrNull;
+    if (create != null) {
+      create.currentStep.value = 0;
+      if (create.pageController.hasClients) {
+        create.pageController.jumpToPage(0);
+      }
+    }
+    if (Get.previousRoute == AppRoutes.createApp) {
+      Get.back();
+      return;
+    }
+    Get.offNamed(AppRoutes.createApp);
+  }
 
   Future<void> cancelBuildForExit() async {
     if (isCancellingBuildExit.value) return;
