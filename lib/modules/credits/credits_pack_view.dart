@@ -52,10 +52,8 @@ class _CreditsPackViewState extends State<CreditsPackView> {
   bool _discountEligible = false;
   String? _offerToken;
   bool _purchasing = false;
-  bool _showCloseButton = false;
   bool _finishing = false;
   late int _creditsWhenOpened;
-  Timer? _closeRevealTimer;
   PremiumService? _premium;
 
   int get packCredits => CreditService.instance.packCredits;
@@ -69,14 +67,10 @@ class _CreditsPackViewState extends State<CreditsPackView> {
     _creditsWhenOpened = CreditService.instance.paidCredits.value;
     CreditService.instance.paidCredits.addListener(_onCreditsChanged);
     unawaited(_loadPrice());
-    _closeRevealTimer = Timer(const Duration(seconds: 2), () {
-      if (mounted) setState(() => _showCloseButton = true);
-    });
   }
 
   @override
   void dispose() {
-    _closeRevealTimer?.cancel();
     CreditService.instance.paidCredits.removeListener(_onCreditsChanged);
     AdPresentationGate.markIapClosed();
     AdPresentationGate.reconcileIapVisibility();
@@ -328,8 +322,7 @@ class _CreditsPackViewState extends State<CreditsPackView> {
                               ),
                             ],
                           ),
-                          if (_showCloseButton)
-                            Positioned(
+                          Positioned(
                               top: topInset +
                                   IapCloseButton.designTop * closeScale -
                                   2,

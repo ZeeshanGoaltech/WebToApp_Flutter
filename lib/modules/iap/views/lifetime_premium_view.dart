@@ -341,11 +341,8 @@ class LifetimePremiumView extends GetView<LifetimePremiumController> {
                     ),
                   ],
                 ),
-                Obx(
-                  () {
-                    if (!controller.showCloseButton.value) {
-                      return const SizedBox.shrink();
-                    }
+                Builder(
+                  builder: (context) {
                     final scale = IapCloseButton.scaleOf(context);
                     final sideInset =
                         (MediaQuery.sizeOf(context).width -

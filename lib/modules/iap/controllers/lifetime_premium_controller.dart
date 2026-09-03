@@ -15,15 +15,12 @@ import 'package:web_to_app/core/services/session_service.dart';
 import 'package:web_to_app/core/utils/app_toast.dart';
 
 const String kMissingStorePrice = '--';
-const Duration kLifetimeCloseRevealDelay = Duration(seconds: 2);
 
 class LifetimePremiumController extends GetxController {
   final isPurchasing = false.obs;
-  final showCloseButton = false.obs;
   final lifetimePrice = kMissingStorePrice.obs;
 
   PremiumService? _premiumService;
-  Timer? _closeRevealTimer;
 
   /// True from buy tap until a terminal purchase status (or failed launch).
   bool _awaitingPurchaseResult = false;
@@ -40,9 +37,6 @@ class LifetimePremiumController extends GetxController {
     AdPresentationGate.markIapOpened();
     AppOpenAdManager.instance.blockAppOpenAds = true;
     unawaited(AnalyticsService.instance.logLifetimePremiumOpen());
-    _closeRevealTimer = Timer(kLifetimeCloseRevealDelay, () {
-      showCloseButton.value = true;
-    });
     unawaited(_initPremium());
   }
 
@@ -193,7 +187,6 @@ class LifetimePremiumController extends GetxController {
 
   @override
   void onClose() {
-    _closeRevealTimer?.cancel();
     AdPresentationGate.markIapClosed();
     AdPresentationGate.reconcileIapVisibility();
     AppOpenAdManager.instance.blockAppOpenAds =

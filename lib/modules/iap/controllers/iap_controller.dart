@@ -18,7 +18,8 @@ import 'package:web_to_app/core/utils/app_toast.dart';
 /// iOS fallback (no monthly): weekly (trial CTA) → yearly → lifetime.
 enum IapPlan { yearly, monthly, weekly, lifetime }
 
-const Duration kIapCloseRevealDelay = Duration(seconds: 2);
+/// Close delay only when IAP opens from splash / first-launch flow.
+const Duration kIapCloseRevealDelayFromLaunch = Duration(milliseconds: 3500);
 
 class IapController extends GetxController {
   final isPurchasing = false.obs;
@@ -94,9 +95,13 @@ class IapController extends GetxController {
       fromLaunch: LaunchFlow.iapOpenedFromLaunch,
       fromSettings: !LaunchFlow.iapOpenedFromLaunch,
     );
-    _closeRevealTimer = Timer(kIapCloseRevealDelay, () {
+    if (LaunchFlow.iapOpenedFromLaunch) {
+      _closeRevealTimer = Timer(kIapCloseRevealDelayFromLaunch, () {
+        showCloseButton.value = true;
+      });
+    } else {
       showCloseButton.value = true;
-    });
+    }
     _initPremium();
   }
 
