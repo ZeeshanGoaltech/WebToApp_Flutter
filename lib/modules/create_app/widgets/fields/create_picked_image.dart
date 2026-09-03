@@ -6,6 +6,15 @@ import 'package:web_to_app/core/theme/app_colors.dart';
 
 bool isAssetImagePath(String path) => path.startsWith('assets/');
 
+bool _isReadableImageFile(String path) {
+  try {
+    final file = File(path);
+    return file.existsSync() && file.lengthSync() > 0;
+  } catch (_) {
+    return false;
+  }
+}
+
 class CreatePickedImage extends StatelessWidget {
   const CreatePickedImage({
     super.key,
@@ -42,6 +51,16 @@ class CreatePickedImage extends StatelessWidget {
       );
     }
 
+    // Empty/missing cache files throw StateError in FileImage before decode;
+    // skip Image.file so Crashlytics never sees a fatal FlutterError.
+    if (!_isReadableImageFile(imagePath)) {
+      return SizedBox(
+        width: width,
+        height: height,
+        child: _errorPlaceholder(),
+      );
+    }
+
     return Image.file(
       File(imagePath),
       fit: fit,
@@ -55,7 +74,10 @@ class CreatePickedImage extends StatelessWidget {
     BuildContext context,
     Object error,
     StackTrace? stackTrace,
-  ) {
+  ) =>
+      _errorPlaceholder();
+
+  Widget _errorPlaceholder() {
     return ColoredBox(
       color: AppColors.createFieldBg,
       child: Center(

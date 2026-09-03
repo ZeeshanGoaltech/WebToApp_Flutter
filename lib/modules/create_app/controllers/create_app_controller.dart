@@ -216,8 +216,14 @@ class CreateAppController extends GetxController {
   void clearIcon() => iconPath.value = null;
   void clearSplash() => splashPath.value = null;
 
+  /// Shared across icon/splash/slide — image_picker allows only one active pick.
+  bool get isImagePickerBusy =>
+      isPickingIcon.value ||
+      isPickingSplash.value ||
+      pickingSlideIndex.value != null;
+
   Future<void> pickAppIcon() async {
-    if (isPickingIcon.value) return;
+    if (isImagePickerBusy) return;
     isPickingIcon.value = true;
     try {
       final path = await CreateAppPickerService.pickImageFromGallery();
@@ -228,7 +234,7 @@ class CreateAppController extends GetxController {
   }
 
   Future<void> pickSplashImage() async {
-    if (isPickingSplash.value) return;
+    if (isImagePickerBusy) return;
     isPickingSplash.value = true;
     try {
       final path = await CreateAppPickerService.pickImageFromGallery();
@@ -239,7 +245,7 @@ class CreateAppController extends GetxController {
   }
 
   Future<void> pickSlideImage(int index) async {
-    if (pickingSlideIndex.value != null) return;
+    if (isImagePickerBusy) return;
     pickingSlideIndex.value = index;
     try {
       final path = await CreateAppPickerService.pickImageFromGallery();

@@ -24,15 +24,14 @@ class AnalyticsService {
 
       FlutterError.onError = (details) {
         FlutterError.presentError(details);
-        if (_isNonFatalFontLoadError(details.exception)) {
-          // Font download/DNS failures are recoverable (system fallback).
-          // Do not mark the session as a fatal crash.
+        final nonFatalReason = _nonFatalReason(details.exception);
+        if (nonFatalReason != null) {
           unawaited(
             FirebaseCrashlytics.instance.recordError(
               details.exception,
               details.stack,
               fatal: false,
-              reason: 'google_fonts_load_failure',
+              reason: nonFatalReason,
             ),
           );
           return;
@@ -41,13 +40,14 @@ class AnalyticsService {
       };
 
       PlatformDispatcher.instance.onError = (error, stack) {
-        if (_isNonFatalFontLoadError(error)) {
+        final nonFatalReason = _nonFatalReason(error);
+        if (nonFatalReason != null) {
           unawaited(
             FirebaseCrashlytics.instance.recordError(
               error,
               stack,
               fatal: false,
-              reason: 'google_fonts_load_failure',
+              reason: nonFatalReason,
             ),
           );
           return true;
@@ -60,14 +60,21 @@ class AnalyticsService {
     }
   }
 
-  /// google_fonts throws when HTTP/DNS fails; UI already falls back safely.
-  static bool _isNonFatalFontLoadError(Object error) {
+  /// Recoverable UI/asset failures that should not mark the session fatal.
+  static String? _nonFatalReason(Object error) {
     final message = error.toString();
-    return message.contains('Failed to load font') ||
+    if (message.contains('Failed to load font') ||
         message.contains('fonts.gstatic.com') ||
         message.contains('google_fonts was unable to load font') ||
         (message.contains('allowRuntimeFetching') &&
-            message.contains('not found in the application assets'));
+            message.contains('not found in the application assets'))) {
+      return 'google_fonts_load_failure';
+    }
+    if (message.contains('is empty and cannot be loaded as an image') ||
+        message.contains('Invalid image data')) {
+      return 'image_file_load_failure';
+    }
+    return null;
   }
 
   Future<void> logScreenView(String screenName, {String? screenClass}) async {
