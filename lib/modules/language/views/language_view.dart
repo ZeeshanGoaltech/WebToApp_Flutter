@@ -55,7 +55,7 @@ class LanguageView extends GetView<LanguageController> {
                   );
                 }),
               ),
-              // Fixed bottom medium native (RC: language_native)
+              // Language — Nail Art mediumfullCTA layout
               const MediumNativeAdWidget(
                 placementId: AdPlacements.languageNative,
               ),

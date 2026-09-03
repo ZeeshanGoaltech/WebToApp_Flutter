@@ -48,7 +48,7 @@ class IntroView extends GetView<IntroController> {
                   },
                 ),
               ),
-              // Same medium ad size as language / other screens (no height clip)
+              // Onboarding — Nail Art select_currency_medium layout
               MediumNativeAdWidget(
                 placementId: AdPlacements.onboardingNative,
                 reserveSpaceWhileLoading: false,

@@ -10,18 +10,22 @@ import 'package:web_to_app/core/ads/ad_placements.dart';
 import 'package:web_to_app/core/ads/ad_service.dart';
 import 'package:web_to_app/core/ads/ads_consent_gate.dart';
 import 'package:web_to_app/core/ads/native_ad_load_gate.dart';
+import 'package:web_to_app/core/ads/native_ad_sizes.dart';
 import 'package:web_to_app/core/services/premium_service.dart';
 import 'package:web_to_app/core/services/session_service.dart';
 import 'package:web_to_app/core/theme/app_colors.dart';
 import 'package:web_to_app/core/utils/responsive.dart';
 
-/// Medium native ad — Android uses custom [factoryId] `mediumAd` (Ummah layout).
-/// iOS falls back to [TemplateType.medium].
+/// Medium native ad.
+///
+/// Language / onboarding use Nail Art layouts (`mediumfullCTA` /
+/// `select_currency_medium`). Other placements keep the legacy `mediumAd` factory.
 class MediumNativeAdWidget extends StatefulWidget {
   const MediumNativeAdWidget({
     super.key,
     required this.placementId,
     this.height,
+    this.factoryId,
     this.reserveSpaceWhileLoading = true,
     this.includeOuterPadding = true,
     this.onVisibilityChanged,
@@ -29,6 +33,9 @@ class MediumNativeAdWidget extends StatefulWidget {
 
   final String placementId;
   final double? height;
+
+  /// Override Android [NativeAd.factoryId]. When null, resolved from [placementId].
+  final String? factoryId;
 
   /// When false, the slot collapses until the ad successfully loads.
   final bool reserveSpaceWhileLoading;
@@ -44,9 +51,6 @@ class MediumNativeAdWidget extends StatefulWidget {
 }
 
 class _MediumNativeAdWidgetState extends State<MediumNativeAdWidget> {
-  static const String _factoryId = 'mediumAd';
-  static const double _androidHeight = 176;
-
   NativeAd? _nativeAd;
   bool _isLoading = true;
   bool _shouldShow = true;
@@ -60,17 +64,36 @@ class _MediumNativeAdWidgetState extends State<MediumNativeAdWidget> {
     return PremiumService.isPremiumCached;
   }
 
+  bool get _isNailArtLayout =>
+      widget.placementId == AdPlacements.languageNative ||
+      widget.placementId == AdPlacements.onboardingNative;
+
+  String get _resolvedFactoryId {
+    if (widget.factoryId != null) return widget.factoryId!;
+    return switch (widget.placementId) {
+      AdPlacements.languageNative => NativeAdSizes.mediumFullCtaFactory,
+      AdPlacements.onboardingNative => NativeAdSizes.selectCurrencyMediumFactory,
+      _ => NativeAdSizes.mediumFactory,
+    };
+  }
+
   double _slotHeight(BuildContext context) {
     if (widget.height != null) return widget.height!;
-    final width = MediaQuery.sizeOf(context).width;
-    if (Platform.isAndroid) {
-      if (width > 600) return 196;
-      if (width >= 360) return 176;
-      return 172;
-    }
-    if (width < 360) return 160;
-    if (width > 600) return 196;
-    return 176;
+    return switch (widget.placementId) {
+      AdPlacements.languageNative => NativeAdSizes.mediumFullCta,
+      AdPlacements.onboardingNative => NativeAdSizes.selectCurrencyMedium,
+      _ => () {
+          final width = MediaQuery.sizeOf(context).width;
+          if (Platform.isAndroid) {
+            if (width > 600) return 196.0;
+            if (width >= 360) return 176.0;
+            return 172.0;
+          }
+          if (width < 360) return 160.0;
+          if (width > 600) return 196.0;
+          return 176.0;
+        }(),
+    };
   }
 
   @override
@@ -171,9 +194,10 @@ class _MediumNativeAdWidgetState extends State<MediumNativeAdWidget> {
       return;
     }
 
+    final factoryId = _resolvedFactoryId;
     developer.log(
       '[MediumNative] loading ${widget.placementId} → $adUnitId '
-      '(factory=${Platform.isAndroid ? _factoryId : 'TemplateType.medium'})',
+      '(factory=${Platform.isAndroid ? factoryId : 'TemplateType.medium'})',
     );
 
     if (mounted) {
@@ -190,7 +214,7 @@ class _MediumNativeAdWidgetState extends State<MediumNativeAdWidget> {
     if (Platform.isAndroid) {
       nativeAd = NativeAd(
         adUnitId: adUnitId,
-        factoryId: _factoryId,
+        factoryId: factoryId,
         request: const AdRequest(),
         nativeAdOptions: NativeAdOptions(
           videoOptions: VideoOptions(
@@ -208,22 +232,22 @@ class _MediumNativeAdWidgetState extends State<MediumNativeAdWidget> {
         request: const AdRequest(),
         nativeTemplateStyle: NativeTemplateStyle(
           templateType: TemplateType.medium,
-          mainBackgroundColor: const Color(0xFFF1F3F4),
-          cornerRadius: 10,
+          mainBackgroundColor: const Color(0xFFF4EEE8),
+          cornerRadius: 16,
           callToActionTextStyle: NativeTemplateTextStyle(
             textColor: Colors.white,
-            backgroundColor: const Color(0xFF1A73E8),
+            backgroundColor: const Color(0xFF00C853),
             style: NativeTemplateFontStyle.bold,
-            size: 15,
+            size: 14,
           ),
           primaryTextStyle: NativeTemplateTextStyle(
-            textColor: const Color(0xFF202124),
+            textColor: Colors.black,
             backgroundColor: Colors.transparent,
             style: NativeTemplateFontStyle.bold,
             size: 16,
           ),
           secondaryTextStyle: NativeTemplateTextStyle(
-            textColor: const Color(0xFF3C4043),
+            textColor: const Color(0xFF666666),
             backgroundColor: Colors.transparent,
             style: NativeTemplateFontStyle.normal,
             size: 13,
@@ -303,11 +327,44 @@ class _MediumNativeAdWidgetState extends State<MediumNativeAdWidget> {
     }
 
     final height = _slotHeight(context);
-    final horizontal =
-        widget.includeOuterPadding ? Responsive.w(context, 16) : 0.0;
-    final vertical =
-        widget.includeOuterPadding ? Responsive.h(context, 8) : 0.0;
-    final bg = const Color(0xFFF1F3F4);
+    // Nail Art: light horizontal inset; layout owns cream card chrome.
+    final horizontal = !widget.includeOuterPadding
+        ? 0.0
+        : (_isNailArtLayout ? 3.0 : Responsive.w(context, 16));
+    final vertical = !widget.includeOuterPadding
+        ? 0.0
+        : (_isNailArtLayout ? 8.0 : Responsive.h(context, 8));
+
+    final child = _isLoading || _nativeAd == null
+        ? Center(
+            child: SizedBox(
+              width: 28,
+              height: 28,
+              child: CircularProgressIndicator(
+                strokeWidth: 2.5,
+                valueColor: AlwaysStoppedAnimation<Color>(
+                  _isNailArtLayout
+                      ? const Color(0xFF00C853)
+                      : AppColors.primary,
+                ),
+              ),
+            ),
+          )
+        : AdWidget(
+            key: ValueKey('native_${widget.placementId}_$_instanceId'),
+            ad: _nativeAd!,
+          );
+
+    if (_isNailArtLayout) {
+      return Padding(
+        padding: EdgeInsets.fromLTRB(horizontal, vertical, horizontal, vertical),
+        child: SizedBox(
+          width: double.infinity,
+          height: height,
+          child: ClipRect(child: child),
+        ),
+      );
+    }
 
     return Padding(
       padding: EdgeInsets.fromLTRB(horizontal, vertical, horizontal, vertical),
@@ -315,7 +372,7 @@ class _MediumNativeAdWidgetState extends State<MediumNativeAdWidget> {
         width: double.infinity,
         height: height,
         decoration: BoxDecoration(
-          color: bg,
+          color: const Color(0xFFF1F3F4),
           borderRadius: BorderRadius.circular(Responsive.r(context, 10)),
           border: Border.all(
             color: const Color(0xFFE0E3E7),
@@ -323,22 +380,7 @@ class _MediumNativeAdWidgetState extends State<MediumNativeAdWidget> {
           ),
         ),
         clipBehavior: Clip.antiAlias,
-        child: _isLoading || _nativeAd == null
-            ? const Center(
-                child: SizedBox(
-                  width: 28,
-                  height: 28,
-                  child: CircularProgressIndicator(
-                    strokeWidth: 2.5,
-                    valueColor:
-                        AlwaysStoppedAnimation<Color>(AppColors.primary),
-                  ),
-                ),
-              )
-            : AdWidget(
-                key: ValueKey('native_${widget.placementId}_$_instanceId'),
-                ad: _nativeAd!,
-              ),
+        child: child,
       ),
     );
   }

@@ -74,6 +74,34 @@ class MainActivity : FlutterActivity() {
             android.util.Log.e("MainActivity", "Failed to register mediumAd: ${e.message}", e)
         }
 
+        try {
+            GoogleMobileAdsPlugin.registerNativeAdFactory(
+                flutterEngine,
+                "mediumfullCTA",
+                MediumFullCtaNativeAdFactory(this),
+            )
+        } catch (e: Exception) {
+            android.util.Log.e(
+                "MainActivity",
+                "Failed to register mediumfullCTA: ${e.message}",
+                e,
+            )
+        }
+
+        try {
+            GoogleMobileAdsPlugin.registerNativeAdFactory(
+                flutterEngine,
+                "select_currency_medium",
+                SelectCurrencyNativeAdFactory(this),
+            )
+        } catch (e: Exception) {
+            android.util.Log.e(
+                "MainActivity",
+                "Failed to register select_currency_medium: ${e.message}",
+                e,
+            )
+        }
+
         PackIapDebug.register(flutterEngine.dartExecutor.binaryMessenger, this)
     }
 
@@ -158,6 +186,8 @@ class MainActivity : FlutterActivity() {
     override fun cleanUpFlutterEngine(flutterEngine: FlutterEngine) {
         GoogleMobileAdsPlugin.unregisterNativeAdFactory(flutterEngine, "smallAd")
         GoogleMobileAdsPlugin.unregisterNativeAdFactory(flutterEngine, "mediumAd")
+        GoogleMobileAdsPlugin.unregisterNativeAdFactory(flutterEngine, "mediumfullCTA")
+        GoogleMobileAdsPlugin.unregisterNativeAdFactory(flutterEngine, "select_currency_medium")
         super.cleanUpFlutterEngine(flutterEngine)
     }
 }
