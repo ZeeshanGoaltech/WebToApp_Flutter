@@ -39,6 +39,14 @@ android {
     buildTypes {
         release {
             signingConfig = signingConfigs.getByName("release")
+            // R8/ProGuard — required so WorkManager (pulled by GMA) keeps
+            // WorkDatabase reflective surface in release (AGP 9 full mode).
+            isMinifyEnabled = true
+            isShrinkResources = true
+            proguardFiles(
+                getDefaultProguardFile("proguard-android-optimize.txt"),
+                "proguard-rules.pro",
+            )
         }
     }
 }
