@@ -295,7 +295,8 @@ class _ProfileSection extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final session = Get.find<SessionService>();
-    final home = Get.find<HomeController>();
+    final home =
+        Get.isRegistered<HomeController>() ? Get.find<HomeController>() : null;
 
     return Obx(() {
       final isGuest = session.isGuest.value;
@@ -306,7 +307,8 @@ class _ProfileSection extends StatelessWidget {
       final email = isGuest ? 'guest@appforge.dev' : (user?.email ?? '');
       final isPremium = session.hasPremiumAccess;
       final planLabel = isPremium ? 'premium'.tr : 'free_plan'.tr;
-      final appsLabel = ' · ${home.apps.length} apps';
+      final appsCount = home?.apps.length ?? 0;
+      final appsLabel = ' · $appsCount apps';
 
       return Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,

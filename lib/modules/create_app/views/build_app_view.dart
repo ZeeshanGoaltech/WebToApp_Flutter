@@ -2,6 +2,7 @@ import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:web_to_app/app/routes/app_routes.dart';
 import 'package:web_to_app/core/ads/ad_presentation_gate.dart';
 import 'package:web_to_app/core/constants/create_app_assets.dart';
 import 'package:web_to_app/core/theme/app_colors.dart';
@@ -9,6 +10,7 @@ import 'package:web_to_app/core/theme/app_text_styles.dart';
 import 'package:web_to_app/core/utils/responsive.dart';
 import 'package:web_to_app/core/widgets/button_loading_indicator.dart';
 import 'package:web_to_app/core/widgets/figma_svg_icon.dart';
+import 'package:web_to_app/modules/create_app/bindings/create_app_binding.dart';
 import 'package:web_to_app/modules/create_app/controllers/build_app_controller.dart';
 import 'package:web_to_app/modules/create_app/controllers/create_app_controller.dart';
 import 'package:web_to_app/modules/create_app/models/preview_mode.dart';
@@ -21,8 +23,35 @@ class BuildAppView extends GetView<BuildAppController> {
 
   @override
   Widget build(BuildContext context) {
+    // Re-ensure after route races / force-deletes so Get.find never crashes.
+    try {
+      CreateAppBinding().dependencies();
+    } catch (_) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (Get.currentRoute == AppRoutes.buildApp) {
+          Get.offAllNamed(AppRoutes.home);
+        }
+      });
+      return const Scaffold(
+        backgroundColor: AppColors.createBackground,
+        body: SizedBox.shrink(),
+      );
+    }
+
+    final createController = CreateAppBinding.createAppOrNull();
+    if (createController == null) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (Get.currentRoute == AppRoutes.buildApp) {
+          Get.offAllNamed(AppRoutes.home);
+        }
+      });
+      return const Scaffold(
+        backgroundColor: AppColors.createBackground,
+        body: SizedBox.shrink(),
+      );
+    }
+
     controller.prepareForCurrentApp();
-    final createController = Get.find<CreateAppController>();
 
     return Obx(() {
       return PopScope(

@@ -20,7 +20,9 @@ class SettingsController extends GetxController {
     isLoggingOut.value = true;
     try {
       await Get.find<SessionService>().clearSession();
-      Get.find<HomeController>().apps.clear();
+      if (Get.isRegistered<HomeController>()) {
+        Get.find<HomeController>().apps.clear();
+      }
       Get.offAllNamed(AppRoutes.auth);
     } finally {
       isLoggingOut.value = false;

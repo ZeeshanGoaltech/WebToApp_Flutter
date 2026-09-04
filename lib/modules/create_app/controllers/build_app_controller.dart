@@ -98,8 +98,12 @@ class BuildAppController extends GetxController {
   }
 
   CreateAppController? get _createAppOrNull {
-    if (!Get.isRegistered<CreateAppController>()) return null;
-    return Get.find<CreateAppController>();
+    try {
+      if (!Get.isRegistered<CreateAppController>()) return null;
+      return Get.find<CreateAppController>();
+    } catch (_) {
+      return null;
+    }
   }
 
   bool canShareFormat(BuildFormat format) => format == BuildFormat.aab

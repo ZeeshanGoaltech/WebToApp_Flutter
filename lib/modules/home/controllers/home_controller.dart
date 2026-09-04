@@ -25,7 +25,7 @@ class HomeController extends GetxController {
   final RxnString openingAppId = RxnString();
   final RxnString appActionId = RxnString();
 
-  static const recentLimit = 2;
+  static const recentLimit = 5;
 
   Timer? _statusPollTimer;
 

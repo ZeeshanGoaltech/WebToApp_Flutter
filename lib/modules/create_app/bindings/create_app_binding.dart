@@ -5,13 +5,38 @@ import 'package:web_to_app/modules/create_app/controllers/create_app_controller.
 class CreateAppBinding extends Bindings {
   @override
   void dependencies() {
+    ensureCreateApp();
+    if (!Get.isRegistered<BuildAppController>()) {
+      Get.lazyPut<BuildAppController>(() => BuildAppController());
+    }
+  }
+
+  /// Ensures [CreateAppController] exists as a live instance (not only a lazy
+  /// factory). Safe to call from views/services after deletes or route races.
+  static CreateAppController ensureCreateApp() {
+    try {
+      if (Get.isRegistered<CreateAppController>()) {
+        return Get.find<CreateAppController>();
+      }
+    } catch (_) {
+      try {
+        Get.delete<CreateAppController>(force: true);
+      } catch (_) {}
+    }
+
     if (!Get.isRegistered<CreateAppController>()) {
       Get.lazyPut<CreateAppController>(() => CreateAppController());
     }
-    // Start CreateApp first so BuildApp never initializes alone.
-    Get.find<CreateAppController>();
-    if (!Get.isRegistered<BuildAppController>()) {
-      Get.lazyPut<BuildAppController>(() => BuildAppController());
+    return Get.find<CreateAppController>();
+  }
+
+  /// Non-throwing lookup used by build UI / controller helpers.
+  static CreateAppController? createAppOrNull() {
+    try {
+      if (!Get.isRegistered<CreateAppController>()) return null;
+      return Get.find<CreateAppController>();
+    } catch (_) {
+      return null;
     }
   }
 

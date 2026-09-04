@@ -50,8 +50,7 @@ class AppOpenService extends GetxService {
     }
 
     CreateAppBinding().dependencies();
-
-    final create = Get.find<CreateAppController>();
+    final create = CreateAppBinding.ensureCreateApp();
     create.prepareForExistingApp(
       appId: summary.id,
       appVersionId: version.id,
