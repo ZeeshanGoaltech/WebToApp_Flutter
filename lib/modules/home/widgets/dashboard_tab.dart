@@ -37,7 +37,7 @@ class DashboardTab extends StatelessWidget {
                 children: [
                   Expanded(
                     child: Text(
-                      'Web to App',
+                      'app_title'.tr,
                       style: AppTextStyles.homeHeaderTitle(context),
                     ),
                   ),

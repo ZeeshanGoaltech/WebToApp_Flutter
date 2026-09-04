@@ -2,7 +2,7 @@
 class AppInfo {
   AppInfo._();
 
-  static const String name = 'Web to App Converter';
+  static const String name = 'Website to App Builder';
 
   static const String androidPackage = 'com.webtoapp.converter.appmaker';
 

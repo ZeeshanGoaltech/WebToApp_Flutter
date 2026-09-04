@@ -53,7 +53,7 @@ void main() {
 
 
 
-    expect(find.text('Web to App Converter'), findsOneWidget);
+    expect(find.text('Website to App Builder'), findsOneWidget);
 
     expect(find.text('Turn any website into a mobile app'), findsOneWidget);
 
