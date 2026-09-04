@@ -5,22 +5,71 @@ class CreateAppValidator {
   CreateAppValidator._();
 
   /// Upgrades `http://` to `https://` so WebViews can load the site
-  /// (Android blocks cleartext HTTP by default).
+  /// (Android blocks cleartext HTTP by default). Also fixes common
+  /// `wwww…` typos to `www`.
   static String normalizeWebsiteUrl(String value) {
     final trimmed = value.trim();
     if (trimmed.isEmpty) return trimmed;
-    final uri = Uri.tryParse(trimmed);
+    var uri = Uri.tryParse(trimmed);
     if (uri == null || !uri.hasScheme) return trimmed;
-    if (uri.scheme.toLowerCase() != 'http') return trimmed;
-    return uri.replace(scheme: 'https').toString();
+
+    var changed = false;
+    if (uri.scheme.toLowerCase() == 'http') {
+      uri = uri.replace(scheme: 'https');
+      changed = true;
+    }
+
+    final host = uri.host;
+    if (host.isNotEmpty) {
+      // wwww.example.com / wwwww.example.com → www.example.com
+      final fixedHost = host.replaceFirstMapped(
+        RegExp(r'^w{4,}\.', caseSensitive: false),
+        (_) => 'www.',
+      );
+      if (fixedHost != host) {
+        uri = uri.replace(host: fixedHost);
+        changed = true;
+      }
+    }
+
+    return changed ? uri.toString() : trimmed;
   }
+
+  /// Rejects hosts whose first label is only `w`s but not exactly `www`
+  /// (e.g. `ww.example.com`, leftover typos after normalize).
+  static bool _hasWwwTypo(String host) {
+    if (host.isEmpty) return false;
+    final firstLabel = host.split('.').first.toLowerCase();
+    return RegExp(r'^w+$').hasMatch(firstLabel) && firstLabel != 'www';
+  }
+
+  static bool _isValidIpv4(String host) {
+    final parts = host.split('.');
+    if (parts.length != 4) return false;
+    for (final part in parts) {
+      final n = int.tryParse(part);
+      if (n == null || n < 0 || n > 255) return false;
+    }
+    return true;
+  }
+
+  /// Domain like `example.com` or `www.example.co.uk` (TLD ≥ 2 letters).
+  static final _domainHostPattern = RegExp(
+    r'^(?:[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?\.)+[a-z]{2,}$',
+    caseSensitive: false,
+  );
 
   static bool isValidUrl(String value) {
     final trimmed = normalizeWebsiteUrl(value);
     if (trimmed.isEmpty) return false;
     final uri = Uri.tryParse(trimmed);
-    if (uri == null || !uri.hasScheme) return false;
-    return uri.scheme == 'http' || uri.scheme == 'https';
+    if (uri == null || !uri.hasScheme || uri.host.isEmpty) return false;
+    if (uri.scheme != 'http' && uri.scheme != 'https') return false;
+
+    final host = uri.host.toLowerCase();
+    if (_hasWwwTypo(host)) return false;
+    if (_isValidIpv4(host)) return true;
+    return _domainHostPattern.hasMatch(host);
   }
 
   static bool isValidPackageName(String value) {
