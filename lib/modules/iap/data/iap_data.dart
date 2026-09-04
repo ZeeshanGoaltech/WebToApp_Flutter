@@ -7,5 +7,6 @@ class IapData {
         'iap_convert_website'.tr,
         'iap_fast_conversion'.tr,
         'iap_ads_free'.tr,
+        'iap_unlimited_apps'.tr,
       ];
 }

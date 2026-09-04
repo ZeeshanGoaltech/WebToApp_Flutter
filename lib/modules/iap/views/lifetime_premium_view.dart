@@ -80,16 +80,39 @@ class LifetimePremiumView extends GetView<LifetimePremiumController> {
                             left: 20,
                             right: 20,
                             bottom: 0,
-                            child: Text(
-                              'lifetime_hero_title'.tr,
-                              textAlign: TextAlign.center,
-                              style: const TextStyle(
-                                color: heading,
-                                fontSize: 28,
-                                fontWeight: FontWeight.w900,
-                                height: 1.15,
-                                letterSpacing: -0.4,
-                              ),
+                            child: Builder(
+                              builder: (context) {
+                                const titleStyle = TextStyle(
+                                  color: heading,
+                                  fontSize: 28,
+                                  fontWeight: FontWeight.w900,
+                                  height: 1.15,
+                                  letterSpacing: -0.4,
+                                );
+                                final accent = 'lifetime_hero_accent'.tr;
+                                final title = 'lifetime_hero_title'.tr;
+                                final showAccent = accent.isNotEmpty &&
+                                    accent != 'lifetime_hero_accent';
+
+                                return Text.rich(
+                                  TextSpan(
+                                    style: titleStyle,
+                                    children: [
+                                      if (showAccent)
+                                        TextSpan(
+                                          text: accent,
+                                          style: const TextStyle(
+                                            color: primary,
+                                          ),
+                                        ),
+                                      TextSpan(
+                                        text: showAccent ? ' $title' : title,
+                                      ),
+                                    ],
+                                  ),
+                                  textAlign: TextAlign.center,
+                                );
+                              },
                             ),
                           ),
                         ],
